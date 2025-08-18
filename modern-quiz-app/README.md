@@ -16,27 +16,31 @@ A modern, responsive quiz application for practicing Azure Developer Associate (
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 
 ### Installation
 
 1. **Navigate to the project directory:**
+
    ```bash
    cd modern-quiz-app
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 3. **Generate quiz data from your question bank:**
+
    ```bash
    npm run seed
    ```
 
 4. **Start the development server:**
+
    ```bash
    npm run dev
    ```
@@ -49,6 +53,7 @@ A modern, responsive quiz application for practicing Azure Developer Associate (
 ### Building for Production
 
 1. **Build the application:**
+
    ```bash
    npm run build
    ```
@@ -61,8 +66,9 @@ A modern, responsive quiz application for practicing Azure Developer Associate (
 ### Deployment
 
 This app is configured for static export and can be deployed to:
+
 - Vercel
-- Netlify 
+- Netlify
 - GitHub Pages
 - Any static hosting service
 
@@ -76,7 +82,7 @@ The app automatically parses your existing question bank from the `../Questions/
 Question: Your question text here?
 
 - [ ] Option A
-- [x] Correct Option B  
+- [x] Correct Option B
 - [ ] Option C
 - [x] Another correct option (for multiple choice)
 

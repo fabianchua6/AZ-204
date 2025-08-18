@@ -12,93 +12,111 @@ import { useQuizState } from '@/hooks/use-quiz-state';
 import type { Question } from '@/types/quiz';
 
 export default function Home() {
-  const { questions, topics, loading, error } = useQuizData();
-  const {
-    currentQuestionIndex,
-    selectedTopic,
-    filteredQuestions,
-    answers,
-    showAnswer,
-    stats,
-    actions
-  } = useQuizState(questions);
+	const { questions, topics, loading, error } = useQuizData();
+	const {
+		currentQuestionIndex,
+		selectedTopic,
+		filteredQuestions,
+		answers,
+		showAnswer,
+		stats,
+		actions,
+	} = useQuizState(questions);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
+	if (loading) {
+		return (
+			<div className="min-h-screen bg-background flex items-center justify-center">
+				<LoadingSpinner />
+			</div>
+		);
+	}
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-destructive mb-4">Error Loading Quiz Data</h1>
-          <p className="text-muted-foreground">{error}</p>
-        </div>
-      </div>
-    );
-  }
+	if (error) {
+		return (
+			<div className="min-h-screen bg-background flex items-center justify-center">
+				<div className="text-center">
+					<h1 className="text-2xl font-bold text-destructive mb-4">
+						Error Loading Quiz Data
+					</h1>
+					<p className="text-muted-foreground">{error}</p>
+				</div>
+			</div>
+		);
+	}
 
-  const currentQuestion = filteredQuestions[currentQuestionIndex];
+	const currentQuestion = filteredQuestions[currentQuestionIndex];
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
-      <Header />
-      
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Topic Selector */}
-          <TopicSelector
-            topics={topics}
-            selectedTopic={selectedTopic}
-            onTopicChange={actions.setSelectedTopic}
-            questionCount={filteredQuestions.length}
-          />
+	return (
+		<div className="min-h-screen bg-background">
+			<Header />
 
-          {/* Quiz Stats */}
-          <QuizStats stats={stats} />
-
-          {/* Quiz Card */}
-          <AnimatePresence mode="wait">
-            {currentQuestion ? (
-              <motion.div
-                key={currentQuestion.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <QuizCard
-                  question={currentQuestion}
-                  questionNumber={currentQuestionIndex + 1}
-                  totalQuestions={filteredQuestions.length}
-                  selectedAnswers={answers[currentQuestion.id] || []}
-                  showAnswer={showAnswer}
-                  onAnswerSelect={actions.setAnswer}
-                  onShowAnswer={actions.toggleShowAnswer}
-                  onNext={actions.nextQuestion}
-                  onPrevious={actions.previousQuestion}
-                  canGoNext={currentQuestionIndex < filteredQuestions.length - 1}
-                  canGoPrevious={currentQuestionIndex > 0}
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center py-12"
-              >
-                <h2 className="text-2xl font-bold text-muted-foreground">
-                  {selectedTopic ? 'No questions found for this topic' : 'Select a topic to start'}
-                </h2>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </main>
-    </div>
-  );
+			<main className="container mx-auto px-4 py-6">
+				<div className="max-w-4xl mx-auto">
+					{/* Quiz Card - Primary Focus */}
+					<AnimatePresence mode="wait">
+						{currentQuestion ? (
+							<motion.div
+								key={currentQuestion.id}
+								initial={{ opacity: 0, scale: 0.98 }}
+								animate={{ opacity: 1, scale: 1 }}
+								exit={{ opacity: 0, scale: 1.02 }}
+								transition={{
+									duration: 0.2,
+									ease: [0.23, 1, 0.32, 1], // easeOutQuart for more natural feel
+								}}
+							>
+								<QuizCard
+									question={currentQuestion}
+									questionNumber={currentQuestionIndex + 1}
+									totalQuestions={filteredQuestions.length}
+									selectedAnswers={answers[currentQuestion.id] || []}
+									showAnswer={showAnswer}
+									onAnswerSelect={actions.setAnswer}
+									onShowAnswer={actions.toggleShowAnswer}
+									onNext={actions.nextQuestion}
+									onPrevious={actions.previousQuestion}
+									canGoNext={
+										currentQuestionIndex < filteredQuestions.length - 1
+									}
+									canGoPrevious={currentQuestionIndex > 0}
+									// Pass additional props for contextual controls
+									topics={topics}
+									selectedTopic={selectedTopic}
+									onTopicChange={actions.setSelectedTopic}
+									stats={stats}
+								/>
+							</motion.div>
+						) : (
+							<motion.div
+								initial={{ opacity: 0, y: 10 }}
+								animate={{ opacity: 1, y: 0 }}
+								className="text-center py-20"
+							>
+								<div className="space-y-6">
+									<div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+										<span className="text-2xl">🎯</span>
+									</div>
+									<div>
+										<h2 className="text-xl font-semibold mb-2">
+											Ready to start?
+										</h2>
+										<p className="text-muted-foreground">
+											Choose a topic to begin your AZ-204 practice
+										</p>
+									</div>
+									<TopicSelector
+										topics={topics}
+										selectedTopic={selectedTopic}
+										onTopicChange={actions.setSelectedTopic}
+										questionCount={filteredQuestions.length}
+										compact={false}
+									/>
+								</div>
+							</motion.div>
+						)}
+					</AnimatePresence>
+				</div>
+			</main>
+		</div>
+	);
 }
