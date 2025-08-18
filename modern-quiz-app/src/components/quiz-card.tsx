@@ -146,46 +146,6 @@ export function QuizCard({
 											questionCount={totalQuestions}
 										/>
 									</div>
-
-									<div className="flex-1">
-										<div className="flex items-center gap-2 mb-3">
-											<BarChart3 className="h-4 w-4 text-muted-foreground" />
-											<span className="text-sm font-medium">Progress</span>
-										</div>
-										<div className="bg-background rounded-lg p-3 border">
-											<div className="flex items-center justify-between text-sm mb-2">
-												<span className="text-muted-foreground">
-													Questions answered
-												</span>
-												<span className="font-medium">
-													{stats.answeredQuestions} / {stats.totalQuestions}
-												</span>
-											</div>
-											<div className="w-full bg-muted rounded-full h-2">
-												<motion.div
-													className="bg-primary h-2 rounded-full"
-													initial={{ width: 0 }}
-													animate={{
-														width: `${Math.round(
-															(stats.answeredQuestions / stats.totalQuestions) *
-																100
-														)}%`,
-													}}
-													transition={{ duration: 0.3, ease: 'easeOut' }}
-												/>
-											</div>
-											<div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-												<span>Correct: {stats.correctAnswers}</span>
-												<span>
-													{Math.round(
-														(stats.answeredQuestions / stats.totalQuestions) *
-															100
-													)}
-													%
-												</span>
-											</div>
-										</div>
-									</div>
 								</div>
 							</CardContent>
 						</Card>
@@ -391,8 +351,8 @@ export function QuizCard({
 							</Button>
 						</div>
 
-						{/* Secondary Actions - Navigation */}
-						<div className="flex items-center justify-between">
+						{/* Navigation - Simplified without progress */}
+						<div className="flex items-center justify-between w-full">
 							<Button
 								variant="ghost"
 								onClick={onPrevious}
@@ -409,29 +369,6 @@ export function QuizCard({
 								<span className="hidden sm:inline">Previous</span>
 								<span className="sm:hidden">Prev</span>
 							</Button>
-
-							{/* Progress indicator - hidden on mobile, enhanced for desktop */}
-							<div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-background/90 to-card-secondary/90 backdrop-blur-md border border-border-light rounded-full shadow-lg">
-								<div className="flex items-center gap-2 text-sm text-muted-foreground">
-									<Target className="h-3.5 w-3.5" />
-									<span className="font-mono tabular-nums">
-										{questionNumber.toString().padStart(2, '0')} /{' '}
-										{totalQuestions.toString().padStart(2, '0')}
-									</span>
-								</div>
-
-								{/* Enhanced mini progress bar */}
-								<div className="w-20 h-2 bg-muted rounded-full overflow-hidden shadow-inner">
-									<motion.div
-										className="h-full bg-gradient-to-r from-primary to-primary-light rounded-full shadow-sm"
-										initial={{ width: 0 }}
-										animate={{
-											width: `${(questionNumber / totalQuestions) * 100}%`,
-										}}
-										transition={{ duration: 0.4, ease: [0.25, 0.8, 0.25, 1] }}
-									/>
-								</div>
-							</div>
 
 							<Button
 								variant="ghost"

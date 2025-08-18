@@ -17,7 +17,7 @@ const nextConfig = {
 	
 	// Build optimizations
 	experimental: {
-		optimizeCss: true,
+		// Remove optimizeCss as it's causing critters dependency issues
 		optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
 	},
 	
