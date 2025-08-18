@@ -1,13 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, BarChart3 } from 'lucide-react';
+import { Filter, Target, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { TopicSelector } from '@/components/topic-selector';
 import type { QuizStats } from '@/types/quiz';
 
 interface QuizControlsProps {
-  showControls: boolean;
   topics: string[];
   selectedTopic: string | null;
   onTopicChange: (topic: string | null) => void;
@@ -16,82 +17,114 @@ interface QuizControlsProps {
 }
 
 export function QuizControls({
-  showControls,
   topics,
   selectedTopic,
   onTopicChange,
   totalQuestions,
   stats,
 }: QuizControlsProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
-    <AnimatePresence>
-      {showControls && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="overflow-hidden"
-        >
-          <Card className="border-dashed border-border bg-muted/60 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex flex-col lg:flex-row gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Filter className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium text-foreground">
-                      Filter by Topic
-                    </span>
-                  </div>
+    <Card className='border-border bg-card shadow-sm'>
+      {/* Collapsed Header */}
+      <div
+        className='flex cursor-pointer items-center justify-between p-4 transition-colors hover:bg-accent/50'
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className='flex items-center gap-3'>
+          <div className='flex items-center gap-2'>
+            <Filter className='h-4 w-4 text-muted-foreground' />
+            <span className='text-sm font-medium'>
+              {selectedTopic || 'All Topics'}
+            </span>
+          </div>
+          <div className='h-4 w-px bg-border' />
+          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
+            <Target className='h-3 w-3' />
+            <span>
+              {stats.answeredQuestions}/{stats.totalQuestions}
+            </span>
+            <span>
+              (
+              {Math.round(
+                (stats.answeredQuestions / stats.totalQuestions) * 100
+              )}
+              %)
+            </span>
+          </div>
+        </div>
+
+        <Button variant='ghost' size='sm' className='h-8 w-8 p-0'>
+          {isExpanded ? (
+            <ChevronUp className='h-4 w-4' />
+          ) : (
+            <ChevronDown className='h-4 w-4' />
+          )}
+        </Button>
+      </div>
+
+      {/* Expanded Content */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className='overflow-hidden'
+          >
+            <CardContent className='p-4 pt-0'>
+              <div className='space-y-4'>
+                <div>
+                  <label className='mb-2 block text-sm font-medium'>
+                    Topic Filter
+                  </label>
                   <TopicSelector
                     topics={topics}
                     selectedTopic={selectedTopic}
                     onTopicChange={onTopicChange}
                     questionCount={totalQuestions}
+                    compact={true}
                   />
                 </div>
 
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium text-foreground">Progress</span>
+                <div className='space-y-3'>
+                  <div className='flex items-center justify-between text-sm'>
+                    <span className='text-muted-foreground'>Progress</span>
+                    <span className='font-medium text-foreground'>
+                      {stats.answeredQuestions} / {stats.totalQuestions}
+                    </span>
                   </div>
-                  <div className="bg-background rounded-lg p-3 border border-border shadow-sm">
-                    <div className="flex items-center justify-between text-sm mb-2">
-                      <span className="text-muted-foreground">
-                        Questions answered
-                      </span>
-                      <span className="font-medium text-foreground">
-                        {stats.answeredQuestions} / {stats.totalQuestions}
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2 border border-border/50">
-                      <motion.div
-                        className="bg-primary h-2 rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{
-                          width: `${Math.round(
-                            (stats.answeredQuestions / stats.totalQuestions) * 100
-                          )}%`,
-                        }}
-                        transition={{ duration: 0.3, ease: 'easeOut' }}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-                      <span>Correct: {stats.correctAnswers}</span>
-                      <span>
-                        {Math.round(
+                  <div className='h-2 w-full rounded-full border border-border/50 bg-muted'>
+                    <div
+                      className='h-2 rounded-full bg-primary transition-all duration-300 ease-out'
+                      style={{
+                        width: `${Math.round(
                           (stats.answeredQuestions / stats.totalQuestions) * 100
-                        )}%
-                      </span>
-                    </div>
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                  <div className='flex items-center justify-between text-xs text-muted-foreground'>
+                    <span>Correct: {stats.correctAnswers}</span>
+                    <span>
+                      Accuracy:{' '}
+                      {stats.answeredQuestions > 0
+                        ? Math.round(
+                            (stats.correctAnswers / stats.answeredQuestions) *
+                              100
+                          )
+                        : 0}
+                      %
+                    </span>
                   </div>
                 </div>
               </div>
             </CardContent>
-          </Card>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
   );
 }
