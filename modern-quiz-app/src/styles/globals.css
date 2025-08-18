@@ -62,60 +62,60 @@
   }
 
   .dark {
-    /* Richer dark theme with better depth */
-    --background: 224 71% 4%;
-    --background-secondary: 224 47% 6%;
-    --background-tertiary: 224 47% 8%;
-    --foreground: 213 31% 91%;
+    /* Sophisticated layered dark theme - inspired by GitHub, Discord, Linear */
+    --background: 220 6% 4%;          /* #0a0a0b - Deepest background */
+    --background-secondary: 220 7% 7%; /* #111113 - Secondary areas */
+    --background-tertiary: 220 8% 10%; /* #191a1c - Tertiary surfaces */
+    --foreground: 220 9% 96%;          /* #f4f4f5 - Primary text */
     
-    /* Enhanced dark cards */
-    --card: 224 71% 4%;
-    --card-secondary: 224 47% 6%;
-    --card-foreground: 213 31% 91%;
-    --card-border: 224 39% 12%;
+    /* Enhanced card system with proper elevation */
+    --card: 220 8% 10%;                /* #1a1a1d - Main cards */
+    --card-secondary: 220 7% 7%;       /* #111113 - Recessed elements */
+    --card-foreground: 220 9% 96%;     /* #f4f4f5 - Card text */
+    --card-border: 220 13% 18%;        /* #2a2a2e - Subtle borders */
     
-    --popover: 224 71% 4%;
-    --popover-foreground: 213 31% 91%;
+    --popover: 220 8% 10%;
+    --popover-foreground: 220 9% 96%;
     
-    /* Vibrant primary for dark mode */
-    --primary: 217 89% 70%;
-    --primary-light: 217 89% 80%;
-    --primary-dark: 217 89% 55%;
-    --primary-foreground: 224 71% 4%;
+    /* Vibrant primary that pops in dark mode */
+    --primary: 217 91% 60%;            /* #3b82f6 - Primary blue */
+    --primary-light: 217 91% 70%;      /* Lighter variant */
+    --primary-dark: 217 91% 50%;       /* Darker variant */
+    --primary-foreground: 220 9% 96%;  /* White text on primary */
     
-    /* Better dark secondary */
-    --secondary: 224 39% 12%;
-    --secondary-light: 224 39% 15%;
-    --secondary-foreground: 213 31% 91%;
+    /* Better contrast secondary */
+    --secondary: 220 13% 18%;          /* #2a2a2e - Muted backgrounds */
+    --secondary-light: 220 13% 23%;    /* #3a3a3e - Hover states */
+    --secondary-foreground: 220 9% 96%;
     
-    /* Improved dark muted */
-    --muted: 224 39% 12%;
-    --muted-light: 224 39% 15%;
-    --muted-foreground: 215.4 16.3% 65.1%;
+    /* Improved muted with better hierarchy */
+    --muted: 220 13% 18%;              /* #2a2a2e - Subtle elements */
+    --muted-light: 220 13% 23%;        /* #3a3a3e - Hover states */
+    --muted-foreground: 220 9% 66%;    /* #a1a1aa - Secondary text */
     
-    /* Dark accent */
-    --accent: 224 39% 12%;
-    --accent-light: 224 39% 15%;
-    --accent-foreground: 213 31% 91%;
+    /* Accent for interactive elements */
+    --accent: 220 30% 14%;             /* #1e293b - Accent background */
+    --accent-light: 220 30% 20%;       /* Lighter accent */
+    --accent-foreground: 220 84% 88%;  /* #e2e8f0 - Accent text */
     
-    /* Dark status colors */
-    --success: 142 71% 60%;
-    --success-light: 142 71% 12%;
-    --success-foreground: 213 31% 91%;
+    /* Enhanced status colors for dark mode */
+    --success: 142 76% 36%;            /* #059669 - Green that works on dark */
+    --success-light: 142 69% 12%;      /* #064e3b - Dark green background */
+    --success-foreground: 142 76% 86%; /* Light green text */
     
-    --warning: 38 92% 65%;
-    --warning-light: 38 92% 12%;
-    --warning-foreground: 213 31% 91%;
+    --warning: 38 92% 50%;             /* #f59e0b - Warm yellow */
+    --warning-light: 45 93% 12%;       /* #451a03 - Dark amber background */
+    --warning-foreground: 45 96% 89%;  /* Light amber text */
     
-    --destructive: 0 84.2% 70%;
-    --destructive-light: 0 84.2% 12%;
-    --destructive-foreground: 213 31% 91%;
+    --destructive: 0 72% 51%;          /* #dc2626 - Red that pops */
+    --destructive-light: 0 63% 15%;    /* #450a0a - Dark red background */
+    --destructive-foreground: 0 86% 97%; /* Light red text */
     
-    /* Dark borders */
-    --border: 224 39% 12%;
-    --border-light: 224 39% 15%;
-    --input: 224 39% 12%;
-    --ring: 217 89% 70%;
+    /* Refined border system */
+    --border: 220 13% 18%;             /* #2a2a2e - Default borders */
+    --border-light: 220 13% 23%;       /* #3a3a3e - Stronger borders */
+    --input: 220 13% 18%;              /* Input borders */
+    --ring: 217 91% 60%;               /* Focus rings */
   }
 }
 

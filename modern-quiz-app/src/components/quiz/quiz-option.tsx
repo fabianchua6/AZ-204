@@ -28,24 +28,24 @@ export function QuizOption({
     if (!showAnswer) {
       return cn(
         'group relative p-3 sm:p-4 rounded-lg border cursor-pointer transition-all duration-200',
-        'hover:bg-accent hover:border-primary/50 hover:shadow-sm focus-within:ring-2 focus-within:ring-primary/20',
+        'hover:bg-card-secondary hover:border-primary/50 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/10 focus-within:ring-2 focus-within:ring-primary/20',
         isSelected
-          ? 'bg-primary/15 border-primary shadow-sm dark:bg-primary/20 dark:border-primary/60'
-          : 'bg-card border-border hover:border-primary/30'
+          ? 'bg-accent border-primary shadow-md dark:bg-accent/60 dark:border-primary/70 dark:shadow-lg dark:shadow-primary/5'
+          : 'bg-card-secondary border-border hover:border-primary/40 dark:bg-background-secondary dark:border-muted'
       );
     }
 
     if (isCorrect) {
       return cn(
         'p-3 sm:p-4 rounded-lg border cursor-default',
-        'bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-600'
+        'bg-success-light border-success dark:bg-success-light dark:border-success/50 shadow-sm'
       );
     }
 
     if (isSelected && !isCorrect) {
       return cn(
         'p-3 sm:p-4 rounded-lg border cursor-default',
-        'bg-red-100 border-red-300 dark:bg-red-900/30 dark:border-red-600'
+        'bg-destructive-light border-destructive dark:bg-destructive-light dark:border-destructive/50 shadow-sm'
       );
     }
 

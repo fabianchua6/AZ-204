@@ -26,10 +26,10 @@ export function QuizControls({
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <Card className='border-border bg-card shadow-sm'>
+    <Card className='bg-card border border-border shadow-md dark:shadow-lg dark:shadow-black/10 dark:border-border-light'>
       {/* Collapsed Header */}
       <div
-        className='flex cursor-pointer items-center justify-between p-4 transition-colors hover:bg-accent/50'
+        className='flex cursor-pointer items-center justify-between p-4 transition-colors hover:bg-muted/30 dark:hover:bg-muted/20 rounded-t-lg'
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className='flex items-center gap-3'>

@@ -79,16 +79,16 @@ export function QuizCard({
       />
 
       {/* Main Quiz Card */}
-      <Card className='relative border-border bg-card shadow-sm'>
+      <Card className='relative bg-card border border-border shadow-sm dark:shadow-md dark:shadow-black/10 dark:border-border-light'>
         {/* Header with Topic Badge and Navigation */}
-        <CardHeader className='px-4 pb-3 pt-4 sm:pt-6'>
+        <CardHeader className='px-4 pb-3 pt-4 sm:pt-6 bg-gradient-to-r from-card to-card/95 dark:from-card dark:to-card-secondary/30 sticky top-0 z-10 backdrop-blur-sm'>
           <div className='flex flex-row items-center justify-between gap-3'>
             <div className='flex flex-wrap items-center gap-3'>
-              <div className='rounded-full border border-accent-foreground/20 bg-accent px-3 py-1.5 text-sm font-medium text-accent-foreground shadow-sm'>
+              <div className='bg-gradient-to-r from-primary to-primary-dark text-primary-foreground px-3 py-1.5 text-sm font-medium rounded-full border border-primary/30'>
                 {question.topic}
               </div>
               {question.hasCode && (
-                <div className='flex items-center gap-2 rounded-full border border-blue-300 bg-blue-100 px-2 py-1 text-xs text-blue-800 shadow-sm dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-200'>
+                <div className='flex items-center gap-2 rounded-full border border-blue-300 bg-blue-100 px-2 py-1 text-xs text-blue-800 shadow-sm dark:border-blue-600/50 dark:bg-blue-900/40 dark:text-blue-200'>
                   <Code2 className='h-3 w-3' />
                   <span className='font-medium'>Code Example</span>
                 </div>
