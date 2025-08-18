@@ -112,11 +112,11 @@ export function QuizOption({
             <div className='flex-shrink-0'>
               {isCorrect ? (
                 <div className='flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50'>
-                  <CheckCircle2 className='h-4 w-4 text-green-600 dark:text-green-400' />
+                  <CheckCircle2 className='h-3.5 w-3.5 text-green-600 dark:text-green-400' />
                 </div>
               ) : isSelected ? (
                 <div className='flex h-6 w-6 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50'>
-                  <XCircle className='h-4 w-4 text-red-600 dark:text-red-400' />
+                  <XCircle className='h-3.5 w-3.5 text-red-600 dark:text-red-400' />
                 </div>
               ) : null}
             </div>
