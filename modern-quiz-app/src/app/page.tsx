@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Target } from 'lucide-react';
 import { Header } from '@/components/header';
 import { QuizCard } from '@/components/quiz-card';
 import { TopicSelector } from '@/components/topic-selector';
@@ -53,15 +54,50 @@ export default function Home() {
 
 			<main className="container mx-auto px-4 py-6">
 				<div className="max-w-4xl mx-auto">
-					{/* Mobile Progress - Shows at top on mobile, hidden on desktop */}
+					{/* Progress Bar - Always at top, minimal on mobile, more detailed on desktop */}
 					{currentQuestion && (
-						<div className="block lg:hidden">
-							<MobileProgress
-								questionNumber={currentQuestionIndex + 1}
-								totalQuestions={filteredQuestions.length}
-								stats={stats}
-							/>
-						</div>
+						<>
+							{/* Mobile Progress */}
+							<div className="block lg:hidden">
+								<MobileProgress
+									questionNumber={currentQuestionIndex + 1}
+									totalQuestions={filteredQuestions.length}
+									stats={stats}
+								/>
+							</div>
+							
+							{/* Desktop Progress */}
+							<div className="hidden lg:block mb-6">
+								<div className="bg-card/80 backdrop-blur-sm border border-border rounded-xl p-4 shadow-sm">
+									<div className="flex items-center justify-between mb-3">
+										<div className="flex items-center gap-2">
+											<Target className="w-4 h-4 text-muted-foreground" />
+											<span className="text-sm font-medium">
+												Question {currentQuestionIndex + 1} of {filteredQuestions.length}
+											</span>
+										</div>
+										{stats.answeredQuestions > 0 && (
+											<div className="flex items-center gap-4 text-sm text-muted-foreground">
+												<span>
+													{stats.correctAnswers}/{stats.answeredQuestions} correct
+												</span>
+												<span>
+													{Math.round((stats.correctAnswers / stats.answeredQuestions) * 100)}% accuracy
+												</span>
+											</div>
+										)}
+									</div>
+									<div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+										<motion.div
+											className="h-full bg-primary rounded-full"
+											initial={{ width: 0 }}
+											animate={{ width: `${((currentQuestionIndex + 1) / filteredQuestions.length) * 100}%` }}
+											transition={{ duration: 0.4, ease: [0.25, 0.8, 0.25, 1] }}
+										/>
+									</div>
+								</div>
+							</div>
+						</>
 					)}
 
 					{/* Quiz Card - Primary Focus */}

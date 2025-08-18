@@ -4,7 +4,14 @@
   "private": true,
   "author": "Fabian Chua",
   "description": "A modern, responsive quiz application for AZ-204 Azure Developer certification preparation",
-  "keywords": ["azure", "az-204", "quiz", "certification", "next.js", "react"],
+  "keywords": [
+    "azure",
+    "az-204",
+    "quiz",
+    "certification",
+    "next.js",
+    "react"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",

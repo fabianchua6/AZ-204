@@ -84,11 +84,7 @@ export function QuizCard({
 		}
 
 		onAnswerSelect(question.id, newAnswers);
-		
-		// For single choice, show answer after selection
-		if (!isMultipleChoice) {
-			setTimeout(() => onShowAnswer(), 500);
-		}
+		// Removed auto-reveal - user must press next or show answer button
 	};
 
 	const getOptionClassName = (optionIndex: number) => {
@@ -288,7 +284,7 @@ export function QuizCard({
 															'w-5 h-5 rounded border-2 flex items-center justify-center transition-colors duration-150',
 															selectedAnswers.includes(index)
 																? 'bg-primary border-primary'
-																: 'border-border'
+																: 'border-muted-foreground/40 hover:border-primary/60'
 														)}
 													>
 														{selectedAnswers.includes(index) && (
@@ -301,7 +297,7 @@ export function QuizCard({
 															'w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors duration-150',
 															selectedAnswers.includes(index)
 																? 'bg-primary border-primary'
-																: 'border-border'
+																: 'border-muted-foreground/40 hover:border-primary/60'
 														)}
 													>
 														{selectedAnswers.includes(index) && (
