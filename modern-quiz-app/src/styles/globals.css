@@ -1,0 +1,214 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .step {
+    counter-increment: step;
+  }
+
+  .step:before {
+    @apply absolute w-9 h-9 bg-muted rounded-full font-mono font-medium text-center text-base inline-flex items-center justify-center -indent-px border-4 border-background;
+    @apply ml-[-50px] mt-[-4px];
+    content: counter(step);
+  }
+}
+
+/* Mobile-first responsive design */
+@layer components {
+  .container {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Quiz-specific styles */
+  .quiz-option {
+    @apply transition-all duration-200 cursor-pointer border-2 border-border rounded-lg p-3 sm:p-4 hover:border-primary/50 hover:bg-accent/50 active:scale-[0.98];
+  }
+
+  .quiz-option.selected {
+    @apply border-primary bg-primary/10;
+  }
+
+  .quiz-option.correct {
+    @apply border-green-500 bg-green-50 dark:bg-green-900/20;
+  }
+
+  .quiz-option.incorrect {
+    @apply border-red-500 bg-red-50 dark:bg-red-900/20;
+  }
+
+  .quiz-option.disabled {
+    @apply pointer-events-none opacity-60;
+  }
+
+  /* Prose styling for markdown content */
+  .prose {
+    @apply max-w-none text-sm sm:text-base;
+  }
+
+  .prose code {
+    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+  }
+
+  .prose pre {
+    @apply bg-muted p-3 sm:p-4 rounded-lg overflow-x-auto text-sm;
+  }
+
+  .prose pre code {
+    @apply bg-transparent p-0;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-border pl-4 italic text-muted-foreground;
+  }
+
+  .prose table {
+    @apply w-full border-collapse border border-border;
+  }
+
+  .prose th,
+  .prose td {
+    @apply border border-border px-3 py-2 text-left;
+  }
+
+  .prose th {
+    @apply bg-muted font-semibold;
+  }
+
+  /* Loading animation */
+  .loading-dots {
+    @apply inline-flex space-x-1;
+  }
+
+  .loading-dots > div {
+    @apply w-2 h-2 bg-primary rounded-full animate-pulse;
+    animation-delay: calc(var(--i) * 0.1s);
+  }
+
+  /* Mobile navigation improvements */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-50;
+  }
+
+  .mobile-nav-button {
+    @apply flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors;
+  }
+
+  /* Topic grid responsive layout */
+  .topic-grid {
+    @apply grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+
+  /* Question card responsive layout */
+  .question-card {
+    @apply bg-card border rounded-lg shadow-sm overflow-hidden;
+  }
+
+  .question-header {
+    @apply border-b p-3 sm:p-4 bg-muted/50;
+  }
+
+  .question-content {
+    @apply p-4 sm:p-6;
+  }
+
+  .question-actions {
+    @apply border-t p-3 sm:p-4 bg-muted/30;
+  }
+
+  /* Stats card responsive layout */
+  .stats-grid {
+    @apply grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4;
+  }
+
+  .stat-card {
+    @apply bg-card border rounded-lg p-3 sm:p-4 text-center;
+  }
+}
+
+/* Responsive font sizes */
+@media (max-width: 640px) {
+  .prose {
+    @apply text-sm;
+  }
+  
+  .prose h1 {
+    @apply text-xl;
+  }
+  
+  .prose h2 {
+    @apply text-lg;
+  }
+  
+  .prose h3 {
+    @apply text-base;
+  }
+}
+
+/* Responsive spacing for buttons */
+@media (max-width: 768px) {
+  .button-group {
+    @apply flex flex-col gap-2;
+  }
+  
+  .button-group-horizontal {
+    @apply flex flex-row gap-2;
+  }
+}
