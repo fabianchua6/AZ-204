@@ -70,13 +70,13 @@ export function QuizCard({
 
   const handleNext = useCallback(() => {
     if (!showAnswer && selectedAnswers.length > 0) {
-      // Show answer before moving to next question
+      // First click: Show answer
       onShowAnswer();
-      // Small delay to let user see the answer, then move to next
-      setTimeout(() => {
-        onNext();
-      }, 1500);
+    } else if (showAnswer) {
+      // Second click: Move to next question
+      onNext();
     } else {
+      // No answer selected, just move to next
       onNext();
     }
   }, [showAnswer, selectedAnswers.length, onShowAnswer, onNext]);
@@ -105,7 +105,7 @@ export function QuizCard({
 
     if (!showAnswer) {
       return cn(
-        'group relative p-4 rounded-lg border cursor-pointer transition-all duration-200',
+        'group relative p-3 sm:p-4 rounded-lg border cursor-pointer transition-all duration-200',
         'hover:bg-accent hover:border-primary/50 hover:shadow-sm focus-within:ring-2 focus-within:ring-primary/20',
         isSelected
           ? 'bg-primary/15 border-primary shadow-sm dark:bg-primary/20 dark:border-primary/60'
@@ -115,19 +115,19 @@ export function QuizCard({
 
     if (isCorrect) {
       return cn(
-        'p-4 rounded-lg border cursor-default',
+        'p-3 sm:p-4 rounded-lg border cursor-default',
         'bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-600'
       );
     }
 
     if (isSelected && !isCorrect) {
       return cn(
-        'p-4 rounded-lg border cursor-default',
+        'p-3 sm:p-4 rounded-lg border cursor-default',
         'bg-red-100 border-red-300 dark:bg-red-900/30 dark:border-red-600'
       );
     }
 
-    return 'p-4 rounded-lg border bg-muted/40 border-muted-foreground/20 cursor-default opacity-60';
+    return 'p-3 sm:p-4 rounded-lg border bg-muted/40 border-muted-foreground/20 cursor-default opacity-60';
   }, [selectedAnswers, showAnswer, question.answerIndexes]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent, optionIndex: number) => {
@@ -213,7 +213,7 @@ export function QuizCard({
       {/* Main Quiz Card */}
       <Card className="relative group hover:shadow-lg transition-all duration-300 border-border bg-card shadow-sm">
         {/* Progress indicator and controls - positioned above the card content */}
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10">
           <div className="flex items-center gap-2">
             {/* Progress indicator - subtle */}
             <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border/50 shadow-sm">
@@ -244,8 +244,8 @@ export function QuizCard({
         </div>
 
         {/* Header */}
-        <CardHeader className="pb-3 pt-6">
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pr-20">
+        <CardHeader className="pb-3 pt-4 sm:pt-6">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pr-16 sm:pr-20">
             <div className="flex flex-wrap items-center gap-3">
               <div className="text-sm bg-accent border border-accent-foreground/20 px-3 py-1.5 rounded-full font-medium text-accent-foreground shadow-sm">
                 {question.topic}
@@ -261,14 +261,14 @@ export function QuizCard({
         </CardHeader>
 
         {/* Question Content */}
-        <CardContent className="pt-0 pb-6">
-          <div className="prose prose-sm sm:prose-base max-w-none mb-6 dark:prose-invert prose-headings:font-semibold prose-p:leading-relaxed">
+        <CardContent className="pt-0 pb-4 sm:pb-6">
+          <div className="prose prose-sm sm:prose-base max-w-none mb-4 sm:mb-6 dark:prose-invert prose-headings:font-semibold prose-p:leading-relaxed">
             <ReactMarkdown>{question.question}</ReactMarkdown>
           </div>
 
           {/* Options */}
           {question.options.length > 0 && (
-            <div className="space-y-3 mb-6">
+            <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
               {isMultipleChoice && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
@@ -402,9 +402,9 @@ export function QuizCard({
                   ease: 'easeOut',
                   height: { duration: 0.3 },
                 }}
-                className="border-t-2 border-dashed border-border pt-6 mt-6 overflow-hidden"
+                className="border-t-2 border-dashed border-border pt-4 sm:pt-6 mt-4 sm:mt-6 overflow-hidden"
               >
-                <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-3 mb-3 sm:mb-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-200 dark:bg-green-800/60">
                     <CheckCircle2 className="h-5 w-5 text-green-700 dark:text-green-200" />
                   </div>
@@ -417,7 +417,7 @@ export function QuizCard({
                     </p>
                   </div>
                 </div>
-                <div className="prose prose-sm sm:prose-base dark:prose-invert rounded-xl border-2 border-green-300 bg-green-100 dark:border-green-600 dark:bg-green-900/30 p-6 shadow-sm">
+                <div className="prose prose-sm sm:prose-base dark:prose-invert rounded-xl border-2 border-green-300 bg-green-100 dark:border-green-600 dark:bg-green-900/30 p-4 sm:p-6 shadow-sm">
                   <ReactMarkdown>{question.answer}</ReactMarkdown>
                 </div>
               </motion.div>
@@ -426,7 +426,7 @@ export function QuizCard({
         </CardContent>
 
         {/* Actions */}
-        <CardFooter className="border-t border-border bg-muted/50 p-6">
+        <CardFooter className="border-t border-border bg-muted/50 p-4 sm:p-6">
           <div className="flex w-full items-center justify-between">
             <Button
               variant="ghost"
@@ -476,8 +476,12 @@ export function QuizCard({
               )}
               size="default"
             >
-              <span className="hidden sm:inline">Next</span>
-              <span className="sm:hidden">Next</span>
+              <span className="hidden sm:inline">
+                {!showAnswer && selectedAnswers.length > 0 ? "Show Answer" : "Next"}
+              </span>
+              <span className="sm:hidden">
+                {!showAnswer && selectedAnswers.length > 0 ? "Show" : "Next"}
+              </span>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

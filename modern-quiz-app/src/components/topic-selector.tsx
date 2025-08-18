@@ -25,12 +25,12 @@ export function TopicSelector({
 }: TopicSelectorProps) {
 	return compact ? (
 		// Compact mode for contextual toolbar
-		<Select value={selectedTopic || ''} onValueChange={(value) => onTopicChange(value || null)}>
+		<Select value={selectedTopic || 'all-topics'} onValueChange={(value) => onTopicChange(value === 'all-topics' ? null : value)}>
 			<SelectTrigger className="w-full">
 				<SelectValue placeholder={`All Topics (${questionCount} questions)`} />
 			</SelectTrigger>
 			<SelectContent>
-				<SelectItem value="">All Topics ({questionCount} questions)</SelectItem>
+				<SelectItem value="all-topics">All Topics ({questionCount} questions)</SelectItem>
 				{topics.map((topic) => (
 					<SelectItem key={topic} value={topic}>
 						{topic}
