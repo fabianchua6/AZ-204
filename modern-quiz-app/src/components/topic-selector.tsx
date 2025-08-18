@@ -1,5 +1,12 @@
-import { Filter, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface TopicSelectorProps {
 	topics: string[];
@@ -18,18 +25,19 @@ export function TopicSelector({
 }: TopicSelectorProps) {
 	return compact ? (
 		// Compact mode for contextual toolbar
-		<select
-			value={selectedTopic || ''}
-			onChange={(e) => onTopicChange(e.target.value || null)}
-			className="w-full px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-		>
-			<option value="">All Topics ({questionCount} questions)</option>
-			{topics.map((topic) => (
-				<option key={topic} value={topic}>
-					{topic}
-				</option>
-			))}
-		</select>
+		<Select value={selectedTopic || ''} onValueChange={(value) => onTopicChange(value || null)}>
+			<SelectTrigger className="w-full">
+				<SelectValue placeholder={`All Topics (${questionCount} questions)`} />
+			</SelectTrigger>
+			<SelectContent>
+				<SelectItem value="">All Topics ({questionCount} questions)</SelectItem>
+				{topics.map((topic) => (
+					<SelectItem key={topic} value={topic}>
+						{topic}
+					</SelectItem>
+				))}
+			</SelectContent>
+		</Select>
 	) : (
 		// Full mode for welcome screen
 		<div className="max-w-2xl mx-auto">
@@ -38,7 +46,7 @@ export function TopicSelector({
 					variant={selectedTopic === null ? 'default' : 'outline'}
 					size="lg"
 					onClick={() => onTopicChange(null)}
-					className="justify-start text-left h-auto py-4 px-4 whitespace-normal group hover:scale-105 transition-all duration-200"
+					className="justify-start text-left h-auto py-4 px-4 whitespace-normal group transition-colors duration-200"
 				>
 					<div className="flex items-center gap-3">
 						<div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -59,7 +67,7 @@ export function TopicSelector({
 						variant={selectedTopic === topic ? 'default' : 'outline'}
 						size="lg"
 						onClick={() => onTopicChange(topic)}
-						className="justify-start text-left h-auto py-4 px-4 whitespace-normal group hover:scale-105 transition-all duration-200"
+						className="justify-start text-left h-auto py-4 px-4 whitespace-normal group transition-colors duration-200"
 					>
 						<div className="flex items-center gap-3">
 							<div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center group-hover:bg-accent/80 transition-colors">
