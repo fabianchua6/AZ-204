@@ -84,6 +84,11 @@ export function QuizCard({
 		}
 
 		onAnswerSelect(question.id, newAnswers);
+		
+		// For single choice, show answer after selection
+		if (!isMultipleChoice) {
+			setTimeout(() => onShowAnswer(), 500);
+		}
 	};
 
 	const getOptionClassName = (optionIndex: number) => {
@@ -92,32 +97,28 @@ export function QuizCard({
 
 		if (!showAnswer) {
 			return cn(
-				'group relative p-5 rounded-xl border-2 cursor-pointer transition-all duration-200',
-				'hover:bg-accent/30 hover:border-primary/40 hover:shadow-md',
-				'active:scale-[0.99] active:duration-75',
+				'group relative p-4 rounded-lg border cursor-pointer transition-colors duration-150',
 				isSelected
-					? 'bg-primary/10 border-primary shadow-md ring-2 ring-primary/20'
-					: 'bg-card border-border hover:border-border/80'
+					? 'bg-primary/5 border-primary/30'
+					: 'bg-card border-border hover:border-primary/20'
 			);
 		}
 
 		if (isCorrect) {
 			return cn(
-				'p-5 rounded-xl border-2 cursor-default',
-				'bg-green-50 border-green-300 shadow-md ring-2 ring-green-200',
-				'dark:bg-green-900/30 dark:border-green-700 dark:ring-green-800/50'
+				'p-4 rounded-lg border cursor-default',
+				'bg-green-50 border-green-200 dark:bg-green-950/50 dark:border-green-800'
 			);
 		}
 
 		if (isSelected && !isCorrect) {
 			return cn(
-				'p-5 rounded-xl border-2 cursor-default',
-				'bg-red-50 border-red-300 shadow-md ring-2 ring-red-200',
-				'dark:bg-red-900/30 dark:border-red-700 dark:ring-red-800/50'
+				'p-4 rounded-lg border cursor-default',
+				'bg-red-50 border-red-200 dark:bg-red-950/50 dark:border-red-800'
 			);
 		}
 
-		return 'p-5 rounded-xl border-2 bg-muted/30 border-muted cursor-default opacity-50';
+		return 'p-4 rounded-lg border bg-muted/20 border-muted cursor-default opacity-60';
 	};
 
 	return (
@@ -271,79 +272,40 @@ export function QuizCard({
 							)}
 
 							{question.options.map((option, index) => (
-								<motion.div
+								<div
 									key={index}
-									initial={{ opacity: 0, y: 15 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{ delay: index * 0.08, ease: 'easeOut' }}
-									whileHover={
-										showAnswer
-											? {}
-											: {
-													scale: 1.005,
-													transition: { duration: 0.15 },
-											  }
-									}
-									whileTap={
-										showAnswer
-											? {}
-											: {
-													scale: 0.995,
-													transition: { duration: 0.1 },
-											  }
-									}
 									className="relative"
 								>
 									<div
 										className={getOptionClassName(index)}
 										onClick={() => handleOptionSelect(index)}
 									>
-										<div className="flex items-start gap-4">
-											<div className="mt-1 flex-shrink-0">
+										<div className="flex items-start gap-3">
+											<div className="mt-0.5 flex-shrink-0">
 												{isMultipleChoice ? (
 													<div
 														className={cn(
-															'w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200',
+															'w-5 h-5 rounded border-2 flex items-center justify-center transition-colors duration-150',
 															selectedAnswers.includes(index)
-																? 'bg-primary border-primary shadow-sm'
-																: 'border-border group-hover:border-primary/60'
+																? 'bg-primary border-primary'
+																: 'border-border'
 														)}
 													>
 														{selectedAnswers.includes(index) && (
-															<motion.div
-																initial={{ scale: 0, rotate: -180 }}
-																animate={{ scale: 1, rotate: 0 }}
-																transition={{
-																	type: 'spring',
-																	stiffness: 400,
-																	damping: 25,
-																	duration: 0.3,
-																}}
-															>
-																<CheckCircle2 className="w-4 h-4 text-primary-foreground" />
-															</motion.div>
+															<CheckCircle2 className="w-3 h-3 text-primary-foreground" />
 														)}
 													</div>
 												) : (
 													<div
 														className={cn(
-															'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200',
+															'w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors duration-150',
 															selectedAnswers.includes(index)
-																? 'bg-primary border-primary shadow-sm'
-																: 'border-border group-hover:border-primary/60'
+																? 'bg-primary border-primary'
+																: 'border-border'
 														)}
 													>
 														{selectedAnswers.includes(index) && (
-															<motion.div
-																initial={{ scale: 0 }}
-																animate={{ scale: 1 }}
-																transition={{
-																	type: 'spring',
-																	stiffness: 400,
-																	damping: 25,
-																}}
-																className="w-3 h-3 bg-primary-foreground rounded-full"
-															/>
+															<div className="w-2.5 h-2.5 bg-primary-foreground rounded-full" />
 														)}
 													</div>
 												)}
@@ -351,34 +313,24 @@ export function QuizCard({
 											<div className="flex-1 prose prose-sm dark:prose-invert prose-p:mb-0">
 												<ReactMarkdown>{option}</ReactMarkdown>
 											</div>
-
+											
 											{/* Show correct/incorrect indicators when answer is revealed */}
 											{showAnswer && (
-												<motion.div
-													initial={{ opacity: 0, scale: 0, rotate: -90 }}
-													animate={{ opacity: 1, scale: 1, rotate: 0 }}
-													transition={{
-														delay: 0.2,
-														type: 'spring',
-														stiffness: 300,
-														damping: 20,
-													}}
-													className="flex-shrink-0"
-												>
+												<div className="flex-shrink-0">
 													{question.answerIndexes.includes(index) ? (
-														<div className="w-8 h-8 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
-															<CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+														<div className="w-6 h-6 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
+															<CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
 														</div>
 													) : selectedAnswers.includes(index) ? (
-														<div className="w-8 h-8 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center">
-															<XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+														<div className="w-6 h-6 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center">
+															<XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
 														</div>
 													) : null}
-												</motion.div>
+												</div>
 											)}
 										</div>
 									</div>
-								</motion.div>
+								</div>
 							))}
 						</div>
 					)}
@@ -426,7 +378,7 @@ export function QuizCard({
 							<Button
 								variant={showAnswer ? 'secondary' : 'default'}
 								onClick={onShowAnswer}
-								className="h-11 px-6 flex items-center gap-3 font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+								className="h-11 px-6 flex items-center gap-3 font-medium transition-colors duration-150"
 								size="default"
 							>
 								{showAnswer ? (
@@ -450,11 +402,10 @@ export function QuizCard({
 								onClick={onPrevious}
 								disabled={!canGoPrevious}
 								className={cn(
-									'h-10 px-4 flex items-center gap-2 font-medium transition-all duration-200',
-									'hover:bg-accent hover:scale-105 active:scale-95',
+									'h-10 px-4 flex items-center gap-2 font-medium transition-colors duration-150',
 									!canGoPrevious
-										? 'opacity-40 cursor-not-allowed hover:scale-100 hover:bg-transparent'
-										: 'hover:shadow-sm'
+										? 'opacity-40 cursor-not-allowed'
+										: 'hover:bg-accent'
 								)}
 								size="default"
 							>
@@ -491,11 +442,10 @@ export function QuizCard({
 								onClick={onNext}
 								disabled={!canGoNext}
 								className={cn(
-									'h-10 px-4 flex items-center gap-2 font-medium transition-all duration-200',
-									'hover:bg-accent hover:scale-105 active:scale-95',
+									'h-10 px-4 flex items-center gap-2 font-medium transition-colors duration-150',
 									!canGoNext
-										? 'opacity-40 cursor-not-allowed hover:scale-100 hover:bg-transparent'
-										: 'hover:shadow-sm'
+										? 'opacity-40 cursor-not-allowed'
+										: 'hover:bg-accent'
 								)}
 								size="default"
 							>
