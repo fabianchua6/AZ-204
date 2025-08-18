@@ -1,47 +1,78 @@
 # Dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# Testing
-/coverage
-
-# Next.js
-/.next/
-/out/
-
-# Production
-/build
-
-# Misc
-.DS_Store
-*.pem
-
-# Debug
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 
-# Local env files
+# Next.js
+.next/
+out/
+
+# Production builds
+build/
+dist/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
+.env
 .env*.local
+.env.production
+.env.staging
 
 # Vercel
-.vercel
+.vercel/
 
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
 
-# Quiz data (generated)
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Quiz data (generated files)
 /src/data/
 /public/data/
 
 # Scripts output
 /scripts/*.log
 
-# IDE
-.vscode/
-.idea/
+# Temporary files
+*.tmp
+*.temp
 
-# OS
-Thumbs.db
+# Cache directories
+.cache/
+.parcel-cache/
+
+# Optional npm cache directory
+.npm
+
+# Serverless directories
+.serverless/
+
+# Lighthouse CI
+.lighthouseci/

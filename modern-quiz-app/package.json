@@ -2,13 +2,35 @@
   "name": "az-204-quiz-app",
   "version": "1.0.0",
   "private": true,
+  "author": "Fabian Chua",
+  "description": "A modern, responsive quiz application for AZ-204 Azure Developer certification preparation",
+  "keywords": ["azure", "az-204", "quiz", "certification", "next.js", "react"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabianchua6/AZ-204.git",
+    "directory": "modern-quiz-app"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "npm run seed && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint --fix",
+    "lint:check": "next lint",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "seed": "node scripts/seed.mjs",
-    "predev": "npm run seed"
+    "predev": "npm run seed",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "analyze": "cross-env ANALYZE=true npm run build",
+    "clean": "rm -rf .next && rm -rf out && rm -rf src/data && rm -rf public/data"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.1",
@@ -48,13 +70,25 @@
     "vaul": "^1.0.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^14.2.15",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/jest": "^29.5.13",
     "@types/node": "^20.16.11",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "cross-env": "^7.0.3",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.15",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-jsx-a11y": "^6.10.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.4.48",
+    "prettier": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.8",
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3"
   }
