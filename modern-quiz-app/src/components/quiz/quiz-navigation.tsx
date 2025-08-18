@@ -91,7 +91,7 @@ export function QuizNavigation({
           'flex h-10 items-center gap-3 px-6 font-medium shadow-sm transition-all duration-300',
           showAnswer
             ? 'border-primary/60 text-primary hover:bg-muted hover:text-primary'
-            : 'hover:scale-[1.02] hover:shadow-md'
+            : 'hover:scale-[1.02] hover:shadow-sm'
         )}
         size='default'
       >

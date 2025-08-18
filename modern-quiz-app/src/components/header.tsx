@@ -20,15 +20,15 @@ export function Header() {
   };
 
   return (
-    <header className='border-border-light via-card-secondary/90 shadow-xs sticky top-0 z-50 border-b bg-gradient-to-r from-card/90 to-card/90 backdrop-blur-md'>
+    <header className='sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-sm'>
       <div className='container mx-auto px-4 py-4'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center space-x-3'>
-            <div className='to-primary-light/20 rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 p-2 shadow-md'>
+            <div className='rounded-xl border border-primary/20 bg-primary/10 p-2'>
               <BookOpen className='h-6 w-6 text-primary' />
             </div>
             <div>
-              <h1 className='bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-xl font-bold text-transparent'>
+              <h1 className='text-xl font-bold text-foreground'>
                 AZ-204 Quiz App
               </h1>
               <p className='text-sm text-muted-foreground'>
@@ -41,7 +41,7 @@ export function Header() {
             variant='ghost'
             size='sm'
             onClick={toggleTheme}
-            className='hover:bg-accent-light border-border-light relative h-9 w-9 border bg-background/80 p-0 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95'
+            className='relative h-9 w-9 border border-border bg-background/50 p-0 transition-colors hover:bg-accent'
           >
             {getThemeIcon()}
             <span className='sr-only'>Toggle theme</span>

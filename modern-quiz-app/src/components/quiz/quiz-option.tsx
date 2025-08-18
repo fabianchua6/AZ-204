@@ -28,9 +28,9 @@ export function QuizOption({
     if (!showAnswer) {
       return cn(
         'group relative p-3 sm:p-4 rounded-lg border cursor-pointer transition-all duration-200',
-        'hover:bg-card-secondary hover:border-primary/50 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/10 focus-within:ring-2 focus-within:ring-primary/20',
+        'hover:bg-card-secondary hover:border-primary/50 hover:shadow-sm dark:hover:shadow-sm focus-within:ring-2 focus-within:ring-primary/20',
         isSelected
-          ? 'bg-accent border-primary shadow-md dark:bg-accent/60 dark:border-primary/70 dark:shadow-lg dark:shadow-primary/5'
+          ? 'bg-accent border-primary shadow-sm dark:bg-accent/60 dark:border-primary/70 dark:shadow-sm'
           : 'bg-card-secondary border-border hover:border-primary/40 dark:bg-background-secondary dark:border-muted'
       );
     }

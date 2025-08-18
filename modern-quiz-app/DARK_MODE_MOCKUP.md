@@ -1,6 +1,7 @@
 # 🌙 Dark Mode Color Scheme Proposal
 
 ## Current Issues
+
 - Too flat and monotonous
 - No visual hierarchy between elements
 - Cards blend into background
@@ -9,39 +10,44 @@
 ## Proposed Color Palette
 
 ### Background Layers (Dark to Light)
+
 ```css
---background: #0a0a0b;           /* Deepest background (body) */
---background-secondary: #111113;  /* Secondary areas */
---card: #1a1a1d;                 /* Cards and elevated surfaces */
---card-hover: #222226;           /* Card hover states */
---muted: #2a2a2e;                /* Subtle elements */
+--background: #0a0a0b; /* Deepest background (body) */
+--background-secondary: #111113; /* Secondary areas */
+--card: #1a1a1d; /* Cards and elevated surfaces */
+--card-hover: #222226; /* Card hover states */
+--muted: #2a2a2e; /* Subtle elements */
 ```
 
 ### Borders & Dividers
+
 ```css
---border: #2a2a2e;               /* Subtle borders */
---border-strong: #3a3a3e;       /* More prominent borders */
---accent-border: #4a4a4e;       /* Interactive borders */
+--border: #2a2a2e; /* Subtle borders */
+--border-strong: #3a3a3e; /* More prominent borders */
+--accent-border: #4a4a4e; /* Interactive borders */
 ```
 
 ### Text Hierarchy
+
 ```css
---foreground: #f4f4f5;          /* Primary text */
---foreground-muted: #a1a1aa;    /* Secondary text */
---foreground-subtle: #71717a;   /* Tertiary text */
+--foreground: #f4f4f5; /* Primary text */
+--foreground-muted: #a1a1aa; /* Secondary text */
+--foreground-subtle: #71717a; /* Tertiary text */
 ```
 
 ### Interactive Elements
+
 ```css
---primary: #3b82f6;             /* Primary actions */
---primary-hover: #2563eb;       /* Primary hover */
---accent: #1e293b;              /* Accent backgrounds */
---accent-foreground: #e2e8f0;   /* Accent text */
+--primary: #3b82f6; /* Primary actions */
+--primary-hover: #2563eb; /* Primary hover */
+--accent: #1e293b; /* Accent backgrounds */
+--accent-foreground: #e2e8f0; /* Accent text */
 ```
 
 ## Visual Hierarchy Examples
 
 ### Quiz Card Structure
+
 ```
 ┌─ QUIZ CONTROLS ──────────────────────────────────┐
 │ Background: #1a1a1d (card)                      │
@@ -78,12 +84,14 @@
 ## Key Improvements
 
 ### 1. **Layered Depth**
+
 - Base: `#0a0a0b` (deepest)
 - Controls card: `#1a1a1d` (elevated)
 - Quiz card: `#1a1a1d` with stronger border
 - Options: `#111113` (recessed)
 
 ### 2. **Interactive States**
+
 ```css
 /* Option states */
 .option-default: background #111113, border #2a2a2e
@@ -94,27 +102,29 @@
 ```
 
 ### 3. **Enhanced Shadows**
+
 ```css
 .quiz-card {
-  box-shadow: 
-    0 1px 3px rgba(0,0,0,0.3),
-    0 4px 12px rgba(0,0,0,0.2),
-    0 0 0 1px rgba(255,255,255,0.05);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 .quiz-controls {
-  box-shadow: 
-    0 1px 2px rgba(0,0,0,0.2),
-    0 0 0 1px rgba(255,255,255,0.03);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 ```
 
 ### 4. **Topic Badge Enhancement**
+
 ```css
 .topic-badge {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
-  border: 1px solid rgba(59,130,246,0.3);
-  box-shadow: 0 2px 4px rgba(59,130,246,0.2);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 ```
 

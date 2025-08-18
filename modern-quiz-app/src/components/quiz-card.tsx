@@ -79,12 +79,12 @@ export function QuizCard({
       />
 
       {/* Main Quiz Card */}
-      <Card className='relative bg-card border border-border shadow-sm dark:shadow-md dark:shadow-black/10 dark:border-border-light'>
+      <Card className='dark:border-border-light relative border border-border bg-card shadow-sm dark:shadow-sm'>
         {/* Header with Topic Badge and Navigation */}
-        <CardHeader className='px-4 pb-3 pt-4 sm:pt-6 bg-gradient-to-r from-card to-card/95 dark:from-card dark:to-card-secondary/30 sticky top-0 z-10 backdrop-blur-sm'>
+        <CardHeader className='sticky top-0 z-10 bg-card/95 px-4 pb-3 pt-4 backdrop-blur-sm rounded-t-lg sm:pt-6'>
           <div className='flex flex-row items-center justify-between gap-3'>
             <div className='flex flex-wrap items-center gap-3'>
-              <div className='bg-gradient-to-r from-primary to-primary-dark text-primary-foreground px-3 py-1.5 text-sm font-medium rounded-full border border-primary/30'>
+              <div className='rounded-full border border-primary/30 bg-primary/20 px-3 py-1.5 text-sm font-medium text-primary'>
                 {question.topic}
               </div>
               {question.hasCode && (
