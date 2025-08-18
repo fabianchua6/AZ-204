@@ -6,6 +6,7 @@ import { Header } from '@/components/header';
 import { QuizCard } from '@/components/quiz-card';
 import { TopicSelector } from '@/components/topic-selector';
 import { QuizStats } from '@/components/quiz-stats';
+import { MobileProgress } from '@/components/mobile-progress';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { useQuizData } from '@/hooks/use-quiz-data';
 import { useQuizState } from '@/hooks/use-quiz-state';
@@ -47,11 +48,22 @@ export default function Home() {
 	const currentQuestion = filteredQuestions[currentQuestionIndex];
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="min-h-screen bg-gradient-to-br from-background via-background-secondary to-background-tertiary">
 			<Header />
 
 			<main className="container mx-auto px-4 py-6">
 				<div className="max-w-4xl mx-auto">
+					{/* Mobile Progress - Shows at top on mobile, hidden on desktop */}
+					{currentQuestion && (
+						<div className="block lg:hidden">
+							<MobileProgress
+								questionNumber={currentQuestionIndex + 1}
+								totalQuestions={filteredQuestions.length}
+								stats={stats}
+							/>
+						</div>
+					)}
+
 					{/* Quiz Card - Primary Focus */}
 					<AnimatePresence mode="wait">
 						{currentQuestion ? (

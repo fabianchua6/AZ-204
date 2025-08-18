@@ -198,7 +198,7 @@ export function QuizCard({
 			</AnimatePresence>
 
 			{/* Main Quiz Card */}
-			<Card className="relative group hover:shadow-lg transition-all duration-300 border-border/50">
+			<Card className="relative group hover:shadow-xl transition-all duration-300 border-border/50 bg-gradient-to-br from-card via-card-secondary to-card shadow-lg backdrop-blur-sm">
 				{/* Floating Action Menu - Redesigned */}
 				<div className="absolute top-6 right-6 z-10">
 					<div className="flex items-center gap-3">
@@ -229,11 +229,11 @@ export function QuizCard({
 				<CardHeader className="pb-4 pt-6">
 					<div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pr-16">
 						<div className="flex flex-wrap items-center gap-3">
-							<div className="text-sm font-semibold text-foreground bg-accent/80 px-4 py-2 rounded-full border">
+							<div className="text-sm font-semibold text-foreground bg-gradient-to-r from-accent-light to-accent px-4 py-2 rounded-full border border-border-light shadow-sm">
 								{question.topic}
 							</div>
 							{question.hasCode && (
-								<div className="flex items-center gap-2 text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-full border border-blue-200 dark:border-blue-800">
+								<div className="flex items-center gap-2 text-xs bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/30 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-full border border-blue-200 dark:border-blue-800 shadow-sm">
 									<Code2 className="h-3.5 w-3.5" />
 									<span className="font-medium">Code Example</span>
 								</div>
@@ -402,10 +402,10 @@ export function QuizCard({
 								onClick={onPrevious}
 								disabled={!canGoPrevious}
 								className={cn(
-									'h-10 px-4 flex items-center gap-2 font-medium transition-colors duration-150',
+									'h-10 px-4 flex items-center gap-2 font-medium transition-all duration-200',
 									!canGoPrevious
 										? 'opacity-40 cursor-not-allowed'
-										: 'hover:bg-accent'
+										: 'hover:bg-accent-light hover:shadow-md hover:scale-105 active:scale-95'
 								)}
 								size="default"
 							>
@@ -414,8 +414,8 @@ export function QuizCard({
 								<span className="sm:hidden">Prev</span>
 							</Button>
 
-							{/* Progress indicator - redesigned */}
-							<div className="flex items-center gap-3 px-4 py-2 bg-background/80 backdrop-blur-sm border rounded-full shadow-sm">
+							{/* Progress indicator - hidden on mobile, enhanced for desktop */}
+							<div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-background/90 to-card-secondary/90 backdrop-blur-md border border-border-light rounded-full shadow-lg">
 								<div className="flex items-center gap-2 text-sm text-muted-foreground">
 									<Target className="h-3.5 w-3.5" />
 									<span className="font-mono tabular-nums">
@@ -424,15 +424,15 @@ export function QuizCard({
 									</span>
 								</div>
 
-								{/* Mini progress bar */}
-								<div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+								{/* Enhanced mini progress bar */}
+								<div className="w-20 h-2 bg-muted rounded-full overflow-hidden shadow-inner">
 									<motion.div
-										className="h-full bg-primary rounded-full"
+										className="h-full bg-gradient-to-r from-primary to-primary-light rounded-full shadow-sm"
 										initial={{ width: 0 }}
 										animate={{
 											width: `${(questionNumber / totalQuestions) * 100}%`,
 										}}
-										transition={{ duration: 0.3, ease: 'easeOut' }}
+										transition={{ duration: 0.4, ease: [0.25, 0.8, 0.25, 1] }}
 									/>
 								</div>
 							</div>
@@ -442,10 +442,10 @@ export function QuizCard({
 								onClick={onNext}
 								disabled={!canGoNext}
 								className={cn(
-									'h-10 px-4 flex items-center gap-2 font-medium transition-colors duration-150',
+									'h-10 px-4 flex items-center gap-2 font-medium transition-all duration-200',
 									!canGoNext
 										? 'opacity-40 cursor-not-allowed'
-										: 'hover:bg-accent'
+										: 'hover:bg-accent-light hover:shadow-md hover:scale-105 active:scale-95'
 								)}
 								size="default"
 							>

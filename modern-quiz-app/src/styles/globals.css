@@ -4,48 +4,118 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* Warmer, richer background with subtle gradients */
+    --background: 0 0% 99%;
+    --background-secondary: 220 13% 97%;
+    --background-tertiary: 220 13% 95%;
     --foreground: 222.2 84% 4.9%;
+    
+    /* Enhanced card system with elevation */
     --card: 0 0% 100%;
+    --card-secondary: 220 13% 98%;
     --card-foreground: 222.2 84% 4.9%;
+    --card-border: 220 13% 91%;
+    
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
+    
+    /* Richer primary with better contrast */
+    --primary: 217 89% 61%;
+    --primary-light: 217 89% 75%;
+    --primary-dark: 217 89% 45%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
+    
+    /* Enhanced secondary palette */
+    --secondary: 217 16% 94%;
+    --secondary-light: 217 16% 97%;
     --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
+    
+    /* Improved muted colors */
+    --muted: 217 16% 94%;
+    --muted-light: 217 16% 97%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
+    
+    /* Better accent system */
+    --accent: 217 16% 94%;
+    --accent-light: 217 16% 97%;
     --accent-foreground: 222.2 84% 4.9%;
+    
+    /* Enhanced status colors */
+    --success: 142 71% 45%;
+    --success-light: 142 71% 94%;
+    --success-foreground: 210 40% 98%;
+    
+    --warning: 38 92% 50%;
+    --warning-light: 38 92% 95%;
+    --warning-foreground: 222.2 84% 4.9%;
+    
     --destructive: 0 84.2% 60.2%;
+    --destructive-light: 0 84.2% 97%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    
+    /* Refined borders */
+    --border: 220 13% 91%;
+    --border-light: 220 13% 95%;
+    --input: 220 13% 91%;
+    --ring: 217 89% 61%;
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    /* Richer dark theme with better depth */
+    --background: 224 71% 4%;
+    --background-secondary: 224 47% 6%;
+    --background-tertiary: 224 47% 8%;
+    --foreground: 213 31% 91%;
+    
+    /* Enhanced dark cards */
+    --card: 224 71% 4%;
+    --card-secondary: 224 47% 6%;
+    --card-foreground: 213 31% 91%;
+    --card-border: 224 39% 12%;
+    
+    --popover: 224 71% 4%;
+    --popover-foreground: 213 31% 91%;
+    
+    /* Vibrant primary for dark mode */
+    --primary: 217 89% 70%;
+    --primary-light: 217 89% 80%;
+    --primary-dark: 217 89% 55%;
+    --primary-foreground: 224 71% 4%;
+    
+    /* Better dark secondary */
+    --secondary: 224 39% 12%;
+    --secondary-light: 224 39% 15%;
+    --secondary-foreground: 213 31% 91%;
+    
+    /* Improved dark muted */
+    --muted: 224 39% 12%;
+    --muted-light: 224 39% 15%;
+    --muted-foreground: 215.4 16.3% 65.1%;
+    
+    /* Dark accent */
+    --accent: 224 39% 12%;
+    --accent-light: 224 39% 15%;
+    --accent-foreground: 213 31% 91%;
+    
+    /* Dark status colors */
+    --success: 142 71% 60%;
+    --success-light: 142 71% 12%;
+    --success-foreground: 213 31% 91%;
+    
+    --warning: 38 92% 65%;
+    --warning-light: 38 92% 12%;
+    --warning-foreground: 213 31% 91%;
+    
+    --destructive: 0 84.2% 70%;
+    --destructive-light: 0 84.2% 12%;
+    --destructive-foreground: 213 31% 91%;
+    
+    /* Dark borders */
+    --border: 224 39% 12%;
+    --border-light: 224 39% 15%;
+    --input: 224 39% 12%;
+    --ring: 217 89% 70%;
   }
 }
 
