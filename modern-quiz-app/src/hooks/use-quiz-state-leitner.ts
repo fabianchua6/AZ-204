@@ -17,27 +17,26 @@ interface EnhancedQuizStats {
   leitner: LeitnerStats;
 }
 
-export function useQuizStateWithLeitner(questions: Question[]) {
+export function useQuizStateWithLeitner(
+  questions: Question[], 
+  selectedTopic: string | null,
+  setSelectedTopic: (topic: string | null) => void
+) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, number[]>>({});
+  const [__forceTick, setForceTick] = useState(0); // diagnostics only
 
-  // Load saved state
+  // Load saved state (excluding topic which is managed by parent)
+  // Use mode-specific localStorage key to avoid conflicts with practice mode
   useEffect(() => {
-    const savedTopic = loadFromLocalStorage('quiz-topic', null);
-    const savedIndex = loadFromLocalStorage('quiz-index', 0);
-    
-    setSelectedTopic(savedTopic);
+    const savedIndex = loadFromLocalStorage('leitner-quiz-index', 0);
     setCurrentQuestionIndex(savedIndex);
   }, []);
 
-  // Save state changes
+  // Save state changes (excluding topic which is managed by parent)
+  // Use mode-specific localStorage key to avoid conflicts with practice mode
   useEffect(() => {
-    saveToLocalStorage('quiz-topic', selectedTopic);
-  }, [selectedTopic]);
-
-  useEffect(() => {
-    saveToLocalStorage('quiz-index', currentQuestionIndex);
+    saveToLocalStorage('leitner-quiz-index', currentQuestionIndex);
   }, [currentQuestionIndex]);
 
   // Filter and sort questions based on topic and Leitner system
@@ -121,26 +120,6 @@ export function useQuizStateWithLeitner(questions: Question[]) {
     setCurrentQuestionIndex(0);
   }, [selectedTopic]);
 
-  // Enhanced answer processing with Leitner integration (async)
-  const processAnswerWithLeitner = useCallback(async (questionId: string, answerIndexes: number[]) => {
-    // Find the question to check correctness
-    const question = questions.find(q => q.id === questionId);
-    if (!question) return;
-
-    // Check if answer is correct
-    const isCorrect = answerIndexes.length === question.answerIndexes.length &&
-      answerIndexes.every(answer => question.answerIndexes.includes(answer));
-
-    try {
-      // Process with Leitner system (now async)
-      const result = await leitnerSystem.processAnswer(questionId, isCorrect);
-      return result;
-    } catch (error) {
-      console.error('Failed to process answer with Leitner system:', error);
-      return undefined;
-    }
-  }, [questions]);
-
   // Separate function for just updating selected answers (no Leitner processing)
   const updateSelectedAnswers = useCallback((questionId: string, answerIndexes: number[]) => {
     setAnswers(prev => ({
@@ -149,8 +128,8 @@ export function useQuizStateWithLeitner(questions: Question[]) {
     }));
   }, []);
 
-  // Actions
-  const actions = {
+  // Actions - Memoized to prevent unnecessary re-renders
+  const actions = useMemo(() => ({
     setSelectedTopic: (topic: string | null) => {
       setSelectedTopic(topic);
     },
@@ -161,8 +140,37 @@ export function useQuizStateWithLeitner(questions: Question[]) {
     },
     
     // For answer submission (with Leitner processing)
-    submitAnswer: (questionId: string, answerIndexes: number[]) => {
-      return processAnswerWithLeitner(questionId, answerIndexes);
+    submitAnswer: async (questionId: string, answerIndexes: number[]) => {
+      if (!questions || questions.length === 0) {
+        console.error('[Leitner] No questions available');
+        return;
+      }
+
+      // First update the local answers state for immediate UI feedback
+      setAnswers(prev => ({
+        ...prev,
+        [questionId]: answerIndexes
+      }));
+
+      // Find the question to check correctness
+      const question = questions.find(q => q.id === questionId);
+      if (!question) {
+        console.error('[Leitner] Question not found', { questionId });
+        return;
+      }
+
+      // Check if answer is correct
+      const isCorrect = answerIndexes.length === question.answerIndexes.length &&
+        answerIndexes.every(answer => question.answerIndexes.includes(answer));
+
+      try {
+        // Process with Leitner system
+        const result = await leitnerSystem.processAnswer(questionId, isCorrect);
+        return result;
+      } catch (error) {
+        console.error('[Leitner] Failed to process answer:', error);
+        throw error;
+      }
     },
 
     // Legacy method for compatibility (now just updates answers)
@@ -171,21 +179,46 @@ export function useQuizStateWithLeitner(questions: Question[]) {
     },
     
     nextQuestion: () => {
+      console.log('[Leitner] nextQuestion invoked', { currentQuestionIndex, filteredLength: filteredQuestions.length });
       if (currentQuestionIndex < filteredQuestions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
+        setCurrentQuestionIndex(prev => {
+          const next = prev + 1;
+            console.log('[Leitner] advancing to', { next });
+          return next;
+        });
+      } else {
+        console.log('[Leitner] nextQuestion blocked (at end)', { currentQuestionIndex, filteredLength: filteredQuestions.length });
       }
     },
     
     previousQuestion: () => {
+      console.log('[Leitner] previousQuestion invoked', { currentQuestionIndex });
       if (currentQuestionIndex > 0) {
-        setCurrentQuestionIndex(prev => prev - 1);
+        setCurrentQuestionIndex(prev => {
+          const prevIdx = prev - 1;
+          console.log('[Leitner] moving back to', { prevIdx });
+          return prevIdx;
+        });
+      } else {
+        console.log('[Leitner] previousQuestion blocked (at start)');
       }
     },
     
     goToQuestion: (index: number) => {
+      console.log('[Leitner] goToQuestion invoked', { index, filteredLength: filteredQuestions.length });
       if (index >= 0 && index < filteredQuestions.length) {
         setCurrentQuestionIndex(index);
+      } else {
+        console.warn('[Leitner] goToQuestion out of bounds', { index });
       }
+    },
+
+    clearCurrentQuestionAnswers: (questionId: string) => {
+      setAnswers(prev => {
+        const newAnswers = { ...prev };
+        delete newAnswers[questionId];
+        return newAnswers;
+      });
     },
 
     // Leitner-specific actions
@@ -194,10 +227,22 @@ export function useQuizStateWithLeitner(questions: Question[]) {
     },
 
     clearAllProgress: () => {
+      console.log('[Leitner] clearAllProgress');
       leitnerSystem.clearProgress();
       setAnswers({});
+      setCurrentQuestionIndex(0);
+      setForceTick(t => t + 1); // force rerender for debug
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [
+    setSelectedTopic,
+    updateSelectedAnswers,
+    currentQuestionIndex,
+    filteredQuestions,
+    questions, // Needed for inline validation in submitAnswer
+  ]);
+
+  console.log('[LeitnerHook] render', { currentQuestionIndex, filteredLen: filteredQuestions.length, answersKeys: Object.keys(answers).length, forceTick: __forceTick });
 
   return {
     currentQuestionIndex,

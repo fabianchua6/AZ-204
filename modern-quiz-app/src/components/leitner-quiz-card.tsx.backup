@@ -16,7 +16,14 @@ import { Button } from '@/components/ui/button';
 import { QuizOption } from '@/components/quiz/quiz-option';
 import { QuizAnswer } from '@/components/quiz/quiz-answer';
 import { QuizControls } from '@/components/quiz/quiz-controls';
+import { useAnswerSelection } from '@/hooks/use-answer-selection';
 import { useQuizCardState } from '@/hooks/use-quiz-card-state';
+import { 
+  createNavigationHandler, 
+  getNavigationButtonStates,
+  type QuizNavigationState,
+  type QuizNavigationActions,
+} from '@/lib/quiz-navigation';
 import { BOX_COLORS } from '@/lib/leitner';
 import type { Question } from '@/types/quiz';
 
@@ -72,7 +79,7 @@ interface LeitnerQuizCardProps {
 
 export function LeitnerQuizCard({
   question,
-  selectedAnswers: externalSelectedAnswers,
+  selectedAnswers,
   onAnswerSelect,
   onAnswerSubmit,
   onNext,
@@ -85,30 +92,47 @@ export function LeitnerQuizCard({
   stats,
   questionProgress,
 }: LeitnerQuizCardProps) {
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [answerSubmitted, setAnswerSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMultipleChoice = question.answerIndexes.length > 1;
 
-  // Use our modular hooks
-  const cardState = useQuizCardState({
-    questionId: question.id,
-    autoAdvanceOnCorrect: true,
-    autoAdvanceDelay: 2500,
-  });
+  // Reset component state when question changes (but keep selected answers)
+  useEffect(() => {
+    setShowAnswer(false);
+    setAnswerSubmitted(false);
+    setIsSubmitting(false);
 
-  // Simplified answer selection - directly use external state
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
+    // Don't clear answers here - let user keep their selections
+  }, [question.id]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleOptionSelect = useCallback(
     (optionIndex: number) => {
-      console.debug('[LeitnerQuizCard] optionSelect', { optionIndex, currentAnswers: externalSelectedAnswers });
-      if (cardState.answerSubmitted) {
-        console.debug('[LeitnerQuizCard] selection ignored (answerSubmitted)');
-        return;
-      }
+      if (answerSubmitted) return;
 
       let newAnswers: number[];
+
       if (isMultipleChoice) {
-        if (externalSelectedAnswers.includes(optionIndex)) {
-          newAnswers = externalSelectedAnswers.filter(i => i !== optionIndex);
+        if (selectedAnswers.includes(optionIndex)) {
+          newAnswers = selectedAnswers.filter(i => i !== optionIndex);
         } else {
-          newAnswers = [...externalSelectedAnswers, optionIndex];
+          newAnswers = [...selectedAnswers, optionIndex];
         }
       } else {
         newAnswers = [optionIndex];
@@ -116,62 +140,65 @@ export function LeitnerQuizCard({
 
       onAnswerSelect(question.id, newAnswers);
     },
-    [cardState.answerSubmitted, isMultipleChoice, externalSelectedAnswers, onAnswerSelect, question.id]
+    [
+      answerSubmitted,
+      isMultipleChoice,
+      selectedAnswers,
+      onAnswerSelect,
+      question.id,
+    ]
   );
 
-  const handleSubmitAnswer = useCallback(async () => {
-    console.debug('[LeitnerQuizCard] submit clicked', { externalSelectedAnswers, isSubmitting: cardState.isSubmitting, answerSubmitted: cardState.answerSubmitted });
-    if (externalSelectedAnswers.length === 0 || cardState.isSubmitting || cardState.answerSubmitted) {
-      return;
+  const handleNextQuestion = useCallback(() => {
+    // Clear any pending auto-advance timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
 
-    cardState.startSubmitting();
+    onNext();
+  }, [onNext]);
+
+  const handlePreviousQuestion = useCallback(() => {
+    // Clear any pending auto-advance timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
+    onPrevious();
+  }, [onPrevious]);
+
+  const handleSubmitAnswer = useCallback(async () => {
+    if (selectedAnswers.length === 0 || isSubmitting || answerSubmitted) return;
+
+    setIsSubmitting(true);
 
     try {
-      const result = await onAnswerSubmit(question.id, externalSelectedAnswers);
-      cardState.markAnswerSubmitted();
-      cardState.finishSubmitting();
+      const result = await onAnswerSubmit(question.id, selectedAnswers);
+      setAnswerSubmitted(true);
+      setShowAnswer(true);
+      setIsSubmitting(false);
 
-      // Auto-advance on correct answers
+      // Simple auto-advance for correct answers only
       if (result?.correct && canGoNext) {
-        cardState.scheduleAutoAdvance(onNext);
+        timeoutRef.current = setTimeout(() => {
+          onNext();
+        }, 2500);
       }
     } catch (error) {
       console.error('Failed to submit answer:', error);
-      cardState.finishSubmitting();
+      setIsSubmitting(false);
     }
   }, [
-    externalSelectedAnswers,
-    cardState,
+    selectedAnswers,
+    isSubmitting,
+    answerSubmitted,
     onAnswerSubmit,
     question.id,
     canGoNext,
     onNext,
   ]);
-
-  // Simplified navigation handlers - direct calls
-  const handleNext = useCallback(() => {
-    cardState.cancelAutoAdvance();
-    if (onNext) {
-      onNext();
-    }
-  }, [cardState, onNext]);
-
-  const handlePrevious = useCallback(() => {
-    cardState.cancelAutoAdvance();
-    if (onPrevious) {
-      onPrevious();
-    }
-  }, [cardState, onPrevious]);
-
-  // Custom button states for Leitner mode - don't disable navigation during submission
-  const buttonStates = {
-    showAnswerDisabled: false,
-    nextDisabled: !canGoNext, // Remove isSubmitting check for navigation
-    previousDisabled: !canGoPrevious, // Remove isSubmitting check for navigation
-    submitDisabled: externalSelectedAnswers.length === 0 || cardState.isSubmitting || cardState.answerSubmitted,
-    showSubmitButton: !cardState.answerSubmitted && externalSelectedAnswers.length > 0,
-  };
 
   // Get box styling
   const currentBox = questionProgress?.currentBox || 1;
@@ -242,9 +269,8 @@ export function LeitnerQuizCard({
                   <Button
                     variant='outline'
                     size='sm'
-                    onClick={handlePrevious}
+                    onClick={handlePreviousQuestion}
                     className='h-8 w-8 p-0'
-                    disabled={buttonStates.previousDisabled}
                   >
                     <ChevronLeft className='h-4 w-4' />
                   </Button>
@@ -253,9 +279,9 @@ export function LeitnerQuizCard({
                   <Button
                     variant='outline'
                     size='sm'
-                    onClick={handleNext}
+                    onClick={handleNextQuestion}
                     className='h-8 w-8 p-0'
-                    disabled={buttonStates.nextDisabled}
+                    disabled={isSubmitting}
                   >
                     <ChevronRight className='h-4 w-4' />
                   </Button>
@@ -274,7 +300,7 @@ export function LeitnerQuizCard({
           {/* Options */}
           {question.options.length > 0 && (
             <div className='mb-4 space-y-2 sm:mb-6 sm:space-y-3'>
-              {isMultipleChoice && !cardState.answerSubmitted && (
+              {isMultipleChoice && !answerSubmitted && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -299,17 +325,16 @@ export function LeitnerQuizCard({
                   key={index}
                   option={option}
                   index={index}
-                  isSelected={externalSelectedAnswers.includes(index)}
+                  isSelected={selectedAnswers.includes(index)}
                   isCorrect={question.answerIndexes.includes(index)}
-                  showAnswer={cardState.showAnswer}
+                  showAnswer={showAnswer}
                   isMultipleChoice={isMultipleChoice}
                   onSelect={handleOptionSelect}
-                  disabled={cardState.answerSubmitted}
                 />
               ))}
 
               {/* Submit Answer Button */}
-              {buttonStates.showSubmitButton && (
+              {!answerSubmitted && selectedAnswers.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -317,11 +342,11 @@ export function LeitnerQuizCard({
                 >
                   <Button
                     onClick={handleSubmitAnswer}
-                    disabled={buttonStates.submitDisabled}
+                    disabled={isSubmitting}
                     className='w-full sm:w-auto'
                     size='lg'
                   >
-                    {cardState.isSubmitting ? 'Processing...' : 'Submit Answer'}
+                    {isSubmitting ? 'Processing...' : 'Submit Answer'}
                   </Button>
                 </motion.div>
               )}
@@ -329,16 +354,7 @@ export function LeitnerQuizCard({
           )}
 
           {/* Answer Section */}
-          <QuizAnswer 
-            answer={question.answer} 
-            showAnswer={cardState.showAnswer}
-            isCorrect={
-              cardState.answerSubmitted 
-                ? externalSelectedAnswers.length === question.answerIndexes.length &&
-                  externalSelectedAnswers.every(answer => question.answerIndexes.includes(answer))
-                : true
-            }
-          />
+          <QuizAnswer answer={question.answer} showAnswer={showAnswer} />
         </CardContent>
       </Card>
     </div>

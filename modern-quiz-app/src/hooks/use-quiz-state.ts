@@ -1,37 +1,36 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import type { Question, QuizState, QuizStats } from '@/types/quiz';
+import type { Question, QuizStats } from '@/types/quiz';
 import { saveToLocalStorage, loadFromLocalStorage, calculateAccuracy } from '@/lib/utils';
 
-export function useQuizState(questions: Question[]) {
+export function useQuizState(
+  questions: Question[], 
+  selectedTopic: string | null,
+  setSelectedTopic: (topic: string | null) => void
+) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, number[]>>({});
   const [showAnswer, setShowAnswer] = useState(false);
 
-  // Load saved state
+  // Load saved state (excluding topic which is managed by parent)
+  // Use mode-specific localStorage keys to avoid conflicts with Leitner mode
   useEffect(() => {
-    const savedAnswers = loadFromLocalStorage('quiz-answers', {});
-    const savedTopic = loadFromLocalStorage('quiz-topic', null);
-    const savedIndex = loadFromLocalStorage('quiz-index', 0);
+    const savedAnswers = loadFromLocalStorage('practice-quiz-answers', {});
+    const savedIndex = loadFromLocalStorage('practice-quiz-index', 0);
     
     setAnswers(savedAnswers);
-    setSelectedTopic(savedTopic);
     setCurrentQuestionIndex(savedIndex);
   }, []);
 
-  // Save state changes
+  // Save state changes (excluding topic which is managed by parent)
+  // Use mode-specific localStorage keys to avoid conflicts with Leitner mode
   useEffect(() => {
-    saveToLocalStorage('quiz-answers', answers);
+    saveToLocalStorage('practice-quiz-answers', answers);
   }, [answers]);
 
   useEffect(() => {
-    saveToLocalStorage('quiz-topic', selectedTopic);
-  }, [selectedTopic]);
-
-  useEffect(() => {
-    saveToLocalStorage('quiz-index', currentQuestionIndex);
+    saveToLocalStorage('practice-quiz-index', currentQuestionIndex);
   }, [currentQuestionIndex]);
 
   // Filter questions by topic
@@ -75,8 +74,8 @@ export function useQuizState(questions: Question[]) {
     setShowAnswer(false);
   }, [selectedTopic]);
 
-  // Actions
-  const actions = {
+  // Actions - Memoized to prevent unnecessary re-renders
+  const actions = useMemo(() => ({
     setSelectedTopic: (topic: string | null) => {
       setSelectedTopic(topic);
     },
@@ -112,7 +111,11 @@ export function useQuizState(questions: Question[]) {
         setShowAnswer(false);
       }
     }
-  };
+  }), [
+    setSelectedTopic,
+    currentQuestionIndex,
+    filteredQuestions.length
+  ]);
 
   return {
     currentQuestionIndex,

@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Code2, CheckCircle2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -8,12 +9,6 @@ import { QuizOption } from '@/components/quiz/quiz-option';
 import { QuizNavigation } from '@/components/quiz/quiz-navigation';
 import { QuizAnswer } from '@/components/quiz/quiz-answer';
 import { QuizControls } from '@/components/quiz/quiz-controls';
-import { useAnswerSelection } from '@/hooks/use-answer-selection';
-import { 
-  createNavigationHandler, 
-  type QuizNavigationState,
-  type QuizNavigationActions,
-} from '@/lib/quiz-navigation';
 import type { Question } from '@/types/quiz';
 import type { QuizStats as QuizStatsType } from '@/types/quiz';
 
@@ -36,8 +31,8 @@ interface QuizCardProps {
 
 export function QuizCard({
   question,
-  selectedAnswers: externalSelectedAnswers,
-  showAnswer: externalShowAnswer,
+  selectedAnswers,
+  showAnswer,
   onAnswerSelect,
   onShowAnswer,
   onNext,
@@ -51,32 +46,26 @@ export function QuizCard({
 }: QuizCardProps) {
   const isMultipleChoice = question.answerIndexes.length > 1;
 
-  // Use our modular hooks - but keep external control for practice mode
-  const answerSelection = useAnswerSelection({
-    questionId: question.id,
-    isMultipleChoice,
-    initialAnswers: externalSelectedAnswers,
-    onAnswerChange: onAnswerSelect,
-    disabled: externalShowAnswer,
-  });
+  const handleOptionSelect = useCallback(
+    (optionIndex: number) => {
+      if (showAnswer) return;
 
-  // Create navigation state and actions for practice mode
-  const navigationState: QuizNavigationState = {
-    showAnswer: externalShowAnswer,
-    hasAnswers: answerSelection.hasAnswers,
-    canGoNext,
-    canGoPrevious,
-    answerSubmitted: false, // Practice mode doesn't submit
-    isSubmitting: false,
-  };
+      let newAnswers: number[];
 
-  const navigationActions: QuizNavigationActions = {
-    onShowAnswer,
-    onNext,
-    onPrevious,
-  };
+      if (isMultipleChoice) {
+        if (selectedAnswers.includes(optionIndex)) {
+          newAnswers = selectedAnswers.filter(i => i !== optionIndex);
+        } else {
+          newAnswers = [...selectedAnswers, optionIndex];
+        }
+      } else {
+        newAnswers = [optionIndex];
+      }
 
-  const navigationHandler = createNavigationHandler(navigationState, navigationActions);
+      onAnswerSelect(question.id, newAnswers);
+    },
+    [showAnswer, isMultipleChoice, selectedAnswers, onAnswerSelect, question.id]
+  );
 
   return (
     <div className='space-y-4'>
@@ -109,13 +98,13 @@ export function QuizCard({
             {/* Navigation in Header */}
             <div className='flex-shrink-0'>
               <QuizNavigation
-                showAnswer={externalShowAnswer}
+                showAnswer={showAnswer}
                 canGoPrevious={canGoPrevious}
                 canGoNext={canGoNext}
-                selectedAnswers={answerSelection.selectedAnswers}
+                selectedAnswers={selectedAnswers}
                 onPrevious={onPrevious}
-                onNext={navigationHandler.handleNext}
-                onShowAnswer={navigationHandler.handleShowAnswer}
+                onNext={onNext}
+                onShowAnswer={onShowAnswer}
                 compact={true}
               />
             </div>
@@ -156,19 +145,18 @@ export function QuizCard({
                   key={index}
                   option={option}
                   index={index}
-                  isSelected={answerSelection.isAnswerSelected(index)}
+                  isSelected={selectedAnswers.includes(index)}
                   isCorrect={question.answerIndexes.includes(index)}
-                  showAnswer={externalShowAnswer}
+                  showAnswer={showAnswer}
                   isMultipleChoice={isMultipleChoice}
-                  onSelect={answerSelection.toggleAnswer}
-                  disabled={externalShowAnswer}
+                  onSelect={handleOptionSelect}
                 />
               ))}
             </div>
           )}
 
           {/* Answer Section */}
-          <QuizAnswer answer={question.answer} showAnswer={externalShowAnswer} />
+          <QuizAnswer answer={question.answer} showAnswer={showAnswer} />
         </CardContent>
       </Card>
     </div>

@@ -105,14 +105,10 @@ interface LeitnerStats {
 
 ### Storage Keys
 
-- `leitner-progress`: Main Leitner progress data
-- `quiz-topic`: Selected topic state (shared between modes)
-- `leitner-quiz-index`: Current question index for Leitner mode
-- `practice-quiz-index`: Current question index for Practice mode
-- `practice-quiz-answers`: Practice mode answers (mode-specific)
-- `quiz-learning-records`: Smart learning system records
-- `quiz-study-sessions`: Smart learning session data
-- `quiz-smart-settings`: Smart learning settings
+- `leitner-progress`: Main progress data
+- `quiz-topic`: Selected topic state
+- `quiz-index`: Current question index
+- `quiz-answers`: Practice mode answers (non-persistent in Leitner)
 
 ## Core Implementation
 

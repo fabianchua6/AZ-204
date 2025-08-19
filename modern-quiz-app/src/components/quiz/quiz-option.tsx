@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
 
@@ -13,6 +13,7 @@ interface QuizOptionProps {
   showAnswer: boolean;
   isMultipleChoice: boolean;
   onSelect: (index: number) => void;
+  disabled?: boolean;
 }
 
 export function QuizOption({
@@ -23,55 +24,73 @@ export function QuizOption({
   showAnswer,
   isMultipleChoice,
   onSelect,
+  disabled = false,
 }: QuizOptionProps) {
   const getOptionClassName = useCallback(() => {
-    if (!showAnswer) {
+    // If disabled or showing answer, use special styling
+    if (disabled || showAnswer) {
+      if (showAnswer) {
+        if (isCorrect) {
+          return cn(
+            'p-3 sm:p-4 rounded-lg border cursor-default',
+            'bg-green-100 border-green-500 dark:bg-green-900/20 dark:border-green-500/50 shadow-sm'
+          );
+        }
+        if (isSelected && !isCorrect) {
+          return cn(
+            'p-3 sm:p-4 rounded-lg border cursor-default',
+            'bg-red-100 border-red-500 dark:bg-red-900/20 dark:border-red-500/50 shadow-sm'
+          );
+        }
+        return 'p-3 sm:p-4 rounded-lg border bg-muted/40 border-muted-foreground/20 cursor-default opacity-60';
+      }
+      
+      // Just disabled but not showing answer
       return cn(
-        'group relative p-3 sm:p-4 rounded-lg border cursor-pointer transition-all duration-200',
-        'hover:bg-card-secondary hover:border-primary/50 hover:shadow-sm dark:hover:shadow-sm focus-within:ring-2 focus-within:ring-primary/20',
+        'p-3 sm:p-4 rounded-lg border cursor-not-allowed opacity-50',
         isSelected
-          ? 'bg-accent border-primary shadow-sm dark:bg-accent/60 dark:border-primary/70 dark:shadow-sm'
-          : 'bg-card-secondary border-border hover:border-primary/40 dark:bg-background-secondary dark:border-muted'
+          ? 'bg-accent border-primary'
+          : 'bg-card-secondary border-border'
       );
     }
 
-    if (isCorrect) {
-      return cn(
-        'p-3 sm:p-4 rounded-lg border cursor-default',
-        'bg-success-light border-success dark:bg-success-light dark:border-success/50 shadow-sm'
-      );
-    }
+    // Interactive state
+    return cn(
+      'group relative p-3 sm:p-4 rounded-lg border cursor-pointer transition-all duration-200',
+      'hover:bg-card-secondary hover:border-primary/50 hover:shadow-sm dark:hover:shadow-sm focus-within:ring-2 focus-within:ring-primary/20',
+      isSelected
+        ? 'bg-accent border-primary shadow-sm dark:bg-accent/60 dark:border-primary/70 dark:shadow-sm'
+        : 'bg-card-secondary border-border hover:border-primary/40 dark:bg-background-secondary dark:border-muted'
+    );
+  }, [isSelected, showAnswer, isCorrect, disabled]);
 
-    if (isSelected && !isCorrect) {
-      return cn(
-        'p-3 sm:p-4 rounded-lg border cursor-default',
-        'bg-destructive-light border-destructive dark:bg-destructive-light dark:border-destructive/50 shadow-sm'
-      );
+  const handleClick = useCallback(() => {
+    if (!disabled && !showAnswer) {
+      onSelect(index);
     }
-
-    return 'p-3 sm:p-4 rounded-lg border bg-muted/40 border-muted-foreground/20 cursor-default opacity-60';
-  }, [isSelected, showAnswer, isCorrect]);
+  }, [disabled, showAnswer, onSelect, index]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
+      if ((e.key === 'Enter' || e.key === ' ') && !disabled && !showAnswer) {
         e.preventDefault();
         onSelect(index);
       }
     },
-    [onSelect, index]
+    [disabled, showAnswer, onSelect, index]
   );
 
   return (
     <div className='relative'>
       <div
         className={getOptionClassName()}
-        onClick={() => onSelect(index)}
+        onClick={handleClick}
         onKeyDown={handleKeyDown}
-        tabIndex={showAnswer ? -1 : 0}
+        tabIndex={disabled || showAnswer ? -1 : 0}
         role='button'
         aria-pressed={isSelected}
         aria-label={`Option ${index + 1}`}
+        aria-disabled={disabled || showAnswer}
       >
         <div className='flex items-start gap-3'>
           <div className='mt-0.5 flex-shrink-0'>
@@ -106,21 +125,6 @@ export function QuizOption({
           <div className='prose prose-sm dark:prose-invert prose-p:mb-0 flex-1 leading-relaxed'>
             <ReactMarkdown>{option}</ReactMarkdown>
           </div>
-
-          {/* Show correct/incorrect indicators when answer is revealed */}
-          {showAnswer && (
-            <div className='flex-shrink-0'>
-              {isCorrect ? (
-                <div className='flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50'>
-                  <CheckCircle2 className='h-3.5 w-3.5 text-green-600 dark:text-green-400' />
-                </div>
-              ) : isSelected ? (
-                <div className='flex h-6 w-6 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50'>
-                  <XCircle className='h-3.5 w-3.5 text-red-600 dark:text-red-400' />
-                </div>
-              ) : null}
-            </div>
-          )}
         </div>
       </div>
     </div>

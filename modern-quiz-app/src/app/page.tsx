@@ -1,25 +1,72 @@
 'use client';
 
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target } from 'lucide-react';
 import { Header } from '@/components/header';
 import { LeitnerQuizCard } from '@/components/leitner-quiz-card';
+import { QuizCard } from '@/components/quiz-card';
 import { TopicSelector } from '@/components/topic-selector';
 import { MobileProgress } from '@/components/mobile-progress';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { useQuizData } from '@/hooks/use-quiz-data';
 import { useQuizStateWithLeitner } from '@/hooks/use-quiz-state-leitner';
+import { useQuizState } from '@/hooks/use-quiz-state';
+import { saveToLocalStorage, loadFromLocalStorage } from '@/lib/utils';
 
 export default function Home() {
   const { questions, topics, loading, error } = useQuizData();
-  const {
-    currentQuestionIndex,
+
+  // Shared topic state - this is the single source of truth
+  const [selectedTopic, setSelectedTopicState] = useState<string | null>(null);
+
+  // Load saved topic state
+  useEffect(() => {
+    const savedTopic = loadFromLocalStorage('quiz-topic', null);
+    setSelectedTopicState(savedTopic);
+  }, []);
+
+  // Save topic changes
+  useEffect(() => {
+    saveToLocalStorage('quiz-topic', selectedTopic);
+  }, [selectedTopic]);
+
+  // Stable topic setter to avoid re-renders
+  const setSelectedTopic = useCallback((topic: string | null) => {
+    setSelectedTopicState(topic);
+  }, []);
+
+  // Use different hooks based on mode, passing the shared topic state
+  const leitnerState = useQuizStateWithLeitner(
+    questions,
     selectedTopic,
-    filteredQuestions,
-    answers,
-    stats,
-    actions,
-  } = useQuizStateWithLeitner(questions);
+    setSelectedTopic
+  );
+  const practiceState = useQuizState(
+    questions,
+    selectedTopic,
+    setSelectedTopic
+  );
+
+  // Determine which mode to use based on selected topic
+  const isLeitnerMode = selectedTopic === null;
+
+  // Reset question index when switching between modes or topics - only when mode/topic actually changes
+  useEffect(() => {
+    if (isLeitnerMode) {
+      leitnerState.actions.goToQuestion(0);
+    } else {
+      practiceState.actions.goToQuestion(0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLeitnerMode, selectedTopic]);
+
+  // Get current state based on mode
+  const currentState = isLeitnerMode ? leitnerState : practiceState;
+  const currentQuestionIndex = currentState.currentQuestionIndex;
+  const filteredQuestions = currentState.filteredQuestions;
+  const answers = currentState.answers;
+  const stats = currentState.stats;
 
   if (loading) {
     return (
@@ -81,12 +128,27 @@ export default function Home() {
                     </div>
                     {stats.answeredQuestions > 0 && (
                       <div className='flex items-center gap-4 text-sm text-muted-foreground'>
-                        <span>{stats.leitner.dueToday} due today</span>
-                        <span>
-                          {Math.round(stats.leitner.accuracyRate * 100)}%
-                          accuracy
-                        </span>
-                        <span>{stats.leitner.streakDays} day streak</span>
+                        {isLeitnerMode ? (
+                          <>
+                            <span>
+                              {leitnerState.stats.leitner.dueToday} due today
+                            </span>
+                            <span>
+                              {Math.round(
+                                leitnerState.stats.leitner.accuracyRate * 100
+                              )}
+                              % accuracy
+                            </span>
+                            <span>
+                              {leitnerState.stats.leitner.streakDays} day streak
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Practice Mode</span>
+                            <span>Free Navigation</span>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
@@ -118,26 +180,57 @@ export default function Home() {
                   ease: [0.23, 1, 0.32, 1], // easeOutQuart for more natural feel
                 }}
               >
-                <LeitnerQuizCard
-                  question={currentQuestion}
-                  selectedAnswers={answers[currentQuestion.id] || []}
-                  onAnswerSelect={actions.updateAnswers}
-                  onAnswerSubmit={actions.submitAnswer}
-                  onNext={actions.nextQuestion}
-                  onPrevious={actions.previousQuestion}
-                  canGoNext={
-                    currentQuestionIndex < filteredQuestions.length - 1
-                  }
-                  canGoPrevious={currentQuestionIndex > 0}
-                  // Pass additional props for contextual controls
-                  topics={topics}
-                  selectedTopic={selectedTopic}
-                  onTopicChange={actions.setSelectedTopic}
-                  stats={stats}
-                  questionProgress={actions.getQuestionProgress(
-                    currentQuestion.id
-                  )}
-                />
+                {isLeitnerMode ? (
+                  <LeitnerQuizCard
+                    question={currentQuestion}
+                    selectedAnswers={answers[currentQuestion.id] || []}
+                    onAnswerSelect={leitnerState.actions.updateAnswers}
+                    onAnswerSubmit={leitnerState.actions.submitAnswer}
+                    onNext={() => {
+                      leitnerState.actions.nextQuestion();
+                    }}
+                    onPrevious={() => {
+                      leitnerState.actions.previousQuestion();
+                    }}
+                    canGoNext={
+                      currentQuestionIndex < filteredQuestions.length - 1
+                    }
+                    canGoPrevious={currentQuestionIndex > 0}
+                    // Pass additional props for contextual controls
+                    topics={topics}
+                    selectedTopic={selectedTopic}
+                    onTopicChange={setSelectedTopic}
+                    stats={leitnerState.stats}
+                    questionProgress={leitnerState.actions.getQuestionProgress(
+                      currentQuestion.id
+                    )}
+                  />
+                ) : (
+                  <QuizCard
+                    question={currentQuestion}
+                    selectedAnswers={answers[currentQuestion.id] || []}
+                    showAnswer={practiceState.showAnswer}
+                    onAnswerSelect={practiceState.actions.setAnswer}
+                    onShowAnswer={practiceState.actions.toggleShowAnswer}
+                    onNext={() => {
+                      console.debug('[Page] onNext clicked (Practice)');
+                      practiceState.actions.nextQuestion();
+                    }}
+                    onPrevious={() => {
+                      console.debug('[Page] onPrevious clicked (Practice)');
+                      practiceState.actions.previousQuestion();
+                    }}
+                    canGoNext={
+                      currentQuestionIndex < filteredQuestions.length - 1
+                    }
+                    canGoPrevious={currentQuestionIndex > 0}
+                    // Pass additional props for contextual controls
+                    topics={topics}
+                    selectedTopic={selectedTopic}
+                    onTopicChange={setSelectedTopic}
+                    stats={practiceState.stats}
+                  />
+                )}
               </motion.div>
             ) : (
               <motion.div
@@ -160,7 +253,7 @@ export default function Home() {
                   <TopicSelector
                     topics={topics}
                     selectedTopic={selectedTopic}
-                    onTopicChange={actions.setSelectedTopic}
+                    onTopicChange={setSelectedTopic}
                     questionCount={filteredQuestions.length}
                     compact={false}
                   />
