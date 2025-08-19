@@ -3,12 +3,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target } from 'lucide-react';
 import { Header } from '@/components/header';
-import { QuizCard } from '@/components/quiz-card';
+import { LeitnerQuizCard } from '@/components/leitner-quiz-card';
 import { TopicSelector } from '@/components/topic-selector';
 import { MobileProgress } from '@/components/mobile-progress';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { useQuizData } from '@/hooks/use-quiz-data';
-import { useQuizState } from '@/hooks/use-quiz-state';
+import { useQuizStateWithLeitner } from '@/hooks/use-quiz-state-leitner';
 
 export default function Home() {
   const { questions, topics, loading, error } = useQuizData();
@@ -17,10 +17,9 @@ export default function Home() {
     selectedTopic,
     filteredQuestions,
     answers,
-    showAnswer,
     stats,
     actions,
-  } = useQuizState(questions);
+  } = useQuizStateWithLeitner(questions);
 
   if (loading) {
     return (
@@ -59,7 +58,13 @@ export default function Home() {
                 <MobileProgress
                   questionNumber={currentQuestionIndex + 1}
                   totalQuestions={filteredQuestions.length}
-                  stats={stats}
+                  stats={{
+                    totalQuestions: stats.totalQuestions,
+                    answeredQuestions: stats.answeredQuestions,
+                    correctAnswers: stats.correctAnswers,
+                    incorrectAnswers: stats.incorrectAnswers,
+                    accuracy: stats.accuracy,
+                  }}
                 />
               </div>
 
@@ -76,17 +81,12 @@ export default function Home() {
                     </div>
                     {stats.answeredQuestions > 0 && (
                       <div className='flex items-center gap-4 text-sm text-muted-foreground'>
+                        <span>{stats.leitner.dueToday} due today</span>
                         <span>
-                          {stats.correctAnswers}/{stats.answeredQuestions}{' '}
-                          correct
+                          {Math.round(stats.leitner.accuracyRate * 100)}%
+                          accuracy
                         </span>
-                        <span>
-                          {Math.round(
-                            (stats.correctAnswers / stats.answeredQuestions) *
-                              100
-                          )}
-                          % accuracy
-                        </span>
+                        <span>{stats.leitner.streakDays} day streak</span>
                       </div>
                     )}
                   </div>
@@ -118,12 +118,11 @@ export default function Home() {
                   ease: [0.23, 1, 0.32, 1], // easeOutQuart for more natural feel
                 }}
               >
-                <QuizCard
+                <LeitnerQuizCard
                   question={currentQuestion}
                   selectedAnswers={answers[currentQuestion.id] || []}
-                  showAnswer={showAnswer}
-                  onAnswerSelect={actions.setAnswer}
-                  onShowAnswer={actions.toggleShowAnswer}
+                  onAnswerSelect={actions.updateAnswers}
+                  onAnswerSubmit={actions.submitAnswer}
                   onNext={actions.nextQuestion}
                   onPrevious={actions.previousQuestion}
                   canGoNext={
@@ -135,6 +134,9 @@ export default function Home() {
                   selectedTopic={selectedTopic}
                   onTopicChange={actions.setSelectedTopic}
                   stats={stats}
+                  questionProgress={actions.getQuestionProgress(
+                    currentQuestion.id
+                  )}
                 />
               </motion.div>
             ) : (
