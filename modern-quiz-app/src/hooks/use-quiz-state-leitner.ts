@@ -113,7 +113,8 @@ export function useQuizStateWithLeitner(
       accuracy,
       leitner
     };
-  }, [filteredQuestions, answers, questions]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredQuestions, answers, questions, __forceTick]); // __forceTick forces recalculation
 
   // Reset current question index when topic changes
   useEffect(() => {
@@ -164,8 +165,15 @@ export function useQuizStateWithLeitner(
         answerIndexes.every(answer => question.answerIndexes.includes(answer));
 
       try {
-        // Process with Leitner system
-        const result = await leitnerSystem.processAnswer(questionId, isCorrect);
+        // Process with Leitner system (synchronous operation)
+        const result = leitnerSystem.processAnswer(questionId, isCorrect);
+        
+        // Force stats recalculation immediately
+        setForceTick(prev => {
+          console.log('[LeitnerHook] forceTick update:', prev, '->', prev + 1);
+          return prev + 1;
+        });
+        
         return result;
       } catch (error) {
         console.error('[Leitner] Failed to process answer:', error);

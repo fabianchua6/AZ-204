@@ -16,7 +16,14 @@ import { Button } from '@/components/ui/button';
 import { QuizOption } from '@/components/quiz/quiz-option';
 import { QuizAnswer } from '@/components/quiz/quiz-answer';
 import { QuizControls } from '@/components/quiz/quiz-controls';
+import { useAnswerSelection } from '@/hooks/use-answer-selection';
 import { useQuizCardState } from '@/hooks/use-quiz-card-state';
+import {
+  createNavigationHandler,
+  getNavigationButtonStates,
+  type QuizNavigationState,
+  type QuizNavigationActions,
+} from '@/lib/quiz-navigation';
 import { BOX_COLORS } from '@/lib/leitner';
 import type { Question } from '@/types/quiz';
 
@@ -94,48 +101,27 @@ export function LeitnerQuizCard({
     autoAdvanceDelay: 2500,
   });
 
-  // Simplified answer selection - directly use external state
-  const handleOptionSelect = useCallback(
-    (optionIndex: number) => {
-      console.debug('[LeitnerQuizCard] optionSelect', {
-        optionIndex,
-        currentAnswers: externalSelectedAnswers,
-      });
-      if (cardState.answerSubmitted) {
-        console.debug('[LeitnerQuizCard] selection ignored (answerSubmitted)');
-        return;
-      }
+  const answerSelection = useAnswerSelection({
+    questionId: question.id,
+    isMultipleChoice,
+    initialAnswers: externalSelectedAnswers,
+    onAnswerChange: onAnswerSelect,
+    disabled: cardState.answerSubmitted,
+  });
 
-      let newAnswers: number[];
-      if (isMultipleChoice) {
-        if (externalSelectedAnswers.includes(optionIndex)) {
-          newAnswers = externalSelectedAnswers.filter(i => i !== optionIndex);
-        } else {
-          newAnswers = [...externalSelectedAnswers, optionIndex];
-        }
-      } else {
-        newAnswers = [optionIndex];
-      }
-
-      onAnswerSelect(question.id, newAnswers);
-    },
-    [
-      cardState.answerSubmitted,
-      isMultipleChoice,
-      externalSelectedAnswers,
-      onAnswerSelect,
-      question.id,
-    ]
-  );
+  // Create navigation state and actions
+  const navigationState: QuizNavigationState = {
+    showAnswer: cardState.showAnswer,
+    hasAnswers: answerSelection.hasAnswers,
+    canGoNext,
+    canGoPrevious,
+    answerSubmitted: cardState.answerSubmitted,
+    isSubmitting: cardState.isSubmitting,
+  };
 
   const handleSubmitAnswer = useCallback(async () => {
-    console.debug('[LeitnerQuizCard] submit clicked', {
-      externalSelectedAnswers,
-      isSubmitting: cardState.isSubmitting,
-      answerSubmitted: cardState.answerSubmitted,
-    });
     if (
-      externalSelectedAnswers.length === 0 ||
+      !answerSelection.hasAnswers ||
       cardState.isSubmitting ||
       cardState.answerSubmitted
     ) {
@@ -145,7 +131,10 @@ export function LeitnerQuizCard({
     cardState.startSubmitting();
 
     try {
-      const result = await onAnswerSubmit(question.id, externalSelectedAnswers);
+      const result = await onAnswerSubmit(
+        question.id,
+        answerSelection.selectedAnswers
+      );
       cardState.markAnswerSubmitted();
       cardState.finishSubmitting();
 
@@ -158,7 +147,8 @@ export function LeitnerQuizCard({
       cardState.finishSubmitting();
     }
   }, [
-    externalSelectedAnswers,
+    answerSelection.hasAnswers,
+    answerSelection.selectedAnswers,
     cardState,
     onAnswerSubmit,
     question.id,
@@ -166,33 +156,28 @@ export function LeitnerQuizCard({
     onNext,
   ]);
 
-  // Simplified navigation handlers - direct calls
   const handleNext = useCallback(() => {
     cardState.cancelAutoAdvance();
-    if (onNext) {
-      onNext();
-    }
+    onNext();
   }, [cardState, onNext]);
 
   const handlePrevious = useCallback(() => {
     cardState.cancelAutoAdvance();
-    if (onPrevious) {
-      onPrevious();
-    }
+    onPrevious();
   }, [cardState, onPrevious]);
 
-  // Custom button states for Leitner mode - don't disable navigation during submission
-  const buttonStates = {
-    showAnswerDisabled: false,
-    nextDisabled: !canGoNext, // Remove isSubmitting check for navigation
-    previousDisabled: !canGoPrevious, // Remove isSubmitting check for navigation
-    submitDisabled:
-      externalSelectedAnswers.length === 0 ||
-      cardState.isSubmitting ||
-      cardState.answerSubmitted,
-    showSubmitButton:
-      !cardState.answerSubmitted && externalSelectedAnswers.length > 0,
+  const navigationActions: QuizNavigationActions = {
+    onShowAnswer: cardState.toggleShowAnswer,
+    onNext: handleNext,
+    onPrevious: handlePrevious,
+    onSubmitAnswer: handleSubmitAnswer,
   };
+
+  const navigationHandler = createNavigationHandler(
+    navigationState,
+    navigationActions
+  );
+  const buttonStates = getNavigationButtonStates(navigationState);
 
   // Get box styling
   const currentBox = questionProgress?.currentBox || 1;
@@ -320,11 +305,11 @@ export function LeitnerQuizCard({
                   key={index}
                   option={option}
                   index={index}
-                  isSelected={externalSelectedAnswers.includes(index)}
+                  isSelected={answerSelection.isAnswerSelected(index)}
                   isCorrect={question.answerIndexes.includes(index)}
                   showAnswer={cardState.showAnswer}
                   isMultipleChoice={isMultipleChoice}
-                  onSelect={handleOptionSelect}
+                  onSelect={answerSelection.toggleAnswer}
                   disabled={cardState.answerSubmitted}
                 />
               ))}
@@ -353,15 +338,6 @@ export function LeitnerQuizCard({
           <QuizAnswer
             answer={question.answer}
             showAnswer={cardState.showAnswer}
-            isCorrect={
-              cardState.answerSubmitted
-                ? externalSelectedAnswers.length ===
-                    question.answerIndexes.length &&
-                  externalSelectedAnswers.every(answer =>
-                    question.answerIndexes.includes(answer)
-                  )
-                : true
-            }
           />
         </CardContent>
       </Card>

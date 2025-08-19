@@ -126,31 +126,30 @@ export default function Home() {
                         {filteredQuestions.length}
                       </span>
                     </div>
-                    {stats.answeredQuestions > 0 && (
-                      <div className='flex items-center gap-4 text-sm text-muted-foreground'>
-                        {isLeitnerMode ? (
-                          <>
-                            <span>
-                              {leitnerState.stats.leitner.dueToday} due today
-                            </span>
-                            <span>
-                              {Math.round(
-                                leitnerState.stats.leitner.accuracyRate * 100
-                              )}
-                              % accuracy
-                            </span>
-                            <span>
-                              {leitnerState.stats.leitner.streakDays} day streak
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Practice Mode</span>
-                            <span>Free Navigation</span>
-                          </>
-                        )}
-                      </div>
-                    )}
+                    <div className='flex items-center gap-4 text-sm text-muted-foreground'>
+                      {isLeitnerMode ? (
+                        <>
+                          <span>
+                            {leitnerState.stats.leitner.dueToday} due today
+                          </span>
+                          <span>
+                            {Math.round(
+                              leitnerState.stats.leitner.accuracyRate * 100
+                            )}
+                            % accuracy
+                          </span>
+                          <span>
+                            🔥 {leitnerState.stats.leitner.streakDays} day
+                            streak
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Practice Mode</span>
+                          <span>Free Navigation</span>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <div className='h-2 w-full overflow-hidden rounded-full bg-muted'>
                     <motion.div

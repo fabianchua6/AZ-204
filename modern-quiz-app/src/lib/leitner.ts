@@ -389,7 +389,6 @@ export class LeitnerSystem {
   // Get current statistics
   getStats(allQuestions: Question[]): LeitnerStats {
     const boxDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    let dueToday = 0;
     let totalCorrect = 0;
     let totalAnswered = 0;
     
@@ -399,17 +398,10 @@ export class LeitnerSystem {
       const progress = this.progress.get(question.id);
       
       if (!progress) {
-        // New questions are in Box 1 and due today
+        // New questions are in Box 1
         boxDistribution[1]++;
-        dueToday++;
       } else {
         boxDistribution[progress.currentBox]++;
-        
-        // Check if due today
-        const reviewDate = progress.nextReviewDate.split('T')[0];
-        if (reviewDate <= today) {
-          dueToday++;
-        }
         
         // Accumulate stats
         totalCorrect += progress.timesCorrect;
@@ -417,15 +409,23 @@ export class LeitnerSystem {
       }
     });
 
+    // Calculate accuracy - show 0% if no questions answered yet
     const accuracyRate = totalAnswered > 0 ? totalCorrect / totalAnswered : 0;
 
     // Calculate streak (simplified - just check if user has been active)
     const streakDays = this.calculateStreakDays();
 
+    // Start with 60, but subtract questions answered today to show progress
+    const questionsAnsweredToday = Array.from(this.progress.values()).filter(
+      progress => progress.lastReviewed.split('T')[0] === today
+    ).length;
+    
+    const displayDueToday = Math.max(0, 60 - questionsAnsweredToday);
+
     return {
       totalQuestions: allQuestions.length,
       boxDistribution,
-      dueToday,
+      dueToday: displayDueToday,
       accuracyRate,
       streakDays,
     };

@@ -44,7 +44,7 @@ export function QuizOption({
         }
         return 'p-3 sm:p-4 rounded-lg border bg-muted/40 border-muted-foreground/20 cursor-default opacity-60';
       }
-      
+
       // Just disabled but not showing answer
       return cn(
         'p-3 sm:p-4 rounded-lg border cursor-not-allowed opacity-50',

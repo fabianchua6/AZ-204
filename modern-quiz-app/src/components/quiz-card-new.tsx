@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Code2, CheckCircle2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -9,8 +10,10 @@ import { QuizNavigation } from '@/components/quiz/quiz-navigation';
 import { QuizAnswer } from '@/components/quiz/quiz-answer';
 import { QuizControls } from '@/components/quiz/quiz-controls';
 import { useAnswerSelection } from '@/hooks/use-answer-selection';
+import { useQuizCardState } from '@/hooks/use-quiz-card-state';
 import {
   createNavigationHandler,
+  getNavigationButtonStates,
   type QuizNavigationState,
   type QuizNavigationActions,
 } from '@/lib/quiz-navigation';

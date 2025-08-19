@@ -9,7 +9,11 @@ interface QuizAnswerProps {
   isCorrect?: boolean; // Whether the user's answer was correct
 }
 
-export function QuizAnswer({ answer, showAnswer, isCorrect = true }: QuizAnswerProps) {
+export function QuizAnswer({
+  answer,
+  showAnswer,
+  isCorrect = true,
+}: QuizAnswerProps) {
   if (!showAnswer) return null;
 
   // Style based on whether the answer was correct or wrong
@@ -38,7 +42,9 @@ export function QuizAnswer({ answer, showAnswer, isCorrect = true }: QuizAnswerP
   return (
     <div className='mt-4 border-t-2 border-dashed border-border pt-4 sm:mt-6 sm:pt-6'>
       <div className='mb-3 flex items-center gap-3 sm:mb-4'>
-        <div className={`flex h-10 w-10 items-center justify-center rounded-full ${styles.iconBg}`}>
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-full ${styles.iconBg}`}
+        >
           <IconComponent className={`h-5 w-5 ${styles.iconColor}`} />
         </div>
         <div>
@@ -46,11 +52,15 @@ export function QuizAnswer({ answer, showAnswer, isCorrect = true }: QuizAnswerP
             Explanation
           </h4>
           <p className={`text-sm ${styles.subtitleColor}`}>
-            {isCorrect ? 'Understanding the correct answer' : 'Why this answer is incorrect'}
+            {isCorrect
+              ? 'Understanding the correct answer'
+              : 'Why this answer is incorrect'}
           </p>
         </div>
       </div>
-      <div className={`prose prose-sm sm:prose-base dark:prose-invert rounded-xl border-2 p-4 shadow-sm sm:p-6 ${styles.containerBorder} ${styles.containerBg}`}>
+      <div
+        className={`prose prose-sm sm:prose-base dark:prose-invert rounded-xl border-2 p-4 shadow-sm sm:p-6 ${styles.containerBorder} ${styles.containerBg}`}
+      >
         <ReactMarkdown>{answer}</ReactMarkdown>
       </div>
     </div>
