@@ -2,12 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target } from 'lucide-react';
 import { Header } from '@/components/header';
 import { LeitnerQuizCard } from '@/components/leitner-quiz-card';
 import { QuizCard } from '@/components/quiz-card';
 import { TopicSelector } from '@/components/topic-selector';
-import { MobileProgress } from '@/components/mobile-progress';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { useQuizData } from '@/hooks/use-quiz-data';
 import { useQuizStateWithLeitner } from '@/hooks/use-quiz-state-leitner';
@@ -97,75 +95,6 @@ export default function Home() {
 
       <main className='container mx-auto px-4 py-6'>
         <div className='mx-auto max-w-4xl'>
-          {/* Progress Bar - Always at top, minimal on mobile, more detailed on desktop */}
-          {currentQuestion && (
-            <>
-              {/* Mobile Progress */}
-              <div className='block lg:hidden'>
-                <MobileProgress
-                  questionNumber={currentQuestionIndex + 1}
-                  totalQuestions={filteredQuestions.length}
-                  stats={{
-                    totalQuestions: stats.totalQuestions,
-                    answeredQuestions: stats.answeredQuestions,
-                    correctAnswers: stats.correctAnswers,
-                    incorrectAnswers: stats.incorrectAnswers,
-                    accuracy: stats.accuracy,
-                  }}
-                />
-              </div>
-
-              {/* Desktop Progress */}
-              <div className='mb-6 hidden lg:block'>
-                <div className='rounded-xl border border-border bg-card/80 p-4 shadow-sm backdrop-blur-sm'>
-                  <div className='mb-3 flex items-center justify-between'>
-                    <div className='flex items-center gap-2'>
-                      <Target className='h-4 w-4 text-muted-foreground' />
-                      <span className='text-sm font-medium'>
-                        Question {currentQuestionIndex + 1} of{' '}
-                        {filteredQuestions.length}
-                      </span>
-                    </div>
-                    <div className='flex items-center gap-4 text-sm text-muted-foreground'>
-                      {isLeitnerMode ? (
-                        <>
-                          <span>
-                            {leitnerState.stats.leitner.dueToday} due today
-                          </span>
-                          <span>
-                            {Math.round(
-                              leitnerState.stats.leitner.accuracyRate * 100
-                            )}
-                            % accuracy
-                          </span>
-                          <span>
-                            🔥 {leitnerState.stats.leitner.streakDays} day
-                            streak
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Practice Mode</span>
-                          <span>Free Navigation</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <div className='h-2 w-full overflow-hidden rounded-full bg-muted'>
-                    <motion.div
-                      className='h-full rounded-full bg-primary'
-                      initial={{ width: 0 }}
-                      animate={{
-                        width: `${((currentQuestionIndex + 1) / filteredQuestions.length) * 100}%`,
-                      }}
-                      transition={{ duration: 0.4, ease: [0.25, 0.8, 0.25, 1] }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
           {/* Quiz Card - Primary Focus */}
           <AnimatePresence mode='wait'>
             {currentQuestion ? (
