@@ -17,7 +17,6 @@ import { QuizQuestionContent } from '@/components/quiz/quiz-question-content';
 import { MultipleChoiceWarning } from '@/components/quiz/multiple-choice-warning';
 import { useQuizCardState } from '@/hooks/use-quiz-card-state';
 import { BOX_COLORS } from '@/lib/leitner';
-import { ANIMATION_DURATIONS } from '@/lib/constants';
 import type { Question } from '@/types/quiz';
 
 interface EnhancedQuizStats {
@@ -68,6 +67,14 @@ interface LeitnerQuizCardProps {
     lastReviewed: string;
     lastAnswerCorrect: boolean;
   } | null;
+  // Add function to get submission state
+  getSubmissionState?: (questionId: string) => {
+    isSubmitted: boolean;
+    isCorrect: boolean;
+    showAnswer: boolean;
+    submittedAt: number;
+    submittedAnswers: number[]; // Add submitted answers to the type
+  } | null;
 }
 
 export function LeitnerQuizCard({
@@ -84,14 +91,23 @@ export function LeitnerQuizCard({
   onTopicChange,
   stats,
   questionProgress,
+  getSubmissionState,
 }: LeitnerQuizCardProps) {
   const isMultipleChoice = question.answerIndexes.length > 1;
 
-  // Use our modular hooks
+    // Use our modular hooks
   const cardState = useQuizCardState({
     questionId: question.id,
     autoAdvanceOnCorrect: true,
-    autoAdvanceDelay: ANIMATION_DURATIONS.AUTO_ADVANCE_DELAY,
+    autoAdvanceDelay: 2500,
+    initialSubmissionState: (() => {
+      const submissionState = getSubmissionState?.(question.id);
+      return submissionState ? {
+        isSubmitted: submissionState.isSubmitted,
+        isCorrect: submissionState.isCorrect,
+        showAnswer: submissionState.showAnswer
+      } : undefined;
+    })()
   });
 
   // Simplified answer selection - directly use external state
@@ -129,16 +145,21 @@ export function LeitnerQuizCard({
   );
 
   const handleSubmitAnswer = useCallback(async () => {
-    console.debug('[LeitnerQuizCard] submit clicked', {
+    console.debug('🎯 [LeitnerQuizCard] submit clicked', {
+      questionId: question.id,
       externalSelectedAnswers,
       isSubmitting: cardState.isSubmitting,
       answerSubmitted: cardState.answerSubmitted,
+      showAnswer: cardState.showAnswer,
+      lastSubmissionResult: cardState.lastSubmissionResult
     });
+    
     if (
       externalSelectedAnswers.length === 0 ||
       cardState.isSubmitting ||
       cardState.answerSubmitted
     ) {
+      console.debug('🎯 [LeitnerQuizCard] submit blocked');
       return;
     }
 
@@ -146,12 +167,36 @@ export function LeitnerQuizCard({
 
     try {
       const result = await onAnswerSubmit(question.id, externalSelectedAnswers);
-      cardState.markAnswerSubmitted(true); // Show answer feedback in Leitner mode
+      
+      // Calculate if the user's answer was correct
+      const isUserAnswerCorrect = externalSelectedAnswers.length === question.answerIndexes.length &&
+        externalSelectedAnswers.every(answer => question.answerIndexes.includes(answer));
+      
+      console.debug('🎯 [LeitnerQuizCard] Answer processed', {
+        questionId: question.id,
+        isUserAnswerCorrect,
+        leitnerResult: result,
+        selectedAnswers: externalSelectedAnswers,
+        correctAnswers: question.answerIndexes
+      });
+      
+      cardState.markAnswerSubmitted(true, isUserAnswerCorrect); // Show answer feedback with correctness
       cardState.finishSubmitting();
 
       // Auto-advance on correct answers
       if (result?.correct && canGoNext) {
+        console.debug('🎯 [LeitnerQuizCard] Scheduling auto-advance (CORRECT)', {
+          resultCorrect: result?.correct,
+          canGoNext,
+          autoAdvanceDelay: 2500
+        });
         cardState.scheduleAutoAdvance(onNext);
+      } else {
+        console.debug('🎯 [LeitnerQuizCard] NOT auto-advancing', {
+          resultCorrect: result?.correct,
+          canGoNext,
+          reason: !result?.correct ? 'incorrect answer' : 'cannot go next'
+        });
       }
     } catch (error) {
       console.error('Failed to submit answer:', error);
@@ -162,6 +207,7 @@ export function LeitnerQuizCard({
     cardState,
     onAnswerSubmit,
     question.id,
+    question.answerIndexes,
     canGoNext,
     onNext,
   ]);
@@ -274,19 +320,31 @@ export function LeitnerQuizCard({
             <div className='mb-4 space-y-2 sm:mb-6 sm:space-y-3'>
               <MultipleChoiceWarning show={isMultipleChoice && !cardState.answerSubmitted} />
 
-              {question.options.map((option, index) => (
-                <QuizOption
-                  key={index}
-                  option={option}
-                  index={index}
-                  isSelected={externalSelectedAnswers.includes(index)}
-                  isCorrect={question.answerIndexes.includes(index)}
-                  showAnswer={cardState.showAnswer}
-                  isMultipleChoice={isMultipleChoice}
-                  onSelect={handleOptionSelect}
-                  disabled={cardState.answerSubmitted}
-                />
-              ))}
+              {question.options.map((option, index) => {
+                // Get the submission state to access submitted answers
+                const submissionState = getSubmissionState?.(question.id);
+                
+                // Use submitted answers when showing answer, otherwise use current selection
+                const isSelected = cardState.showAnswer && submissionState?.submittedAnswers
+                  ? submissionState.submittedAnswers.includes(index)
+                  : externalSelectedAnswers.includes(index);
+                  
+                const isCorrect = question.answerIndexes.includes(index);
+                
+                return (
+                  <QuizOption
+                    key={index}
+                    option={option}
+                    index={index}
+                    isSelected={isSelected}
+                    isCorrect={isCorrect}
+                    showAnswer={cardState.showAnswer}
+                    isMultipleChoice={isMultipleChoice}
+                    onSelect={handleOptionSelect}
+                    disabled={cardState.answerSubmitted}
+                  />
+                );
+              })}
 
               {/* Submit Answer Button */}
               {buttonStates.showSubmitButton && (
@@ -312,15 +370,7 @@ export function LeitnerQuizCard({
           <QuizAnswer
             answer={question.answer}
             showAnswer={cardState.showAnswer}
-            isCorrect={
-              cardState.answerSubmitted
-                ? externalSelectedAnswers.length ===
-                    question.answerIndexes.length &&
-                  externalSelectedAnswers.every(answer =>
-                    question.answerIndexes.includes(answer)
-                  )
-                : true
-            }
+            isCorrect={cardState.lastSubmissionResult ?? true}
           />
         </CardContent>
       </Card>

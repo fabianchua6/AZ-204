@@ -24,6 +24,13 @@ export function useQuizStateWithLeitner(
 ) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number[]>>({});
+  const [submissionStates, setSubmissionStates] = useState<Record<string, {
+    isSubmitted: boolean;
+    isCorrect: boolean;
+    showAnswer: boolean;
+    submittedAt: number;
+    submittedAnswers: number[]; // Add submitted answers to the type
+  }>>({});
   const [__forceTick, setForceTick] = useState(0); // diagnostics only
 
   // Load saved state (excluding topic which is managed by parent)
@@ -169,6 +176,21 @@ export function useQuizStateWithLeitner(
       const isCorrect = answerIndexes.length === question.answerIndexes.length &&
         answerIndexes.every(answer => question.answerIndexes.includes(answer));
 
+      // Store submission state with submitted answers
+      setSubmissionStates(prev => {
+        const newState = {
+          ...prev,
+          [questionId]: {
+            isSubmitted: true,
+            isCorrect,
+            showAnswer: true,
+            submittedAt: Date.now(),
+            submittedAnswers: answerIndexes // Store the submitted answers
+          }
+        };
+        return newState;
+      });
+
       try {
         // Process with Leitner system (synchronous operation)
         const result = leitnerSystem.processAnswer(questionId, isCorrect);
@@ -240,10 +262,16 @@ export function useQuizStateWithLeitner(
       return leitnerSystem.getQuestionProgress(questionId);
     },
 
+    getSubmissionState: (questionId: string) => {
+      const state = submissionStates[questionId] || null;
+      return state;
+    },
+
     clearAllProgress: () => {
       console.log('[Leitner] clearAllProgress');
       leitnerSystem.clearProgress();
       setAnswers({});
+      setSubmissionStates({});
       setCurrentQuestionIndex(0);
       setForceTick(t => t + 1); // force rerender for debug
     }
@@ -254,6 +282,7 @@ export function useQuizStateWithLeitner(
     currentQuestionIndex,
     filteredQuestions,
     questions, // Needed for inline validation in submitAnswer
+    submissionStates, // Needed for getSubmissionState to access current state
   ]);
 
   console.log('[LeitnerHook] render', { currentQuestionIndex, filteredLen: filteredQuestions.length, answersKeys: Object.keys(answers).length, forceTick: __forceTick });

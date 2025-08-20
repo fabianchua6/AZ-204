@@ -133,6 +133,7 @@ export default function Home() {
                     questionProgress={leitnerState.getQuestionProgress(
                       currentQuestion.id
                     )}
+                    getSubmissionState={leitnerState.actions.getSubmissionState}
                   />
                 ) : (
                   <QuizCard
