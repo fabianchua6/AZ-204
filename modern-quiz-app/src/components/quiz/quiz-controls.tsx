@@ -25,21 +25,23 @@ export function QuizControls({
   stats,
 }: QuizControlsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  
-  const progressPercentage = (stats.answeredQuestions / stats.totalQuestions) * 100;
-  const accuracyPercentage = stats.answeredQuestions > 0 
-    ? Math.round((stats.correctAnswers / stats.answeredQuestions) * 100)
-    : 0;
+
+  const progressPercentage =
+    (stats.answeredQuestions / stats.totalQuestions) * 100;
+  const accuracyPercentage =
+    stats.answeredQuestions > 0
+      ? Math.round((stats.correctAnswers / stats.answeredQuestions) * 100)
+      : 0;
 
   return (
     <Card className='dark:border-border-light border border-border bg-card shadow-sm dark:shadow-sm'>
       {/* Always Visible Progress Bar - Mobile Style */}
-      <div className='w-full bg-card/80 backdrop-blur-sm p-3 rounded-t-xl'>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <Target className="w-3 h-3" />
-              <span className="font-mono">
+      <div className='w-full rounded-t-xl bg-card/80 p-3 backdrop-blur-sm'>
+        <div className='space-y-2'>
+          <div className='flex items-center justify-between text-xs text-muted-foreground'>
+            <div className='flex items-center gap-1.5'>
+              <Target className='h-3 w-3' />
+              <span className='font-mono'>
                 {stats.answeredQuestions}/{stats.totalQuestions}
               </span>
             </div>
@@ -47,14 +49,14 @@ export function QuizControls({
               <span>{accuracyPercentage}% correct</span>
             )}
           </div>
-          <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+          <div className='h-1.5 w-full overflow-hidden rounded-full bg-muted'>
             <motion.div
-              className="h-full bg-primary rounded-full"
+              className='h-full rounded-full bg-primary'
               initial={{ width: 0 }}
               animate={{ width: `${progressPercentage}%` }}
-              transition={{ 
-                duration: ANIMATION_DURATIONS.PROGRESS_ANIMATION, 
-                ease: ANIMATION_EASINGS.EASE_OUT_CUBIC
+              transition={{
+                duration: ANIMATION_DURATIONS.PROGRESS_ANIMATION,
+                ease: ANIMATION_EASINGS.EASE_OUT_CUBIC,
               }}
             />
           </div>
@@ -63,7 +65,7 @@ export function QuizControls({
 
       {/* Collapsed Header */}
       <div
-        className='flex cursor-pointer items-center justify-between p-4 transition-colors hover:bg-muted/30 dark:hover:bg-muted/20 border-t border-border'
+        className='flex cursor-pointer items-center justify-between border-t border-border p-4 transition-colors hover:bg-muted/30 dark:hover:bg-muted/20'
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className='flex items-center gap-3'>

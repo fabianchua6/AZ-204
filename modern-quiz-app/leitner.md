@@ -75,7 +75,7 @@ private moveQuestion(currentBox: number, wasCorrect: boolean): number {
 
 - **Stable Randomization**: Consistent pseudo-random sorting using seed-based hash
 - **Optimized Interleaving**: Topic-based distribution for better learning
-- **Code Filtering**: Automatically excludes questions with code examples
+- **Smart Filtering**: Automatically excludes questions with code examples and questions with no select options
 - **Race Condition Prevention**: Async initialization with promise caching
 - **Memory Management**: Debounced saves and timeout cleanup
 
@@ -273,16 +273,16 @@ private cleanupOldData(): void {
 )}
 ```
 
-### Auto-Advance Logic
+### Auto-Advance Logic (Disabled)
 
 ```typescript
-// Auto-advance after correct answers in Leitner mode
-if (result?.correct && canGoNext) {
-  timeoutRef.current = setTimeout(() => {
-    onNext();
-    resetState();
-  }, 2500); // 2.5 second delay
-}
+// Auto-advance after correct answers - DISABLED
+// if (result?.correct && canGoNext) {
+//   timeoutRef.current = setTimeout(() => {
+//     onNext();
+//     resetState();
+//   }, 0); // No delay - disabled
+// }
 ```
 
 ## Performance Features
@@ -386,15 +386,15 @@ const CLEANUP_THRESHOLD = 30; // days
 1. Select "All Topics"
 2. System loads due questions using Leitner algorithm
 3. Questions prioritized by box, failures, and due date
-4. Code examples automatically filtered out
+4. Code examples and questions with no options automatically filtered out
 5. Submit answer → automatic box movement
-6. Correct answers auto-advance after 2.5s
+6. No auto-advance after answers (immediate manual navigation)
 7. Progress tracked in localStorage
 
 ### Practice Mode (Specific Topic)
 
 1. Select specific topic from dropdown
-2. System loads all questions for that topic
+2. System loads all questions for that topic (filtered for code/options)
 3. Free navigation with Previous/Next buttons
 4. Show/Hide answer toggle available
 5. No Leitner tracking or box movement

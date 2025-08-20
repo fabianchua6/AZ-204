@@ -8,9 +8,9 @@ interface QuizQuestionContentProps {
   className?: string;
 }
 
-export function QuizQuestionContent({ 
-  question, 
-  className = 'prose prose-sm sm:prose-base dark:prose-invert prose-headings:font-semibold prose-p:leading-relaxed mb-4 max-w-none sm:mb-6'
+export function QuizQuestionContent({
+  question,
+  className = 'prose prose-sm sm:prose-base dark:prose-invert prose-headings:font-semibold prose-p:leading-relaxed mb-4 max-w-none sm:mb-6',
 }: QuizQuestionContentProps) {
   return (
     <div className={className}>
