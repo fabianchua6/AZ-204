@@ -3,20 +3,21 @@
 import { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Code2,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Package,
 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { QuizOption } from '@/components/quiz/quiz-option';
 import { QuizAnswer } from '@/components/quiz/quiz-answer';
 import { QuizControls } from '@/components/quiz/quiz-controls';
+import { QuizBadges } from '@/components/quiz/quiz-badges';
+import { QuizQuestionContent } from '@/components/quiz/quiz-question-content';
+import { MultipleChoiceWarning } from '@/components/quiz/multiple-choice-warning';
 import { useQuizCardState } from '@/hooks/use-quiz-card-state';
 import { BOX_COLORS } from '@/lib/leitner';
+import { ANIMATION_DURATIONS } from '@/lib/constants';
 import type { Question } from '@/types/quiz';
 
 interface EnhancedQuizStats {
@@ -90,7 +91,7 @@ export function LeitnerQuizCard({
   const cardState = useQuizCardState({
     questionId: question.id,
     autoAdvanceOnCorrect: true,
-    autoAdvanceDelay: 2500,
+    autoAdvanceDelay: ANIMATION_DURATIONS.AUTO_ADVANCE_DELAY,
   });
 
   // Simplified answer selection - directly use external state
@@ -230,18 +231,8 @@ export function LeitnerQuizCard({
                 <span>{currentBox}</span>
               </div>
 
-              {/* Topic Badge */}
-              <div className='flex h-8 items-center rounded-full border border-primary/30 bg-primary/20 px-3 text-sm font-medium text-primary'>
-                {question.topic}
-              </div>
-
-              {/* Code Example Badge */}
-              {question.hasCode && (
-                <div className='flex h-8 items-center gap-2 rounded-full border border-blue-300 bg-blue-100 px-3 text-xs text-blue-800 dark:border-blue-600/50 dark:bg-blue-900/40 dark:text-blue-200'>
-                  <Code2 className='h-3 w-3' />
-                  <span className='font-medium'>Code Example</span>
-                </div>
-              )}
+              {/* Topic and Code Badges */}
+              <QuizBadges question={question} />
             </div>
 
             {/* Navigation */}
@@ -276,32 +267,12 @@ export function LeitnerQuizCard({
 
         {/* Question Content */}
         <CardContent className='px-4 pb-4 pt-0 sm:pb-6'>
-          <div className='prose prose-sm sm:prose-base dark:prose-invert prose-headings:font-semibold prose-p:leading-relaxed mb-4 max-w-none sm:mb-6'>
-            <ReactMarkdown>{question.question}</ReactMarkdown>
-          </div>
+          <QuizQuestionContent question={question} />
 
           {/* Options */}
           {question.options.length > 0 && (
             <div className='mb-4 space-y-2 sm:mb-6 sm:space-y-3'>
-              {isMultipleChoice && !cardState.answerSubmitted && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className='flex items-center gap-3 rounded-xl border border-blue-300 bg-blue-100 p-4 text-sm dark:border-blue-600 dark:bg-blue-900/40'
-                >
-                  <div className='flex h-8 w-8 items-center justify-center rounded-full bg-blue-200 dark:bg-blue-800/60'>
-                    <CheckCircle2 className='h-4 w-4 text-blue-700 dark:text-blue-300' />
-                  </div>
-                  <div>
-                    <div className='font-medium text-blue-900 dark:text-blue-100'>
-                      Multiple Choice Question
-                    </div>
-                    <div className='text-xs text-blue-700 dark:text-blue-200'>
-                      Select all correct answers
-                    </div>
-                  </div>
-                </motion.div>
-              )}
+              <MultipleChoiceWarning show={isMultipleChoice && !cardState.answerSubmitted} />
 
               {question.options.map((option, index) => (
                 <QuizOption

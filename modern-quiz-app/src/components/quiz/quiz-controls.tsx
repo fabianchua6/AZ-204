@@ -6,6 +6,7 @@ import { Filter, Target, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TopicSelector } from '@/components/topic-selector';
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/lib/constants';
 import type { QuizStats } from '@/types/quiz';
 
 interface QuizControlsProps {
@@ -52,8 +53,8 @@ export function QuizControls({
               initial={{ width: 0 }}
               animate={{ width: `${progressPercentage}%` }}
               transition={{ 
-                duration: 0.4, 
-                ease: [0.25, 0.8, 0.25, 1]
+                duration: ANIMATION_DURATIONS.PROGRESS_ANIMATION, 
+                ease: ANIMATION_EASINGS.EASE_OUT_CUBIC
               }}
             />
           </div>

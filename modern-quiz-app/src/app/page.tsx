@@ -11,6 +11,7 @@ import { useQuizData } from '@/hooks/use-quiz-data';
 import { useQuizStateWithLeitner } from '@/hooks/use-quiz-state-leitner';
 import { useQuizState } from '@/hooks/use-quiz-state';
 import { saveToLocalStorage, loadFromLocalStorage } from '@/lib/utils';
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/lib/constants';
 
 export default function Home() {
   const { questions, topics, loading, error } = useQuizData();
@@ -104,8 +105,8 @@ export default function Home() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.02 }}
                 transition={{
-                  duration: 0.2,
-                  ease: [0.23, 1, 0.32, 1], // easeOutQuart for more natural feel
+                  duration: ANIMATION_DURATIONS.CARD_TRANSITION,
+                  ease: ANIMATION_EASINGS.EASE_OUT_QUART, // easeOutQuart for more natural feel
                 }}
               >
                 {isLeitnerMode ? (
