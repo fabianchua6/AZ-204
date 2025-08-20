@@ -2,11 +2,7 @@
 
 import { useCallback } from 'react';
 import { motion } from 'framer-motion';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Package,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Package } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { QuizOption } from '@/components/quiz/quiz-option';
@@ -95,19 +91,21 @@ export function LeitnerQuizCard({
 }: LeitnerQuizCardProps) {
   const isMultipleChoice = question.answerIndexes.length > 1;
 
-    // Use our modular hooks
+  // Use our modular hooks
   const cardState = useQuizCardState({
     questionId: question.id,
-    autoAdvanceOnCorrect: true,
-    autoAdvanceDelay: 2500,
+    autoAdvanceOnCorrect: false,
+    autoAdvanceDelay: 0,
     initialSubmissionState: (() => {
       const submissionState = getSubmissionState?.(question.id);
-      return submissionState ? {
-        isSubmitted: submissionState.isSubmitted,
-        isCorrect: submissionState.isCorrect,
-        showAnswer: submissionState.showAnswer
-      } : undefined;
-    })()
+      return submissionState
+        ? {
+            isSubmitted: submissionState.isSubmitted,
+            isCorrect: submissionState.isCorrect,
+            showAnswer: submissionState.showAnswer,
+          }
+        : undefined;
+    })(),
   });
 
   // Simplified answer selection - directly use external state
@@ -151,9 +149,9 @@ export function LeitnerQuizCard({
       isSubmitting: cardState.isSubmitting,
       answerSubmitted: cardState.answerSubmitted,
       showAnswer: cardState.showAnswer,
-      lastSubmissionResult: cardState.lastSubmissionResult
+      lastSubmissionResult: cardState.lastSubmissionResult,
     });
-    
+
     if (
       externalSelectedAnswers.length === 0 ||
       cardState.isSubmitting ||
@@ -167,37 +165,43 @@ export function LeitnerQuizCard({
 
     try {
       const result = await onAnswerSubmit(question.id, externalSelectedAnswers);
-      
+
       // Calculate if the user's answer was correct
-      const isUserAnswerCorrect = externalSelectedAnswers.length === question.answerIndexes.length &&
-        externalSelectedAnswers.every(answer => question.answerIndexes.includes(answer));
-      
+      const isUserAnswerCorrect =
+        externalSelectedAnswers.length === question.answerIndexes.length &&
+        externalSelectedAnswers.every(answer =>
+          question.answerIndexes.includes(answer)
+        );
+
       console.debug('🎯 [LeitnerQuizCard] Answer processed', {
         questionId: question.id,
         isUserAnswerCorrect,
         leitnerResult: result,
         selectedAnswers: externalSelectedAnswers,
-        correctAnswers: question.answerIndexes
+        correctAnswers: question.answerIndexes,
       });
-      
+
       cardState.markAnswerSubmitted(true, isUserAnswerCorrect); // Show answer feedback with correctness
       cardState.finishSubmitting();
 
-      // Auto-advance on correct answers
-      if (result?.correct && canGoNext) {
-        console.debug('🎯 [LeitnerQuizCard] Scheduling auto-advance (CORRECT)', {
-          resultCorrect: result?.correct,
-          canGoNext,
-          autoAdvanceDelay: 2500
-        });
-        cardState.scheduleAutoAdvance(onNext);
-      } else {
-        console.debug('🎯 [LeitnerQuizCard] NOT auto-advancing', {
-          resultCorrect: result?.correct,
-          canGoNext,
-          reason: !result?.correct ? 'incorrect answer' : 'cannot go next'
-        });
-      }
+      // Auto-advance on correct answers - DISABLED
+      // if (result?.correct && canGoNext) {
+      //   console.debug(
+      //     '🎯 [LeitnerQuizCard] Scheduling auto-advance (CORRECT)',
+      //     {
+      //       resultCorrect: result?.correct,
+      //       canGoNext,
+      //       autoAdvanceDelay: 0,
+      //     }
+      //   );
+      //   cardState.scheduleAutoAdvance(onNext);
+      // } else {
+      //   console.debug('🎯 [LeitnerQuizCard] NOT auto-advancing', {
+      //     resultCorrect: result?.correct,
+      //     canGoNext,
+      //     reason: !result?.correct ? 'incorrect answer' : 'cannot go next',
+      //   });
+      // }
     } catch (error) {
       console.error('Failed to submit answer:', error);
       cardState.finishSubmitting();
@@ -208,8 +212,6 @@ export function LeitnerQuizCard({
     onAnswerSubmit,
     question.id,
     question.answerIndexes,
-    canGoNext,
-    onNext,
   ]);
 
   // Simplified navigation handlers - direct calls
@@ -318,19 +320,22 @@ export function LeitnerQuizCard({
           {/* Options */}
           {question.options.length > 0 && (
             <div className='mb-4 space-y-2 sm:mb-6 sm:space-y-3'>
-              <MultipleChoiceWarning show={isMultipleChoice && !cardState.answerSubmitted} />
+              <MultipleChoiceWarning
+                show={isMultipleChoice && !cardState.answerSubmitted}
+              />
 
               {question.options.map((option, index) => {
                 // Get the submission state to access submitted answers
                 const submissionState = getSubmissionState?.(question.id);
-                
+
                 // Use submitted answers when showing answer, otherwise use current selection
-                const isSelected = cardState.showAnswer && submissionState?.submittedAnswers
-                  ? submissionState.submittedAnswers.includes(index)
-                  : externalSelectedAnswers.includes(index);
-                  
+                const isSelected =
+                  cardState.showAnswer && submissionState?.submittedAnswers
+                    ? submissionState.submittedAnswers.includes(index)
+                    : externalSelectedAnswers.includes(index);
+
                 const isCorrect = question.answerIndexes.includes(index);
-                
+
                 return (
                   <QuizOption
                     key={index}

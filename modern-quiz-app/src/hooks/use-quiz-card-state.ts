@@ -15,7 +15,7 @@ interface UseQuizCardStateProps {
 export function useQuizCardState({
   questionId,
   autoAdvanceOnCorrect = false,
-  autoAdvanceDelay = 2500,
+  autoAdvanceDelay = 0,
   initialSubmissionState,
 }: UseQuizCardStateProps) {
   const [showAnswer, setShowAnswer] = useState(initialSubmissionState?.showAnswer ?? false);

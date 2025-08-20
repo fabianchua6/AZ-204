@@ -1,7 +1,7 @@
 // Animation and timing constants
 export const ANIMATION_DURATIONS = {
   CARD_TRANSITION: 0.2,
-  AUTO_ADVANCE_DELAY: 2500,
+  AUTO_ADVANCE_DELAY: 0,
   PROGRESS_ANIMATION: 0.4,
 } as const;
 

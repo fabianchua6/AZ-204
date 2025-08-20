@@ -54,9 +54,22 @@ export function useQuizStateWithLeitner(
     const updateQuestions = async () => {
       let baseQuestions = questions;
       
+      // Filter out code questions and questions with no select options
+      baseQuestions = baseQuestions.filter(question => {
+        // Exclude questions with code examples
+        if (question.hasCode) {
+          return false;
+        }
+        // Exclude questions with no select options
+        if (question.options.length === 0) {
+          return false;
+        }
+        return true;
+      });
+      
       // If specific topic selected, filter by topic
       if (selectedTopic) {
-        baseQuestions = questions.filter(q => q.topic === selectedTopic);
+        baseQuestions = baseQuestions.filter(q => q.topic === selectedTopic);
         setFilteredQuestions(baseQuestions);
         return;
       }

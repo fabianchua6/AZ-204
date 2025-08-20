@@ -286,11 +286,23 @@ export class LeitnerSystem {
       return [];
     }
     
-    // Don't filter out code questions - they're important for learning
+    // Filter out code questions and questions with no select options
+    const filteredQuestions = allQuestions.filter(question => {
+      // Exclude questions with code examples
+      if (question.hasCode) {
+        return false;
+      }
+      // Exclude questions with no select options
+      if (question.options.length === 0) {
+        return false;
+      }
+      return true;
+    });
+    
     const currentDate = new Date();
     
     // Use map for O(1) lookups instead of repeated gets
-    const questionsWithPriority: QuestionWithLeitner[] = allQuestions.map(question => {
+    const questionsWithPriority: QuestionWithLeitner[] = filteredQuestions.map(question => {
       const progress = this.progress.get(question.id);
       
       if (!progress) {

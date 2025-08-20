@@ -33,10 +33,25 @@ export function useQuizState(
     saveToLocalStorage('practice-quiz-index', currentQuestionIndex);
   }, [currentQuestionIndex]);
 
-  // Filter questions by topic
+  // Filter questions by topic and exclude code examples and questions with no options
   const filteredQuestions = useMemo(() => {
-    if (!selectedTopic) return questions;
-    return questions.filter(q => q.topic === selectedTopic);
+    let baseQuestions = questions;
+    
+    // Filter out code questions and questions with no select options
+    baseQuestions = baseQuestions.filter(question => {
+      // Exclude questions with code examples
+      if (question.hasCode) {
+        return false;
+      }
+      // Exclude questions with no select options
+      if (question.options.length === 0) {
+        return false;
+      }
+      return true;
+    });
+    
+    if (!selectedTopic) return baseQuestions;
+    return baseQuestions.filter(q => q.topic === selectedTopic);
   }, [questions, selectedTopic]);
 
   // Calculate stats
