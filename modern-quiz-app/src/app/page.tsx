@@ -200,7 +200,7 @@ export default function Home() {
                     selectedTopic={selectedTopic}
                     onTopicChange={setSelectedTopic}
                     stats={leitnerState.stats}
-                    questionProgress={leitnerState.actions.getQuestionProgress(
+                    questionProgress={leitnerState.getQuestionProgress(
                       currentQuestion.id
                     )}
                   />

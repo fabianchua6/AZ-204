@@ -42,9 +42,9 @@ export function useQuizCardState({
     setShowAnswer(prev => !prev);
   }, []);
 
-  const markAnswerSubmitted = useCallback(() => {
+  const markAnswerSubmitted = useCallback((shouldShowAnswer: boolean = true) => {
     setAnswerSubmitted(true);
-    setShowAnswer(true);
+    setShowAnswer(shouldShowAnswer);
   }, []);
 
   const startSubmitting = useCallback(() => {

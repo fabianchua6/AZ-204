@@ -15,6 +15,7 @@ export interface LeitnerProgress {
 
 export interface LeitnerStats {
   totalQuestions: number;
+  questionsStarted: number; // Questions that have been attempted at least once
   boxDistribution: Record<number, number>; // box -> count
   dueToday: number;
   accuracyRate: number;
@@ -73,7 +74,7 @@ export class LeitnerSystem {
   }
 
   // Ensure system is initialized before operations
-  private async ensureInitialized(): Promise<void> {
+  async ensureInitialized(): Promise<void> {
     if (!this.initialized) {
       await this.initializeAsync();
     }
@@ -277,19 +278,19 @@ export class LeitnerSystem {
     };
   }
 
-  // Get questions due for review with optimized sorting and interleaving
-  async getDueQuestions(allQuestions: Question[], currentDate = new Date()): Promise<QuestionWithLeitner[]> {
+    // Get questions due for review with optimized sorting and interleaving
+  async getDueQuestions(allQuestions: Question[]): Promise<QuestionWithLeitner[]> {
     await this.ensureInitialized();
     
     if (!Array.isArray(allQuestions) || allQuestions.length === 0) {
       return [];
     }
     
-    // Filter out questions with code examples first
-    const questionsWithoutCode = allQuestions.filter(question => !question.hasCode);
+    // Don't filter out code questions - they're important for learning
+    const currentDate = new Date();
     
     // Use map for O(1) lookups instead of repeated gets
-    const questionsWithPriority: QuestionWithLeitner[] = questionsWithoutCode.map(question => {
+    const questionsWithPriority: QuestionWithLeitner[] = allQuestions.map(question => {
       const progress = this.progress.get(question.id);
       
       if (!progress) {
@@ -308,8 +309,27 @@ export class LeitnerSystem {
       };
     });
 
+    // Filter to only questions that are due or new, plus some review questions
+    const dueAndNewQuestions = questionsWithPriority.filter(q => {
+      // Include all due questions and new questions
+      if (q.isDue) return true;
+      
+      // Include some questions from higher boxes for review (10% chance)
+      if (q.currentBox >= 4 && Math.random() < 0.1) return true;
+      
+      return false;
+    });
+
+    // If we have too few due questions, add some from lower boxes
+    if (dueAndNewQuestions.length < 20) {
+      const additionalQuestions = questionsWithPriority
+        .filter(q => !q.isDue && q.currentBox <= 3)
+        .slice(0, 20 - dueAndNewQuestions.length);
+      dueAndNewQuestions.push(...additionalQuestions);
+    }
+
     // Optimized sorting with early returns
-    const sortedQuestions = questionsWithPriority.sort((a, b) => {
+    const sortedQuestions = dueAndNewQuestions.sort((a, b) => {
       // Due questions first
       if (a.isDue !== b.isDue) return a.isDue ? -1 : 1;
       
@@ -391,6 +411,7 @@ export class LeitnerSystem {
     const boxDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     let totalCorrect = 0;
     let totalAnswered = 0;
+    let questionsStarted = 0; // Questions that have been attempted at least once
     
     const today = new Date().toISOString().split('T')[0];
 
@@ -402,6 +423,7 @@ export class LeitnerSystem {
         boxDistribution[1]++;
       } else {
         boxDistribution[progress.currentBox]++;
+        questionsStarted++; // This question has been started
         
         // Accumulate stats
         totalCorrect += progress.timesCorrect;
@@ -424,6 +446,7 @@ export class LeitnerSystem {
 
     return {
       totalQuestions: allQuestions.length,
+      questionsStarted, // Add this to track how many questions have been attempted
       boxDistribution,
       dueToday: displayDueToday,
       accuracyRate,
@@ -434,6 +457,45 @@ export class LeitnerSystem {
   // Get progress for a specific question
   getQuestionProgress(questionId: string): LeitnerProgress | null {
     return this.progress.get(questionId) || null;
+  }
+
+  // Get completion progress for progress bars
+  getCompletionProgress(allQuestions: Question[]): {
+    totalQuestions: number;
+    answeredQuestions: number;
+    correctAnswers: number;
+    incorrectAnswers: number;
+    accuracy: number;
+  } {
+    let answeredQuestions = 0;
+    let correctAnswers = 0;
+    let totalCorrect = 0;
+    let totalAnswered = 0;
+
+    allQuestions.forEach(question => {
+      const progress = this.progress.get(question.id);
+      if (progress) {
+        answeredQuestions++;
+        totalCorrect += progress.timesCorrect;
+        totalAnswered += progress.timesCorrect + progress.timesIncorrect;
+        
+        // Consider a question "correct" if they got it right more often than wrong
+        if (progress.timesCorrect > progress.timesIncorrect) {
+          correctAnswers++;
+        }
+      }
+    });
+
+    const incorrectAnswers = answeredQuestions - correctAnswers;
+    const accuracy = totalAnswered > 0 ? totalCorrect / totalAnswered : 0;
+
+    return {
+      totalQuestions: allQuestions.length,
+      answeredQuestions,
+      correctAnswers,
+      incorrectAnswers,
+      accuracy,
+    };
   }
 
   // Simple streak calculation based on recent activity

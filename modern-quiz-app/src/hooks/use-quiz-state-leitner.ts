@@ -82,39 +82,21 @@ export function useQuizStateWithLeitner(
 
   // Calculate enhanced stats including Leitner data
   const stats: EnhancedQuizStats = useMemo(() => {
-    const totalQuestions = filteredQuestions.length;
-    
-    // Traditional quiz stats
-    const answeredQuestions = Object.keys(answers).filter(id =>
-      filteredQuestions.some(q => q.id === id)
-    ).length;
-
-    let correctAnswers = 0;
-    filteredQuestions.forEach(question => {
-      const userAnswers = answers[question.id];
-      if (userAnswers && userAnswers.length > 0) {
-        const isCorrect = userAnswers.length === question.answerIndexes.length &&
-          userAnswers.every(answer => question.answerIndexes.includes(answer));
-        if (isCorrect) correctAnswers++;
-      }
-    });
-
-    const incorrectAnswers = answeredQuestions - correctAnswers;
-    const accuracy = answeredQuestions > 0 ? correctAnswers / answeredQuestions : 0;
-
-    // Leitner-specific stats
-    const leitner = leitnerSystem.getStats(questions);
+    // In Leitner mode, use Leitner system for progress tracking
+    const leitnerCompletion = leitnerSystem.getCompletionProgress(questions);
+    const leitnerStats = leitnerSystem.getStats(questions);
 
     return {
-      totalQuestions,
-      answeredQuestions,
-      correctAnswers,
-      incorrectAnswers,
-      accuracy,
-      leitner
+      // Use Leitner completion stats instead of traditional answer tracking
+      totalQuestions: leitnerCompletion.totalQuestions,
+      answeredQuestions: leitnerCompletion.answeredQuestions,
+      correctAnswers: leitnerCompletion.correctAnswers,
+      incorrectAnswers: leitnerCompletion.incorrectAnswers,
+      accuracy: leitnerCompletion.accuracy,
+      leitner: leitnerStats
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredQuestions, answers, questions, __forceTick]); // __forceTick forces recalculation
+  }, [questions, __forceTick]); // Depend on forceTick for updates
 
   // Reset current question index when topic changes
   useEffect(() => {
@@ -128,6 +110,29 @@ export function useQuizStateWithLeitner(
       [questionId]: answerIndexes
     }));
   }, []);
+
+  // Sync Leitner progress with traditional answers state for progress tracking
+  useEffect(() => {
+    const syncAnswers = async () => {
+      await leitnerSystem.ensureInitialized();
+      
+      // Add entries for questions that have been answered in Leitner system
+      const syncedAnswers: Record<string, number[]> = {};
+      questions.forEach(question => {
+        const progress = leitnerSystem.getQuestionProgress(question.id);
+        if (progress) {
+          // Add a placeholder entry to mark this question as "answered"
+          // Use the correct answer indexes as the stored answer for progress tracking
+          syncedAnswers[question.id] = question.answerIndexes;
+        }
+      });
+      
+      // Merge with existing answers (preserve user selections)
+      setAnswers(prev => ({ ...prev, ...syncedAnswers }));
+    };
+    
+    syncAnswers();
+  }, [questions, __forceTick]); // Re-sync when forceTick changes (after new answers)
 
   // Actions - Memoized to prevent unnecessary re-renders
   const actions = useMemo(() => ({
@@ -171,6 +176,7 @@ export function useQuizStateWithLeitner(
         // Force stats recalculation immediately
         setForceTick(prev => {
           console.log('[LeitnerHook] forceTick update:', prev, '->', prev + 1);
+          console.log('[LeitnerHook] Question completed:', questionId, 'isCorrect:', isCorrect);
           return prev + 1;
         });
         
@@ -252,12 +258,20 @@ export function useQuizStateWithLeitner(
 
   console.log('[LeitnerHook] render', { currentQuestionIndex, filteredLen: filteredQuestions.length, answersKeys: Object.keys(answers).length, forceTick: __forceTick });
 
+  // Reactive question progress that updates when answers change
+  const getQuestionProgress = useCallback((questionId: string) => {
+    // This will be called fresh each time __forceTick changes
+    return leitnerSystem.getQuestionProgress(questionId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [__forceTick]); // Re-create when forceTick changes
+
   return {
     currentQuestionIndex,
     selectedTopic,
     filteredQuestions,
     answers,
     stats,
-    actions
+    actions,
+    getQuestionProgress
   };
 }

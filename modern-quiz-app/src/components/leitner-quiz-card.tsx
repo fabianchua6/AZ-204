@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import {
   Code2,
   CheckCircle2,
-  RotateCcw,
   ChevronLeft,
   ChevronRight,
   Package,
@@ -146,7 +145,7 @@ export function LeitnerQuizCard({
 
     try {
       const result = await onAnswerSubmit(question.id, externalSelectedAnswers);
-      cardState.markAnswerSubmitted();
+      cardState.markAnswerSubmitted(true); // Show answer feedback in Leitner mode
       cardState.finishSubmitting();
 
       // Auto-advance on correct answers
@@ -241,17 +240,6 @@ export function LeitnerQuizCard({
                 <div className='flex h-8 items-center gap-2 rounded-full border border-blue-300 bg-blue-100 px-3 text-xs text-blue-800 dark:border-blue-600/50 dark:bg-blue-900/40 dark:text-blue-200'>
                   <Code2 className='h-3 w-3' />
                   <span className='font-medium'>Code Example</span>
-                </div>
-              )}
-
-              {/* Progress Info */}
-              {questionProgress && (
-                <div className='flex h-8 items-center gap-2 rounded-full border border-muted bg-muted/50 px-3 text-xs text-muted-foreground'>
-                  <RotateCcw className='h-3 w-3' />
-                  <span>
-                    {questionProgress.timesCorrect}✓{' '}
-                    {questionProgress.timesIncorrect}✗
-                  </span>
                 </div>
               )}
             </div>
