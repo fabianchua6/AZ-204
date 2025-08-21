@@ -121,30 +121,32 @@ export function useQuizStateWithLeitner(
     const syncAnswers = async () => {
       await leitnerSystem.ensureInitialized();
 
-      // Build map of questions that have progress (answered in Leitner system)
-      const progressPlaceholders: Record<string, number[]> = {};
-      questions.forEach(question => {
-        const progress = leitnerSystem.getQuestionProgress(question.id);
-        if (progress) {
-          // Use correct answers ONLY as a placeholder if user never submitted/select any answers in this session
-          progressPlaceholders[question.id] = question.answerIndexes;
-        }
-      });
-
-      // Merge WITHOUT overwriting existing user selections (preserve wrong answers for feedback)
+      // Do NOT pre-fill answers for Leitner questions!
+      // Each time a question appears for review, the user should answer fresh
+      // Only keep answers that have been actively selected in the current session
+      
+      // Clear any stale answer state for questions that need fresh review
       setAnswers(prev => {
-        const merged = { ...prev };
-        for (const [qid, ans] of Object.entries(progressPlaceholders)) {
-          if (!(qid in prev)) {
-            merged[qid] = ans;
+        const cleaned = { ...prev };
+        
+        // Remove answers for questions that don't have fresh submission states
+        Object.keys(cleaned).forEach(questionId => {
+          const submissionState = submissionStates[questionId];
+          // Keep answers only if they were submitted in the current session recently (within 10 seconds)
+          const isRecentSubmission = submissionState?.submittedAt && 
+            (Date.now() - submissionState.submittedAt) < 10000;
+          
+          if (!isRecentSubmission) {
+            delete cleaned[questionId];
           }
-        }
-        return merged;
+        });
+        
+        return cleaned;
       });
     };
 
     syncAnswers();
-  }, [questions, __forceTick]); // Re-sync when forceTick changes (after new answers)
+  }, [questions, __forceTick, submissionStates]); // Include submissionStates to react to submissions
 
   // Actions - Memoized to prevent unnecessary re-renders
   const actions = useMemo(
@@ -235,6 +237,27 @@ export function useQuizStateWithLeitner(
       goToQuestion: (index: number) => {
         if (index >= 0 && index < filteredQuestions.length) {
           setCurrentQuestionIndex(index);
+          
+          // Clear answer state for the new question to ensure fresh review
+          const newQuestionId = filteredQuestions[index]?.id;
+          if (newQuestionId) {
+            setAnswers(prev => {
+              const newAnswers = { ...prev };
+              delete newAnswers[newQuestionId];
+              return newAnswers;
+            });
+            
+            // Also clear submission state unless it's very recent
+            setSubmissionStates(prev => {
+              const submissionState = prev[newQuestionId];
+              if (submissionState && (Date.now() - submissionState.submittedAt) > 5000) {
+                const newStates = { ...prev };
+                delete newStates[newQuestionId];
+                return newStates;
+              }
+              return prev;
+            });
+          }
         }
       },
 
@@ -266,10 +289,9 @@ export function useQuizStateWithLeitner(
     (questionId: string) => {
       // This will be called fresh each time __forceTick changes
       return leitnerSystem.getQuestionProgress(questionId);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [__forceTick]
-  ); // Re-create when forceTick changes
+    [] // Remove __forceTick dependency as it's not actually needed
+  );
 
   return {
     currentQuestionIndex,
