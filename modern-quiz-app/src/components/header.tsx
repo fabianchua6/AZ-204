@@ -38,9 +38,6 @@ export function Header() {
               <h1 className='text-xl font-bold text-foreground'>
                 AZ-204 Quiz App
               </h1>
-              <p className='text-sm text-muted-foreground'>
-                Azure Developer Associate Practice
-              </p>
             </div>
           </Link>
 
