@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Package, Calendar, Flame, Target, Clock } from 'lucide-react';
+import { Calendar, Flame, Target, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { questionService } from '@/lib/question-service';
 import { saveToLocalStorage, loadFromLocalStorage } from '@/lib/utils';
@@ -210,7 +210,7 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
         ))}
       </div>
 
-      {/* Compact Box Distribution Subsection (no full card) */}
+      {/* Compact Box Distribution Subsection (Option A: Proportional Segmented Bar) */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -220,50 +220,102 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
         <h2 className='text-base font-semibold tracking-wide text-muted-foreground'>
           Leitner Box Distribution
         </h2>
-        <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5'>
-          {Object.entries(appStats.boxDistribution).map(([box, count]) => {
-            const boxNumber = parseInt(box);
-            const questionCount = count as number;
-            const percentage =
-              Math.round((questionCount / appStats.totalQuestions) * 100) || 0;
+        <div className='flex flex-col gap-3'>
+          {/* Segmented Bar (polished) */}
+          <div className='flex w-full overflow-hidden rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm dark:bg-background/60'>
+            {Object.entries(appStats.boxDistribution).map(([box, count], idx) => {
+              const boxNumber = parseInt(box, 10);
+              const questionCount = count as number;
+              const percentage = appStats.totalQuestions > 0 ? (questionCount / appStats.totalQuestions) * 100 : 0;
+              const flexGrow = questionCount > 0 ? questionCount : 0.6;
 
-            const getBoxColors = (boxNum: number) => {
-              switch (boxNum) {
-                case 1:
-                  return 'bg-slate-100 dark:bg-slate-700/40 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-500';
-                case 2:
-                  return 'bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-200 border-amber-200 dark:border-amber-400/50';
-                case 3:
-                  return 'bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-200 border-sky-200 dark:border-sky-400/50';
-                case 4:
-                  return 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-200 border-emerald-200 dark:border-emerald-400/50';
-                case 5:
-                  return 'bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-200 border-violet-200 dark:border-violet-400/50';
-                default:
-                  return 'bg-slate-100 dark:bg-slate-700/40 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-500';
-              }
-            };
+              const segmentStyles = (() => {
+                switch (boxNumber) {
+                  case 1:
+                    return {
+                      fill: 'bg-slate-100 dark:bg-slate-800/70',
+                      text: 'text-slate-800 dark:text-slate-100',
+                      accent: 'before:bg-slate-400/70 dark:before:bg-slate-500/70'
+                    };
+                  case 2:
+                    return {
+                      fill: 'bg-amber-100 dark:bg-amber-700/60',
+                      text: 'text-amber-900 dark:text-amber-50',
+                      accent: 'before:bg-amber-400/80 dark:before:bg-amber-300/70'
+                    };
+                  case 3:
+                    return {
+                      fill: 'bg-sky-100 dark:bg-sky-700/60',
+                      text: 'text-sky-900 dark:text-sky-50',
+                      accent: 'before:bg-sky-400/80 dark:before:bg-sky-300/70'
+                    };
+                  case 4:
+                    return {
+                      fill: 'bg-emerald-100 dark:bg-emerald-700/60',
+                      text: 'text-emerald-900 dark:text-emerald-50',
+                      accent: 'before:bg-emerald-400/80 dark:before:bg-emerald-300/70'
+                    };
+                  case 5:
+                    return {
+                      fill: 'bg-violet-100 dark:bg-violet-700/60',
+                      text: 'text-violet-900 dark:text-violet-50',
+                      accent: 'before:bg-violet-400/80 dark:before:bg-violet-300/70'
+                    };
+                  default:
+                    return {
+                      fill: 'bg-slate-100 dark:bg-slate-800/70',
+                      text: 'text-slate-800 dark:text-slate-100',
+                      accent: 'before:bg-slate-400/70 dark:before:bg-slate-500/70'
+                    };
+                }
+              })();
 
-            const colors = getBoxColors(boxNumber);
-
-            return (
-              <div
-                key={box}
-                className={`relative flex flex-col items-center justify-between rounded-md border p-2 text-center transition-colors ${colors}`}
-              >
-                <div className='flex items-center gap-1 text-[10px] font-semibold'>
-                  <Package className='h-3 w-3 opacity-70' />
-                  <span>{box}</span>
+              return (
+                <div
+                  key={box}
+                  className={`relative group flex min-w-[54px] flex-col items-center justify-center px-2 py-3 sm:px-3 sm:py-4 text-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${segmentStyles.fill} ${segmentStyles.text} ${segmentStyles.accent} before:absolute before:bottom-0 before:left-0 before:h-0.5 before:w-full before:content-[''] ${idx !== 0 ? 'border-l border-border/40 dark:border-border/30' : ''}`}
+                  style={{ flexGrow, flexBasis: `${percentage}%` }}
+                  tabIndex={0}
+                  aria-label={`Box ${boxNumber}: ${questionCount} questions (${percentage.toFixed(1)}%)`}
+                  title={`Box ${boxNumber} • ${questionCount} (${percentage.toFixed(1)}%)`}
+                >
+                  <span className='absolute left-1 top-1 rounded-sm bg-black/5 px-1.5 py-0.5 text-[10px] font-medium tracking-wide dark:bg-white/10'>
+                    {boxNumber}
+                  </span>
+                  <span className='text-sm font-semibold tabular-nums sm:text-base'>
+                    {questionCount}
+                  </span>
+                  <div className='pointer-events-none absolute inset-0 rounded-md opacity-0 transition-opacity group-hover:opacity-[0.06] group-focus-visible:opacity-[0.10] bg-black dark:bg-white' />
                 </div>
-                <div className='mt-1 text-sm font-bold leading-none'>
-                  {questionCount}
-                </div>
-                <div className='mt-1 text-[10px] tabular-nums opacity-60'>
-                  {percentage}%
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+          {/* Legend */}
+            <div className='flex flex-wrap gap-x-4 gap-y-1.5 text-xs'>
+              {Object.entries(appStats.boxDistribution).map(([box, count]) => {
+                const boxNumber = parseInt(box, 10);
+                const questionCount = count as number;
+                const percentage = appStats.totalQuestions > 0 ? Math.round((questionCount / appStats.totalQuestions) * 100) : 0;
+                const colorDot = (() => {
+                  switch (boxNumber) {
+                    case 1: return 'bg-slate-400';
+                    case 2: return 'bg-amber-400';
+                    case 3: return 'bg-sky-400';
+                    case 4: return 'bg-emerald-400';
+                    case 5: return 'bg-violet-400';
+                    default: return 'bg-slate-400';
+                  }
+                })();
+                return (
+                  <div key={box} className='flex items-center gap-1 text-muted-foreground'>
+                    <span className={`h-2 w-2 rounded-full ${colorDot}`}></span>
+                    <span className='font-medium text-foreground'>{boxNumber}</span>
+                    <span className='tabular-nums text-foreground/80'>{questionCount}</span>
+                    <span className='opacity-60'>({percentage}%)</span>
+                  </div>
+                );
+              })}
+            </div>
         </div>
       </motion.div>
     </div>
