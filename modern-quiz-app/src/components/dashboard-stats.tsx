@@ -116,9 +116,8 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
     );
   }
 
-  // Use centralized stats instead of manual calculations
-  const masteredQuestions =
-    (appStats.boxDistribution[4] || 0) + (appStats.boxDistribution[5] || 0);
+  // Use centralized stats instead of manual calculations (3-box system)
+  const masteredQuestions = appStats.boxDistribution[3] || 0;
   const masteryPercentage = Math.round(
     (masteredQuestions / appStats.totalQuestions) * 100
   );
@@ -155,7 +154,7 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
       title: 'Mastery Progress',
       value: `${masteryPercentage}%`,
       icon: Target,
-      description: `${masteredQuestions} questions in boxes 4-5`,
+      description: `${masteredQuestions} questions in box 3`,
       bgColor: 'bg-emerald-50/90 dark:bg-emerald-500/10',
       textColor: 'text-emerald-800 dark:text-emerald-300',
       iconColor: 'text-emerald-600 dark:text-emerald-400',
@@ -230,55 +229,48 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
           Leitner Box Distribution
         </h2>
         <div className='flex flex-col gap-3'>
-          {/* Segmented Bar */}
+          {/* Segmented Bar - 3 Box System */}
           <div className='flex w-full overflow-hidden rounded-xl border border-border/60'>
-            {Object.entries(appStats.boxDistribution).map(
-              ([box, count], idx) => {
-                const boxNumber = parseInt(box, 10);
-                const questionCount = count as number;
-                const percentage =
-                  appStats.totalQuestions > 0
-                    ? (questionCount / appStats.totalQuestions) * 100
-                    : 0;
-                // Use actual percentage for proportional sizing, with small minimum for visibility
-                const flexGrow = questionCount > 0 ? Math.max(percentage, 3) : 0.5;
+            {[1, 2, 3].map((boxNumber, idx) => {
+              const questionCount = appStats.boxDistribution[boxNumber] || 0;
+              const percentage =
+                appStats.totalQuestions > 0
+                  ? (questionCount / appStats.totalQuestions) * 100
+                  : 0;
+              // Use actual percentage for proportional sizing, with small minimum for visibility
+              const flexGrow = questionCount > 0 ? Math.max(percentage, 5) : 1;
 
-                const segmentBgClass = `leitner-box-surface-${boxNumber}`;
-                const segmentTextClass = `leitner-box-text-${boxNumber}`;
+              const segmentBgClass = `leitner-box-surface-${boxNumber}`;
+              const segmentTextClass = `leitner-box-text-${boxNumber}`;
 
-                // Skip rendering segments with 0 questions for cleaner look
-                if (questionCount === 0) return null;
-
-                return (
-                  <div
-                    key={box}
-                    className={`group relative flex flex-col items-center justify-center px-2 py-4 text-center outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/40 ${segmentBgClass} ${segmentTextClass} ${idx !== 0 ? 'border-l-2 border-white/20 dark:border-black/20' : ''}`}
-                    style={{
-                      flexGrow,
-                      minWidth: '40px', // Smaller minimum width for better proportions
-                      minHeight: '60px',
-                    }}
-                    tabIndex={0}
-                    aria-label={`Box ${boxNumber}: ${questionCount} questions (${percentage.toFixed(1)}%)`}
-                    title={`Box ${boxNumber} • ${questionCount} (${percentage.toFixed(1)}%)`}
-                  >
-                    <span className='absolute left-1 top-1 rounded-sm bg-black/5 px-1.5 py-0.5 text-[10px] font-medium tracking-wide dark:bg-white/10'>
-                      {boxNumber}
-                    </span>
-                    <span className='text-sm font-semibold tabular-nums sm:text-base'>
-                      {questionCount}
-                    </span>
-                    <div className='pointer-events-none absolute inset-0 rounded-md bg-black opacity-0 transition-opacity group-hover:opacity-[0.06] group-focus-visible:opacity-[0.10] dark:bg-white' />
-                  </div>
-                );
-              }
-            )}
+              return (
+                <div
+                  key={boxNumber}
+                  className={`group relative flex flex-col items-center justify-center px-3 py-4 text-center outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/40 ${segmentBgClass} ${segmentTextClass} ${idx !== 0 ? 'border-l-2 border-white/20 dark:border-black/20' : ''}`}
+                  style={{
+                    flexGrow,
+                    minWidth: '60px', // Larger minimum width for 3-box system
+                    minHeight: '60px',
+                  }}
+                  tabIndex={0}
+                  aria-label={`Box ${boxNumber}: ${questionCount} questions (${percentage.toFixed(1)}%)`}
+                  title={`Box ${boxNumber} • ${questionCount} (${percentage.toFixed(1)}%)`}
+                >
+                  <span className='absolute left-1 top-1 rounded-sm bg-black/5 px-1.5 py-0.5 text-[10px] font-medium tracking-wide dark:bg-white/10'>
+                    {boxNumber}
+                  </span>
+                  <span className='text-sm font-semibold tabular-nums sm:text-base'>
+                    {questionCount}
+                  </span>
+                  <div className='pointer-events-none absolute inset-0 rounded-md bg-black opacity-0 transition-opacity group-hover:opacity-[0.06] group-focus-visible:opacity-[0.10] dark:bg-white' />
+                </div>
+              );
+            })}
           </div>
-          {/* Legend */}
+          {/* Legend - 3 Box System */}
           <div className='flex flex-wrap gap-x-4 gap-y-1.5 text-xs'>
-            {Object.entries(appStats.boxDistribution).map(([box, count]) => {
-              const boxNumber = parseInt(box, 10);
-              const questionCount = count as number;
+            {[1, 2, 3].map((boxNumber) => {
+              const questionCount = appStats.boxDistribution[boxNumber] || 0;
               const percentage =
                 appStats.totalQuestions > 0
                   ? Math.round((questionCount / appStats.totalQuestions) * 100)
@@ -286,7 +278,7 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
               const dotClass = `leitner-box-dot-${boxNumber}`;
               return (
                 <div
-                  key={box}
+                  key={boxNumber}
                   className='flex items-center gap-1 text-muted-foreground'
                 >
                   <span className={`h-2 w-2 rounded-full ${dotClass}`}></span>

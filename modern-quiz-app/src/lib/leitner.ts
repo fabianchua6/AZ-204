@@ -5,7 +5,7 @@ import type { Question } from '@/types/quiz';
 
 export interface LeitnerProgress {
   questionId: string;
-  currentBox: number; // 1-5
+  currentBox: number; // 1-3 (3-box system)
   nextReviewDate: string; // ISO date string
   timesCorrect: number;
   timesIncorrect: number;
@@ -29,13 +29,11 @@ export interface QuestionWithLeitner extends Question {
   timesIncorrect?: number;
 }
 
-// Leitner box intervals in days
+// Leitner box intervals in days (3-box system for short study periods)
 const LEITNER_INTERVALS = {
   1: 1, // Box 1: 1 day (new/difficult)
   2: 2, // Box 2: 2 days (improving)
-  3: 4, // Box 3: 4 days (moderate)
-  4: 8, // Box 4: 8 days (good)
-  5: 16, // Box 5: 16 days (mastered)
+  3: 3, // Box 3: 3 days (mastered)
 } as const;
 
 const STORAGE_KEY = 'leitner-progress';
@@ -93,10 +91,36 @@ export class LeitnerSystem {
       }
 
       this.progress = new Map(Object.entries(data));
+      
+      // Migrate existing 5-box data to 3-box system
+      this.migrateToThreeBoxSystem();
     } catch (error) {
       console.error('Failed to load Leitner progress:', error);
       // Clear corrupted data
       localStorage.removeItem(STORAGE_KEY);
+    }
+  }
+
+  // Migrate existing 5-box system data to 3-box system
+  private migrateToThreeBoxSystem(): void {
+    let migrationMade = false;
+    
+    this.progress.forEach((progress) => {
+      if (progress.currentBox > 3) {
+        // Move boxes 4 and 5 to box 3 (mastered)
+        progress.currentBox = 3;
+        
+        // Recalculate next review date for box 3
+        const lastReviewed = new Date(progress.lastReviewed);
+        progress.nextReviewDate = this.calculateNextReviewDate(3, lastReviewed).toISOString();
+        
+        migrationMade = true;
+      }
+    });
+    
+    if (migrationMade) {
+      console.log('Migrated Leitner data from 5-box to 3-box system');
+      this.saveToStorage();
     }
   }
 
@@ -123,7 +147,7 @@ export class LeitnerSystem {
       typeof p.questionId === 'string' &&
       typeof p.currentBox === 'number' &&
       p.currentBox >= 1 &&
-      p.currentBox <= 5 &&
+      p.currentBox <= 3 &&
       typeof p.nextReviewDate === 'string' &&
       typeof p.timesCorrect === 'number' &&
       typeof p.timesIncorrect === 'number'
@@ -172,7 +196,7 @@ export class LeitnerSystem {
 
     const keysToDelete: string[] = [];
     this.progress.forEach((progress, questionId) => {
-      if (progress.lastReviewed < cutoffDate && progress.currentBox === 5) {
+      if (progress.lastReviewed < cutoffDate && progress.currentBox === 3) {
         // Remove old mastered questions that haven't been reviewed recently
         keysToDelete.push(questionId);
       }
@@ -228,13 +252,13 @@ export class LeitnerSystem {
     return Math.abs(hash) / 2147483647; // Normalize to 0-1
   }
   private moveQuestion(currentBox: number, wasCorrect: boolean): number {
-    if (currentBox < 1 || currentBox > 5) {
+    if (currentBox < 1 || currentBox > 3) {
       console.warn(`Invalid current box: ${currentBox}, defaulting to 1`);
       return 1;
     }
 
     if (wasCorrect) {
-      return Math.min(currentBox + 1, 5); // Move up, max Box 5
+      return Math.min(currentBox + 1, 3); // Move up, max Box 3
     } else {
       return 1; // Reset to Box 1 for incorrect answers
     }
@@ -343,7 +367,7 @@ export class LeitnerSystem {
       if (q.isDue) return true;
 
       // Include some questions from higher boxes for review (10% chance)
-      if (q.currentBox >= 4 && Math.random() < 0.1) return true;
+      if (q.currentBox >= 3 && Math.random() < 0.1) return true;
 
       return false;
     });
