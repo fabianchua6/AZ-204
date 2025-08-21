@@ -282,3 +282,22 @@
     @apply flex flex-row gap-2;
   }
 }
+
+/* Hide scrollbars (user request). Note: may impact discoverability; adjust if needed */
+body {
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;    /* Firefox */
+}
+body::-webkit-scrollbar {
+  display: none;            /* Chrome/Safari */
+}
+
+/* Optional: still allow scroll on elements with explicit class if needed */
+.show-scrollbar {
+  -ms-overflow-style: auto;
+  scrollbar-width: auto;
+}
+.show-scrollbar::-webkit-scrollbar {
+  display: initial;
+  width: 8px;
+}
