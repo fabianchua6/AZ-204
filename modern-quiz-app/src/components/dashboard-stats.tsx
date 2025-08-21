@@ -1,11 +1,20 @@
 'use client';
 
+// React imports
 import { useEffect, useState } from 'react';
+
+// Third-party imports
 import { motion } from 'framer-motion';
 import { Calendar, Flame, Target, Clock } from 'lucide-react';
+
+// UI component imports
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+// Service and utility imports
 import { questionService } from '@/lib/question-service';
 import { saveToLocalStorage, loadFromLocalStorage } from '@/lib/utils';
+
+// Type imports
 import type { Question } from '@/types/quiz';
 
 interface DashboardStatsProps {
@@ -120,8 +129,8 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
       value: appStats.dueToday.toString(),
       icon: Clock,
       description: 'Questions ready for review',
-      bgColor: 'bg-amber-50 dark:bg-amber-500/15',
-      textColor: 'text-amber-700 dark:text-amber-200',
+      bgColor: 'bg-amber-50/90 dark:bg-amber-500/10',
+      textColor: 'text-amber-800 dark:text-amber-300',
       iconColor: 'text-amber-600 dark:text-amber-400',
     },
     {
@@ -129,8 +138,8 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
       value: `${studyStreak.currentStreak} days`,
       icon: Flame,
       description: 'Consecutive study days',
-      bgColor: 'bg-orange-50 dark:bg-orange-500/15',
-      textColor: 'text-orange-700 dark:text-orange-200',
+      bgColor: 'bg-orange-50/90 dark:bg-orange-500/10',
+      textColor: 'text-orange-800 dark:text-orange-300',
       iconColor: 'text-orange-600 dark:text-orange-400',
     },
     {
@@ -138,26 +147,26 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
       value: `${studyStreak.bestStreak} days`,
       icon: Target,
       description: 'Your longest study streak',
-      bgColor: 'bg-emerald-50 dark:bg-emerald-500/15',
-      textColor: 'text-emerald-700 dark:text-emerald-200',
-      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      bgColor: 'bg-teal-50/90 dark:bg-teal-500/10',
+      textColor: 'text-teal-800 dark:text-teal-300',
+      iconColor: 'text-teal-600 dark:text-teal-400',
     },
     {
       title: 'Mastery Progress',
       value: `${masteryPercentage}%`,
       icon: Target,
       description: `${masteredQuestions} questions in boxes 4-5`,
-      bgColor: 'bg-violet-50 dark:bg-violet-500/15',
-      textColor: 'text-violet-700 dark:text-violet-200',
-      iconColor: 'text-violet-600 dark:text-violet-400',
+      bgColor: 'bg-emerald-50/90 dark:bg-emerald-500/10',
+      textColor: 'text-emerald-800 dark:text-emerald-300',
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
     },
     {
       title: 'Questions Started',
       value: appStats.questionsStarted.toString(),
       icon: Calendar,
       description: `Out of ${appStats.totalQuestions} total questions`,
-      bgColor: 'bg-blue-50 dark:bg-blue-500/15',
-      textColor: 'text-blue-700 dark:text-blue-200',
+      bgColor: 'bg-blue-50/90 dark:bg-blue-500/10',
+      textColor: 'text-blue-800 dark:text-blue-300',
       iconColor: 'text-blue-600 dark:text-blue-400',
     },
     {
@@ -165,9 +174,9 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
       value: `${Math.round(appStats.accuracyRate * 100)}%`,
       icon: Target,
       description: 'Overall performance',
-      bgColor: 'bg-green-50 dark:bg-green-500/15',
-      textColor: 'text-green-700 dark:text-green-200',
-      iconColor: 'text-green-600 dark:text-green-400',
+      bgColor: 'bg-violet-50/90 dark:bg-violet-500/10',
+      textColor: 'text-violet-800 dark:text-violet-300',
+      iconColor: 'text-violet-600 dark:text-violet-400',
     },
   ];
 
@@ -182,7 +191,7 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <Card className={`${stat.bgColor} border-0 shadow-sm`}>
+            <Card className={`${stat.bgColor} shadow-sm backdrop-blur-sm border-0`}>
               <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3'>
                 <CardTitle
                   className={`text-xs font-medium sm:text-sm ${stat.textColor}`}
@@ -221,101 +230,77 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
           Leitner Box Distribution
         </h2>
         <div className='flex flex-col gap-3'>
-          {/* Segmented Bar (polished) */}
-          <div className='flex w-full overflow-hidden rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm dark:bg-background/60'>
-            {Object.entries(appStats.boxDistribution).map(([box, count], idx) => {
+          {/* Segmented Bar */}
+          <div className='flex w-full overflow-hidden rounded-xl border border-border/60'>
+            {Object.entries(appStats.boxDistribution).map(
+              ([box, count], idx) => {
+                const boxNumber = parseInt(box, 10);
+                const questionCount = count as number;
+                const percentage =
+                  appStats.totalQuestions > 0
+                    ? (questionCount / appStats.totalQuestions) * 100
+                    : 0;
+                // Use actual percentage for proportional sizing, with small minimum for visibility
+                const flexGrow = questionCount > 0 ? Math.max(percentage, 3) : 0.5;
+
+                const segmentBgClass = `leitner-box-surface-${boxNumber}`;
+                const segmentTextClass = `leitner-box-text-${boxNumber}`;
+
+                // Skip rendering segments with 0 questions for cleaner look
+                if (questionCount === 0) return null;
+
+                return (
+                  <div
+                    key={box}
+                    className={`group relative flex flex-col items-center justify-center px-2 py-4 text-center outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/40 ${segmentBgClass} ${segmentTextClass} ${idx !== 0 ? 'border-l-2 border-white/20 dark:border-black/20' : ''}`}
+                    style={{
+                      flexGrow,
+                      minWidth: '40px', // Smaller minimum width for better proportions
+                      minHeight: '60px',
+                    }}
+                    tabIndex={0}
+                    aria-label={`Box ${boxNumber}: ${questionCount} questions (${percentage.toFixed(1)}%)`}
+                    title={`Box ${boxNumber} • ${questionCount} (${percentage.toFixed(1)}%)`}
+                  >
+                    <span className='absolute left-1 top-1 rounded-sm bg-black/5 px-1.5 py-0.5 text-[10px] font-medium tracking-wide dark:bg-white/10'>
+                      {boxNumber}
+                    </span>
+                    <span className='text-sm font-semibold tabular-nums sm:text-base'>
+                      {questionCount}
+                    </span>
+                    <div className='pointer-events-none absolute inset-0 rounded-md bg-black opacity-0 transition-opacity group-hover:opacity-[0.06] group-focus-visible:opacity-[0.10] dark:bg-white' />
+                  </div>
+                );
+              }
+            )}
+          </div>
+          {/* Legend */}
+          <div className='flex flex-wrap gap-x-4 gap-y-1.5 text-xs'>
+            {Object.entries(appStats.boxDistribution).map(([box, count]) => {
               const boxNumber = parseInt(box, 10);
               const questionCount = count as number;
-              const percentage = appStats.totalQuestions > 0 ? (questionCount / appStats.totalQuestions) * 100 : 0;
-              const flexGrow = questionCount > 0 ? questionCount : 0.6;
-
-              const segmentStyles = (() => {
-                switch (boxNumber) {
-                  case 1:
-                    return {
-                      fill: 'bg-slate-100 dark:bg-slate-800/70',
-                      text: 'text-slate-800 dark:text-slate-100',
-                      accent: 'before:bg-slate-400/70 dark:before:bg-slate-500/70'
-                    };
-                  case 2:
-                    return {
-                      fill: 'bg-amber-100 dark:bg-amber-700/60',
-                      text: 'text-amber-900 dark:text-amber-50',
-                      accent: 'before:bg-amber-400/80 dark:before:bg-amber-300/70'
-                    };
-                  case 3:
-                    return {
-                      fill: 'bg-sky-100 dark:bg-sky-700/60',
-                      text: 'text-sky-900 dark:text-sky-50',
-                      accent: 'before:bg-sky-400/80 dark:before:bg-sky-300/70'
-                    };
-                  case 4:
-                    return {
-                      fill: 'bg-emerald-100 dark:bg-emerald-700/60',
-                      text: 'text-emerald-900 dark:text-emerald-50',
-                      accent: 'before:bg-emerald-400/80 dark:before:bg-emerald-300/70'
-                    };
-                  case 5:
-                    return {
-                      fill: 'bg-violet-100 dark:bg-violet-700/60',
-                      text: 'text-violet-900 dark:text-violet-50',
-                      accent: 'before:bg-violet-400/80 dark:before:bg-violet-300/70'
-                    };
-                  default:
-                    return {
-                      fill: 'bg-slate-100 dark:bg-slate-800/70',
-                      text: 'text-slate-800 dark:text-slate-100',
-                      accent: 'before:bg-slate-400/70 dark:before:bg-slate-500/70'
-                    };
-                }
-              })();
-
+              const percentage =
+                appStats.totalQuestions > 0
+                  ? Math.round((questionCount / appStats.totalQuestions) * 100)
+                  : 0;
+              const dotClass = `leitner-box-dot-${boxNumber}`;
               return (
                 <div
                   key={box}
-                  className={`relative group flex min-w-[54px] flex-col items-center justify-center px-2 py-3 sm:px-3 sm:py-4 text-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${segmentStyles.fill} ${segmentStyles.text} ${segmentStyles.accent} before:absolute before:bottom-0 before:left-0 before:h-0.5 before:w-full before:content-[''] ${idx !== 0 ? 'border-l border-border/40 dark:border-border/30' : ''}`}
-                  style={{ flexGrow, flexBasis: `${percentage}%` }}
-                  tabIndex={0}
-                  aria-label={`Box ${boxNumber}: ${questionCount} questions (${percentage.toFixed(1)}%)`}
-                  title={`Box ${boxNumber} • ${questionCount} (${percentage.toFixed(1)}%)`}
+                  className='flex items-center gap-1 text-muted-foreground'
                 >
-                  <span className='absolute left-1 top-1 rounded-sm bg-black/5 px-1.5 py-0.5 text-[10px] font-medium tracking-wide dark:bg-white/10'>
+                  <span className={`h-2 w-2 rounded-full ${dotClass}`}></span>
+                  <span className='font-medium text-foreground'>
                     {boxNumber}
                   </span>
-                  <span className='text-sm font-semibold tabular-nums sm:text-base'>
+                  <span className='tabular-nums text-foreground/80'>
                     {questionCount}
                   </span>
-                  <div className='pointer-events-none absolute inset-0 rounded-md opacity-0 transition-opacity group-hover:opacity-[0.06] group-focus-visible:opacity-[0.10] bg-black dark:bg-white' />
+                  <span className='opacity-60'>({percentage}%)</span>
                 </div>
               );
             })}
           </div>
-          {/* Legend */}
-            <div className='flex flex-wrap gap-x-4 gap-y-1.5 text-xs'>
-              {Object.entries(appStats.boxDistribution).map(([box, count]) => {
-                const boxNumber = parseInt(box, 10);
-                const questionCount = count as number;
-                const percentage = appStats.totalQuestions > 0 ? Math.round((questionCount / appStats.totalQuestions) * 100) : 0;
-                const colorDot = (() => {
-                  switch (boxNumber) {
-                    case 1: return 'bg-slate-400';
-                    case 2: return 'bg-amber-400';
-                    case 3: return 'bg-sky-400';
-                    case 4: return 'bg-emerald-400';
-                    case 5: return 'bg-violet-400';
-                    default: return 'bg-slate-400';
-                  }
-                })();
-                return (
-                  <div key={box} className='flex items-center gap-1 text-muted-foreground'>
-                    <span className={`h-2 w-2 rounded-full ${colorDot}`}></span>
-                    <span className='font-medium text-foreground'>{boxNumber}</span>
-                    <span className='tabular-nums text-foreground/80'>{questionCount}</span>
-                    <span className='opacity-60'>({percentage}%)</span>
-                  </div>
-                );
-              })}
-            </div>
         </div>
       </motion.div>
     </div>

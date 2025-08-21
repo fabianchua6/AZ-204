@@ -24,7 +24,9 @@ interface UseAppStatisticsResult {
  * Single hook for accessing app-wide statistics
  * Replaces manual filtering in individual components
  */
-export function useAppStatistics(questions: Question[]): UseAppStatisticsResult {
+export function useAppStatistics(
+  questions: Question[]
+): UseAppStatisticsResult {
   const [stats, setStats] = useState<UseAppStatisticsResult>({
     totalQuestions: 0,
     questionsStarted: 0,
@@ -38,16 +40,16 @@ export function useAppStatistics(questions: Question[]): UseAppStatisticsResult 
     completionAccuracy: 0,
     filteredQuestions: [],
     loading: true,
-    error: null
+    error: null,
   });
 
   useEffect(() => {
     const loadStats = async () => {
       try {
         setStats(prev => ({ ...prev, loading: true, error: null }));
-        
+
         const appStats = await questionService.getAppStatistics(questions);
-        
+
         setStats({
           totalQuestions: appStats.totalQuestions,
           questionsStarted: appStats.questionsStarted,
@@ -61,14 +63,14 @@ export function useAppStatistics(questions: Question[]): UseAppStatisticsResult 
           completionAccuracy: appStats.completionAccuracy,
           filteredQuestions: appStats.filteredQuestions,
           loading: false,
-          error: null
+          error: null,
         });
       } catch (error) {
         console.error('Failed to load app statistics:', error);
         setStats(prev => ({
           ...prev,
           loading: false,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error',
         }));
       }
     };

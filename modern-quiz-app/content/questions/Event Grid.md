@@ -158,9 +158,9 @@ Question: Fill in "XXX" and "YYY" for this Event Grid filter:
     {
       "operatorType": "StringContains",
       "key": "Subject",
-      "YYY": ["container1", "container2"]
-    }
-  ]
+      "YYY": ["container1", "container2"],
+    },
+  ],
 }
 ```
 
@@ -172,9 +172,9 @@ Answer:
     {
       "operatorType": "StringContains",
       "key": "Subject",
-      "values": ["container1", "container2"]
-    }
-  ]
+      "values": ["container1", "container2"],
+    },
+  ],
 }
 ```
 

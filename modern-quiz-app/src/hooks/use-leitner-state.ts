@@ -25,31 +25,37 @@ export function useLeitnerState(questions: Question[]) {
   const getStats = useCallback(() => {
     if (!initialized) return null;
     return leitnerSystem.getStats(questions);
-  }, [initialized, questions, refreshTrigger]);
+  }, [initialized, questions]);
 
   // Get completion progress
   const getProgress = useCallback(() => {
     if (!initialized) return null;
     return leitnerSystem.getCompletionProgress(questions);
-  }, [initialized, questions, refreshTrigger]);
+  }, [initialized, questions]);
 
   // Process an answer and refresh state
-  const processAnswer = useCallback(async (questionId: string, isCorrect: boolean) => {
-    if (!initialized) return null;
-    
-    const result = leitnerSystem.processAnswer(questionId, isCorrect);
-    
-    // Trigger refresh for dependent components
-    setRefreshTrigger(prev => prev + 1);
-    
-    return result;
-  }, [initialized]);
+  const processAnswer = useCallback(
+    async (questionId: string, isCorrect: boolean) => {
+      if (!initialized) return null;
+
+      const result = leitnerSystem.processAnswer(questionId, isCorrect);
+
+      // Trigger refresh for dependent components
+      setRefreshTrigger(prev => prev + 1);
+
+      return result;
+    },
+    [initialized]
+  );
 
   // Get question progress
-  const getQuestionProgress = useCallback((questionId: string) => {
-    if (!initialized) return null;
-    return leitnerSystem.getQuestionProgress(questionId);
-  }, [initialized, refreshTrigger]);
+  const getQuestionProgress = useCallback(
+    (questionId: string) => {
+      if (!initialized) return null;
+      return leitnerSystem.getQuestionProgress(questionId);
+    },
+    [initialized]
+  );
 
   return {
     initialized,

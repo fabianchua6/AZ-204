@@ -1,18 +1,28 @@
 'use client';
 
+// React imports
 import { useCallback } from 'react';
+
+// Third-party imports
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Package } from 'lucide-react';
+
+// UI component imports
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+
+// Quiz component imports
 import { QuizOption } from '@/components/quiz/quiz-option';
 import { QuizAnswer } from '@/components/quiz/quiz-answer';
 import { QuizControls } from '@/components/quiz/quiz-controls';
 import { QuizBadges } from '@/components/quiz/quiz-badges';
 import { QuizQuestionContent } from '@/components/quiz/quiz-question-content';
 import { MultipleChoiceWarning } from '@/components/quiz/multiple-choice-warning';
+
+// Hook imports
 import { useQuizCardState } from '@/hooks/use-quiz-card-state';
-import { BOX_COLORS } from '@/lib/leitner';
+
+// Type imports
 import type { Question } from '@/types/quiz';
 
 interface EnhancedQuizStats {
@@ -108,56 +118,39 @@ export function LeitnerQuizCard({
     })(),
   });
 
-  // Simplified answer selection - directly use external state
+  // Handle answer selection with proper multi-select support
   const handleOptionSelect = useCallback(
     (optionIndex: number) => {
-      console.debug('[LeitnerQuizCard] optionSelect', {
-        optionIndex,
-        currentAnswers: externalSelectedAnswers,
-      });
       if (cardState.answerSubmitted) {
-        console.debug('[LeitnerQuizCard] selection ignored (answerSubmitted)');
         return;
       }
 
       let newAnswers: number[];
+      
       if (isMultipleChoice) {
+        // Multi-select: toggle the option
         if (externalSelectedAnswers.includes(optionIndex)) {
           newAnswers = externalSelectedAnswers.filter(i => i !== optionIndex);
         } else {
           newAnswers = [...externalSelectedAnswers, optionIndex];
         }
       } else {
+        // Single select: replace existing selection
         newAnswers = [optionIndex];
       }
 
       onAnswerSelect(question.id, newAnswers);
     },
-    [
-      cardState.answerSubmitted,
-      isMultipleChoice,
-      externalSelectedAnswers,
-      onAnswerSelect,
-      question.id,
-    ]
+    [cardState.answerSubmitted, onAnswerSelect, question.id, isMultipleChoice, externalSelectedAnswers]
   );
 
-  const handleSubmitAnswer = useCallback(async () => {
-    console.debug('🎯 [LeitnerQuizCard] submit clicked', {
-      questionId: question.id,
-      externalSelectedAnswers,
-      isSubmitting: cardState.isSubmitting,
-      answerSubmitted: cardState.answerSubmitted,
-      showAnswer: cardState.showAnswer,
-      lastSubmissionResult: cardState.lastSubmissionResult,
-    });
-
+  const handleSubmit = useCallback(async () => {
     if (
+      !question.id ||
+      !Array.isArray(externalSelectedAnswers) ||
       externalSelectedAnswers.length === 0 ||
-      cardState.isSubmitting ||
       cardState.answerSubmitted
     ) {
-      console.debug('🎯 [LeitnerQuizCard] submit blocked');
       return;
     }
 
@@ -165,54 +158,15 @@ export function LeitnerQuizCard({
 
     try {
       const result = await onAnswerSubmit(question.id, externalSelectedAnswers);
-
-      // Calculate if the user's answer was correct
-      const isUserAnswerCorrect =
-        externalSelectedAnswers.length === question.answerIndexes.length &&
-        externalSelectedAnswers.every(answer =>
-          question.answerIndexes.includes(answer)
-        );
-
-      console.debug('🎯 [LeitnerQuizCard] Answer processed', {
-        questionId: question.id,
-        isUserAnswerCorrect,
-        leitnerResult: result,
-        selectedAnswers: externalSelectedAnswers,
-        correctAnswers: question.answerIndexes,
-      });
-
-      cardState.markAnswerSubmitted(true, isUserAnswerCorrect); // Show answer feedback with correctness
-      cardState.finishSubmitting();
-
-      // Auto-advance on correct answers - DISABLED
-      // if (result?.correct && canGoNext) {
-      //   console.debug(
-      //     '🎯 [LeitnerQuizCard] Scheduling auto-advance (CORRECT)',
-      //     {
-      //       resultCorrect: result?.correct,
-      //       canGoNext,
-      //       autoAdvanceDelay: 0,
-      //     }
-      //   );
-      //   cardState.scheduleAutoAdvance(onNext);
-      // } else {
-      //   console.debug('🎯 [LeitnerQuizCard] NOT auto-advancing', {
-      //     resultCorrect: result?.correct,
-      //     canGoNext,
-      //     reason: !result?.correct ? 'incorrect answer' : 'cannot go next',
-      //   });
-      // }
+      if (result) {
+        // Update stats from result
+      }
     } catch (error) {
       console.error('Failed to submit answer:', error);
+    } finally {
       cardState.finishSubmitting();
     }
-  }, [
-    externalSelectedAnswers,
-    cardState,
-    onAnswerSubmit,
-    question.id,
-    question.answerIndexes,
-  ]);
+  }, [question.id, externalSelectedAnswers, cardState, onAnswerSubmit]);
 
   // Simplified navigation handlers - direct calls
   const handleNext = useCallback(() => {
@@ -242,9 +196,10 @@ export function LeitnerQuizCard({
       !cardState.answerSubmitted && externalSelectedAnswers.length > 0,
   };
 
-  // Get box styling
+  // Get box styling using CSS classes
   const currentBox = questionProgress?.currentBox || 1;
-  const boxColor = BOX_COLORS[currentBox as keyof typeof BOX_COLORS];
+  const boxBgClass = `leitner-box-bg-${currentBox}`;
+  const boxTextClass = `leitner-box-text-${currentBox}`;
 
   return (
     <div className='space-y-4'>
@@ -269,14 +224,12 @@ export function LeitnerQuizCard({
         <CardHeader className='sticky top-0 z-10 rounded-t-lg bg-card/95 px-4 pb-3 pt-4 backdrop-blur-sm sm:pt-6'>
           <div className='flex flex-row items-center justify-between gap-3'>
             <div className='flex flex-wrap items-center gap-3'>
-              {/* Minimalistic Box Number - First */}
+              {/* Box Indicator with Icon - First */}
               <div
-                className={`flex h-8 w-10 items-center justify-center gap-1 rounded-lg border text-xs font-bold ${boxColor.bg} ${boxColor.text} ${boxColor.border}`}
+                className={`flex h-8 items-center justify-center gap-1 rounded-md border-2 border-border px-2 text-[11px] font-bold shadow-sm ${boxBgClass} ${boxTextClass}`}
               >
-                <Package
-                  className={`h-3 w-3 flex-shrink-0 ${boxColor.accent.replace('bg-', 'text-')}`}
-                />
-                <span>{currentBox}</span>
+                <Package className='h-3 w-3' />
+                <span className='leading-none'>{currentBox}</span>
               </div>
 
               {/* Topic and Code Badges */}
@@ -359,7 +312,7 @@ export function LeitnerQuizCard({
                   className='pt-2'
                 >
                   <Button
-                    onClick={handleSubmitAnswer}
+                    onClick={handleSubmit}
                     disabled={buttonStates.submitDisabled}
                     className='w-full sm:w-auto'
                     size='lg'

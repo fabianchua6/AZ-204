@@ -33,13 +33,13 @@ export function QuizOption({
         if (isCorrect) {
           return cn(
             'p-3 sm:p-4 rounded-lg border cursor-default',
-            'bg-green-100 border-green-500 dark:bg-green-900/20 dark:border-green-500/50 shadow-sm'
+            'bg-success-light border-success text-success-light-foreground shadow-sm'
           );
         }
         if (isSelected && !isCorrect) {
           return cn(
             'p-3 sm:p-4 rounded-lg border cursor-default',
-            'bg-red-100 border-red-500 dark:bg-red-900/20 dark:border-red-500/50 shadow-sm'
+            'bg-destructive-light border-destructive text-destructive-light-foreground shadow-sm'
           );
         }
         return 'p-3 sm:p-4 rounded-lg border bg-muted/40 border-muted-foreground/20 cursor-default opacity-60';

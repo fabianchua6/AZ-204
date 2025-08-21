@@ -2,10 +2,14 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import type { Question, QuizStats } from '@/types/quiz';
-import { saveToLocalStorage, loadFromLocalStorage, calculateAccuracy } from '@/lib/utils';
+import {
+  saveToLocalStorage,
+  loadFromLocalStorage,
+  calculateAccuracy,
+} from '@/lib/utils';
 
 export function useQuizState(
-  questions: Question[], 
+  questions: Question[],
   selectedTopic: string | null,
   setSelectedTopic: (topic: string | null) => void
 ) {
@@ -18,7 +22,7 @@ export function useQuizState(
   useEffect(() => {
     const savedAnswers = loadFromLocalStorage('practice-quiz-answers', {});
     const savedIndex = loadFromLocalStorage('practice-quiz-index', 0);
-    
+
     setAnswers(savedAnswers);
     setCurrentQuestionIndex(savedIndex);
   }, []);
@@ -36,7 +40,7 @@ export function useQuizState(
   // Filter questions by topic and exclude code examples and questions with no options
   const filteredQuestions = useMemo(() => {
     let baseQuestions = questions;
-    
+
     // Filter out code questions and questions with no select options
     baseQuestions = baseQuestions.filter(question => {
       // Exclude questions with code examples
@@ -49,7 +53,7 @@ export function useQuizState(
       }
       return true;
     });
-    
+
     if (!selectedTopic) return baseQuestions;
     return baseQuestions.filter(q => q.topic === selectedTopic);
   }, [questions, selectedTopic]);
@@ -65,7 +69,8 @@ export function useQuizState(
     filteredQuestions.forEach(question => {
       const userAnswers = answers[question.id];
       if (userAnswers && userAnswers.length > 0) {
-        const isCorrect = userAnswers.length === question.answerIndexes.length &&
+        const isCorrect =
+          userAnswers.length === question.answerIndexes.length &&
           userAnswers.every(answer => question.answerIndexes.includes(answer));
         if (isCorrect) correctAnswers++;
       }
@@ -79,7 +84,7 @@ export function useQuizState(
       answeredQuestions,
       correctAnswers,
       incorrectAnswers,
-      accuracy
+      accuracy,
     };
   }, [filteredQuestions, answers]);
 
@@ -90,47 +95,46 @@ export function useQuizState(
   }, [selectedTopic]);
 
   // Actions - Memoized to prevent unnecessary re-renders
-  const actions = useMemo(() => ({
-    setSelectedTopic: (topic: string | null) => {
-      setSelectedTopic(topic);
-    },
-    
-    setAnswer: (questionId: string, answerIndexes: number[]) => {
-      setAnswers(prev => ({
-        ...prev,
-        [questionId]: answerIndexes
-      }));
-    },
-    
-    toggleShowAnswer: () => {
-      setShowAnswer(prev => !prev);
-    },
-    
-    nextQuestion: () => {
-      if (currentQuestionIndex < filteredQuestions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-        setShowAnswer(false);
-      }
-    },
-    
-    previousQuestion: () => {
-      if (currentQuestionIndex > 0) {
-        setCurrentQuestionIndex(prev => prev - 1);
-        setShowAnswer(false);
-      }
-    },
-    
-    goToQuestion: (index: number) => {
-      if (index >= 0 && index < filteredQuestions.length) {
-        setCurrentQuestionIndex(index);
-        setShowAnswer(false);
-      }
-    }
-  }), [
-    setSelectedTopic,
-    currentQuestionIndex,
-    filteredQuestions.length
-  ]);
+  const actions = useMemo(
+    () => ({
+      setSelectedTopic: (topic: string | null) => {
+        setSelectedTopic(topic);
+      },
+
+      setAnswer: (questionId: string, answerIndexes: number[]) => {
+        setAnswers(prev => ({
+          ...prev,
+          [questionId]: answerIndexes,
+        }));
+      },
+
+      toggleShowAnswer: () => {
+        setShowAnswer(prev => !prev);
+      },
+
+      nextQuestion: () => {
+        if (currentQuestionIndex < filteredQuestions.length - 1) {
+          setCurrentQuestionIndex(prev => prev + 1);
+          setShowAnswer(false);
+        }
+      },
+
+      previousQuestion: () => {
+        if (currentQuestionIndex > 0) {
+          setCurrentQuestionIndex(prev => prev - 1);
+          setShowAnswer(false);
+        }
+      },
+
+      goToQuestion: (index: number) => {
+        if (index >= 0 && index < filteredQuestions.length) {
+          setCurrentQuestionIndex(index);
+          setShowAnswer(false);
+        }
+      },
+    }),
+    [setSelectedTopic, currentQuestionIndex, filteredQuestions.length]
+  );
 
   return {
     currentQuestionIndex,
@@ -139,6 +143,6 @@ export function useQuizState(
     answers,
     showAnswer,
     stats,
-    actions
+    actions,
   };
 }

@@ -9,113 +9,177 @@
     --background-secondary: 220 13% 97%;
     --background-tertiary: 220 13% 95%;
     --foreground: 222.2 84% 4.9%;
-    
+
     /* Enhanced card system with elevation */
     --card: 0 0% 100%;
     --card-secondary: 220 13% 98%;
     --card-foreground: 222.2 84% 4.9%;
     --card-border: 220 13% 91%;
-    
+
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    
+
     /* Richer primary with better contrast */
     --primary: 217 89% 61%;
     --primary-light: 217 89% 75%;
     --primary-dark: 217 89% 45%;
     --primary-foreground: 210 40% 98%;
-    
+
     /* Enhanced secondary palette */
     --secondary: 217 16% 94%;
     --secondary-light: 217 16% 97%;
     --secondary-foreground: 222.2 84% 4.9%;
-    
+
     /* Improved muted colors */
     --muted: 217 16% 94%;
     --muted-light: 217 16% 97%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    
+
     /* Better accent system */
     --accent: 217 16% 94%;
     --accent-light: 217 16% 97%;
     --accent-foreground: 222.2 84% 4.9%;
-    
+
     /* Enhanced status colors */
     --success: 142 71% 45%;
     --success-light: 142 71% 94%;
     --success-foreground: 210 40% 98%;
-    
+    --success-light-foreground: 142 71% 25%; /* Dark green for light backgrounds */
+
     --warning: 38 92% 50%;
     --warning-light: 38 92% 95%;
     --warning-foreground: 222.2 84% 4.9%;
-    
+    --warning-light-foreground: 38 92% 30%; /* Dark orange for light backgrounds */
+
     --destructive: 0 84.2% 60.2%;
     --destructive-light: 0 84.2% 97%;
     --destructive-foreground: 210 40% 98%;
-    
+    --destructive-light-foreground: 0 84.2% 35%; /* Dark red for light backgrounds */
+
     /* Refined borders */
     --border: 220 13% 91%;
     --border-light: 220 13% 95%;
     --input: 220 13% 91%;
     --ring: 217 89% 61%;
     --radius: 0.75rem;
+
+    /* Leitner box semantic tokens (light) */
+    --box1-bg: 210 40% 96%;
+    --box1-fg: 215 25% 27%;
+    --box1-bg-transparent: 215 25% 50% / 0.08; /* Subtle transparency */
+    --box2-bg: 45 100% 94%;
+    --box2-fg: 32 84% 30%;
+    --box2-bg-transparent: 32 84% 45% / 0.1;
+    --box3-bg: 200 100% 94%;
+    --box3-fg: 205 65% 30%;
+    --box3-bg-transparent: 205 65% 45% / 0.1;
+    --box4-bg: 145 60% 93%;
+    --box4-fg: 143 55% 25%;
+    --box4-bg-transparent: 143 55% 40% / 0.1;
+    --box5-bg: 260 80% 95%;
+    --box5-fg: 258 60% 32%;
+    --box5-bg-transparent: 258 60% 45% / 0.1;
+
+    /* Dashboard metric semantic tokens (light) */
+    --metric-due-bg: 48 100% 94%; /* Soft amber background */
+    --metric-due-fg: 34 85% 32%; /* Amber/ochre text */
+    --metric-streak-bg: 20 95% 95%; /* Soft orange background */
+    --metric-streak-fg: 18 78% 34%; /* Orange text */
+    --metric-best-bg: 160 55% 94%; /* Teal background */
+    --metric-best-fg: 160 55% 28%; /* Teal text */
+    --metric-started-bg: 217 90% 95%; /* Blue background */
+    --metric-started-fg: 217 82% 42%; /* Blue text */
+    --metric-accuracy-bg: 142 55% 94%; /* Green background */
+    --metric-accuracy-fg: 142 55% 30%; /* Green text */
   }
 
   .dark {
     /* Sophisticated layered dark theme - inspired by GitHub, Discord, Linear */
-    --background: 220 6% 4%;          /* #0a0a0b - Deepest background */
+    --background: 220 6% 4%; /* #0a0a0b - Deepest background */
     --background-secondary: 220 7% 7%; /* #111113 - Secondary areas */
     --background-tertiary: 220 8% 10%; /* #191a1c - Tertiary surfaces */
-    --foreground: 220 9% 96%;          /* #f4f4f5 - Primary text */
-    
+    --foreground: 220 9% 96%; /* #f4f4f5 - Primary text */
+
     /* Enhanced card system with proper elevation */
-    --card: 220 8% 10%;                /* #1a1a1d - Main cards */
-    --card-secondary: 220 7% 7%;       /* #111113 - Recessed elements */
-    --card-foreground: 220 9% 96%;     /* #f4f4f5 - Card text */
-    --card-border: 220 13% 18%;        /* #2a2a2e - Subtle borders */
-    
+    --card: 220 8% 10%; /* #1a1a1d - Main cards */
+    --card-secondary: 220 7% 7%; /* #111113 - Recessed elements */
+    --card-foreground: 220 9% 96%; /* #f4f4f5 - Card text */
+    --card-border: 220 13% 18%; /* #2a2a2e - Subtle borders */
+
     --popover: 220 8% 10%;
     --popover-foreground: 220 9% 96%;
-    
+
     /* Vibrant primary that pops in dark mode */
-    --primary: 217 91% 60%;            /* #3b82f6 - Primary blue */
-    --primary-light: 217 91% 70%;      /* Lighter variant */
-    --primary-dark: 217 91% 50%;       /* Darker variant */
-    --primary-foreground: 220 9% 96%;  /* White text on primary */
-    
+    --primary: 217 91% 60%; /* #3b82f6 - Primary blue */
+    --primary-light: 217 91% 70%; /* Lighter variant */
+    --primary-dark: 217 91% 50%; /* Darker variant */
+    --primary-foreground: 220 9% 96%; /* White text on primary */
+
     /* Better contrast secondary */
-    --secondary: 220 13% 18%;          /* #2a2a2e - Muted backgrounds */
-    --secondary-light: 220 13% 23%;    /* #3a3a3e - Hover states */
+    --secondary: 220 13% 18%; /* #2a2a2e - Muted backgrounds */
+    --secondary-light: 220 13% 23%; /* #3a3a3e - Hover states */
     --secondary-foreground: 220 9% 96%;
-    
+
     /* Improved muted with better hierarchy */
-    --muted: 220 13% 18%;              /* #2a2a2e - Subtle elements */
-    --muted-light: 220 13% 23%;        /* #3a3a3e - Hover states */
-    --muted-foreground: 220 9% 66%;    /* #a1a1aa - Secondary text */
-    
+    --muted: 220 13% 18%; /* #2a2a2e - Subtle elements */
+    --muted-light: 220 13% 23%; /* #3a3a3e - Hover states */
+    --muted-foreground: 220 9% 66%; /* #a1a1aa - Secondary text */
+
     /* Accent for interactive elements */
-    --accent: 220 30% 14%;             /* #1e293b - Accent background */
-    --accent-light: 220 30% 20%;       /* Lighter accent */
-    --accent-foreground: 220 84% 88%;  /* #e2e8f0 - Accent text */
-    
+    --accent: 220 30% 14%; /* #1e293b - Accent background */
+    --accent-light: 220 30% 20%; /* Lighter accent */
+    --accent-foreground: 220 84% 88%; /* #e2e8f0 - Accent text */
+
     /* Enhanced status colors for dark mode */
-    --success: 142 76% 36%;            /* #059669 - Green that works on dark */
-    --success-light: 142 69% 12%;      /* #064e3b - Dark green background */
+    --success: 142 76% 36%; /* #059669 - Green that works on dark */
+    --success-light: 142 69% 12%; /* #064e3b - Dark green background */
     --success-foreground: 142 76% 86%; /* Light green text */
-    
-    --warning: 38 92% 50%;             /* #f59e0b - Warm yellow */
-    --warning-light: 45 93% 12%;       /* #451a03 - Dark amber background */
-    --warning-foreground: 45 96% 89%;  /* Light amber text */
-    
-    --destructive: 0 72% 51%;          /* #dc2626 - Red that pops */
-    --destructive-light: 0 63% 15%;    /* #450a0a - Dark red background */
+    --success-light-foreground: 142 76% 80%; /* Lighter green for dark backgrounds */
+
+    --warning: 38 92% 50%; /* #f59e0b - Warm yellow */
+    --warning-light: 45 93% 12%; /* #451a03 - Dark amber background */
+    --warning-foreground: 45 96% 89%; /* Light amber text */
+    --warning-light-foreground: 45 96% 85%; /* Lighter amber for dark backgrounds */
+
+    --destructive: 0 72% 51%; /* #dc2626 - Red that pops */
+    --destructive-light: 0 63% 15%; /* #450a0a - Dark red background */
     --destructive-foreground: 0 86% 97%; /* Light red text */
-    
+    --destructive-light-foreground: 0 86% 90%; /* Lighter red for dark backgrounds */
+
     /* Refined border system */
-    --border: 220 13% 18%;             /* #2a2a2e - Default borders */
-    --border-light: 220 13% 23%;       /* #3a3a3e - Stronger borders */
-    --input: 220 13% 18%;              /* Input borders */
-    --ring: 217 91% 60%;               /* Focus rings */
+    --border: 220 13% 18%; /* #2a2a2e - Default borders */
+    --border-light: 220 13% 23%; /* #3a3a3e - Stronger borders */
+    --input: 220 13% 18%; /* Input borders */
+    --ring: 217 91% 60%; /* Focus rings */
+
+    /* Leitner box semantic tokens (dark) */
+    --box1-bg: 220 7% 14%;
+    --box1-fg: 220 9% 92%;
+    --box1-bg-transparent: 220 9% 80% / 0.15; /* More transparency for softer feel */
+    --box2-bg: 38 72% 18%;
+    --box2-fg: 38 92% 70%;
+    --box2-bg-transparent: 38 85% 65% / 0.18;
+    --box3-bg: 204 80% 20%;
+    --box3-fg: 204 90% 80%;
+    --box3-bg-transparent: 204 85% 75% / 0.18;
+    --box4-bg: 142 70% 18%;
+    --box4-fg: 142 76% 75%;
+    --box4-bg-transparent: 142 70% 70% / 0.18;
+    --box5-bg: 262 70% 22%;
+    --box5-fg: 262 85% 85%;
+    --box5-bg-transparent: 262 80% 80% / 0.18;
+
+    /* Dashboard metric semantic tokens (dark) */
+    --metric-due-bg: 38 72% 18%;
+    --metric-due-fg: 38 92% 70%;
+    --metric-streak-bg: 20 65% 20%;
+    --metric-streak-fg: 20 85% 72%;
+    --metric-best-bg: 160 45% 20%;
+    --metric-best-fg: 160 55% 72%;
+    --metric-started-bg: 217 65% 22%;
+    --metric-started-fg: 217 85% 75%;
+    --metric-accuracy-bg: 142 60% 20%;
+    --metric-accuracy-fg: 142 70% 72%;
   }
 }
 
@@ -125,7 +189,9 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
   }
 }
 
@@ -135,7 +201,7 @@
   }
 
   .step:before {
-    @apply absolute w-9 h-9 bg-muted rounded-full font-mono font-medium text-center text-base inline-flex items-center justify-center -indent-px border-4 border-background;
+    @apply absolute inline-flex h-9 w-9 items-center justify-center rounded-full border-4 border-background bg-muted text-center -indent-px font-mono text-base font-medium;
     @apply ml-[-50px] mt-[-4px];
     content: counter(step);
   }
@@ -144,12 +210,12 @@
 /* Mobile-first responsive design */
 @layer components {
   .container {
-    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full px-4 sm:px-6 lg:px-8;
   }
 
   /* Quiz-specific styles */
   .quiz-option {
-    @apply transition-all duration-200 cursor-pointer border-2 border-border rounded-lg p-3 sm:p-4 hover:border-primary/50 hover:bg-accent/50 active:scale-[0.98];
+    @apply cursor-pointer rounded-lg border-2 border-border p-3 transition-all duration-200 hover:border-primary/50 hover:bg-accent/50 active:scale-[0.98] sm:p-4;
   }
 
   .quiz-option.selected {
@@ -174,11 +240,11 @@
   }
 
   .prose code {
-    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+    @apply rounded bg-muted px-1.5 py-0.5 font-mono text-sm;
   }
 
   .prose pre {
-    @apply bg-muted p-3 sm:p-4 rounded-lg overflow-x-auto text-sm;
+    @apply overflow-x-auto rounded-lg bg-muted p-3 text-sm sm:p-4;
   }
 
   .prose pre code {
@@ -208,31 +274,31 @@
   }
 
   .loading-dots > div {
-    @apply w-2 h-2 bg-primary rounded-full animate-pulse;
+    @apply h-2 w-2 animate-pulse rounded-full bg-primary;
     animation-delay: calc(var(--i) * 0.1s);
   }
 
   /* Mobile navigation improvements */
   .mobile-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-50;
+    @apply fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card p-4;
   }
 
   .mobile-nav-button {
-    @apply flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors;
+    @apply flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-colors;
   }
 
   /* Topic grid responsive layout */
   .topic-grid {
-    @apply grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
   }
 
   /* Question card responsive layout */
   .question-card {
-    @apply bg-card border rounded-lg shadow-sm overflow-hidden;
+    @apply overflow-hidden rounded-lg border bg-card shadow-sm;
   }
 
   .question-header {
-    @apply border-b p-3 sm:p-4 bg-muted/50;
+    @apply border-b bg-muted/50 p-3 sm:p-4;
   }
 
   .question-content {
@@ -240,16 +306,136 @@
   }
 
   .question-actions {
-    @apply border-t p-3 sm:p-4 bg-muted/30;
+    @apply border-t bg-muted/30 p-3 sm:p-4;
   }
 
   /* Stats card responsive layout */
   .stats-grid {
-    @apply grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4;
+    @apply grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4;
   }
 
   .stat-card {
-    @apply bg-card border rounded-lg p-3 sm:p-4 text-center;
+    @apply rounded-lg border bg-card p-3 text-center sm:p-4;
+  }
+
+  /* Leitner box utility classes (single source of truth) */
+  .leitner-box-bg-1 {
+    background-color: hsl(var(--box1-bg));
+  }
+  .leitner-box-bg-2 {
+    background-color: hsl(var(--box2-bg));
+  }
+  .leitner-box-bg-3 {
+    background-color: hsl(var(--box3-bg));
+  }
+  .leitner-box-bg-4 {
+    background-color: hsl(var(--box4-bg));
+  }
+  .leitner-box-bg-5 {
+    background-color: hsl(var(--box5-bg));
+  }
+
+  /* Transparent background variants for a softer feel */
+  .leitner-box-bg-transparent-1 {
+    background-color: hsl(var(--box1-bg-transparent));
+  }
+  .leitner-box-bg-transparent-2 {
+    background-color: hsl(var(--box2-bg-transparent));
+  }
+  .leitner-box-bg-transparent-3 {
+    background-color: hsl(var(--box3-bg-transparent));
+  }
+  .leitner-box-bg-transparent-4 {
+    background-color: hsl(var(--box4-bg-transparent));
+  }
+  .leitner-box-bg-transparent-5 {
+    background-color: hsl(var(--box5-bg-transparent));
+  }
+
+  .leitner-box-text-1 {
+    color: hsl(var(--box1-fg));
+  }
+  .leitner-box-text-2 {
+    color: hsl(var(--box2-fg));
+  }
+  .leitner-box-text-3 {
+    color: hsl(var(--box3-fg));
+  }
+  .leitner-box-text-4 {
+    color: hsl(var(--box4-fg));
+  }
+  .leitner-box-text-5 {
+    color: hsl(var(--box5-fg));
+  }
+
+  .leitner-box-surface-1 {
+    @apply leitner-box-bg-1 leitner-box-text-1;
+  }
+  .leitner-box-surface-2 {
+    @apply leitner-box-bg-2 leitner-box-text-2;
+  }
+  .leitner-box-surface-3 {
+    @apply leitner-box-bg-3 leitner-box-text-3;
+  }
+  .leitner-box-surface-4 {
+    @apply leitner-box-bg-4 leitner-box-text-4;
+  }
+  .leitner-box-surface-5 {
+    @apply leitner-box-bg-5 leitner-box-text-5;
+  }
+
+  /* Transparent surface variants for a softer, more elegant feel */
+  .leitner-box-surface-transparent-1 {
+    background-color: hsl(var(--box1-bg-transparent));
+    color: hsl(var(--box1-fg));
+  }
+  .leitner-box-surface-transparent-2 {
+    background-color: hsl(var(--box2-bg-transparent));
+    color: hsl(var(--box2-fg));
+  }
+  .leitner-box-surface-transparent-3 {
+    background-color: hsl(var(--box3-bg-transparent));
+    color: hsl(var(--box3-fg));
+  }
+  .leitner-box-surface-transparent-4 {
+    background-color: hsl(var(--box4-bg-transparent));
+    color: hsl(var(--box4-fg));
+  }
+  .leitner-box-surface-transparent-5 {
+    background-color: hsl(var(--box5-bg-transparent));
+    color: hsl(var(--box5-fg));
+  }
+
+  .leitner-box-dot-1 {
+    background-color: hsl(var(--box1-fg));
+  }
+  .leitner-box-dot-2 {
+    background-color: hsl(var(--box2-fg));
+  }
+  .leitner-box-dot-3 {
+    background-color: hsl(var(--box3-fg));
+  }
+  .leitner-box-dot-4 {
+    background-color: hsl(var(--box4-fg));
+  }
+  .leitner-box-dot-5 {
+    background-color: hsl(var(--box5-fg));
+  }
+
+  .leitner-accent-1 {
+    background-color: hsl(var(--box1-fg) / 0.15);
+  }
+  .leitner-accent-2 {
+    background-color: hsl(var(--box2-fg) / 0.15);
+  }
+  .leitner-accent-3 {
+    background-color: hsl(var(--box3-fg) / 0.15);
+  }
+  .leitner-accent-4 {
+    background-color: hsl(var(--box4-fg) / 0.15);
+  }
+  .leitner-accent-5 {
+    background-color: hsl(var(--box5-fg) / 0.15);
   }
 }
 
@@ -258,15 +444,15 @@
   .prose {
     @apply text-sm;
   }
-  
+
   .prose h1 {
     @apply text-xl;
   }
-  
+
   .prose h2 {
     @apply text-lg;
   }
-  
+
   .prose h3 {
     @apply text-base;
   }
@@ -277,7 +463,7 @@
   .button-group {
     @apply flex flex-col gap-2;
   }
-  
+
   .button-group-horizontal {
     @apply flex flex-row gap-2;
   }
@@ -286,10 +472,10 @@
 /* Hide scrollbars (user request). Note: may impact discoverability; adjust if needed */
 body {
   -ms-overflow-style: none; /* IE/Edge */
-  scrollbar-width: none;    /* Firefox */
+  scrollbar-width: none; /* Firefox */
 }
 body::-webkit-scrollbar {
-  display: none;            /* Chrome/Safari */
+  display: none; /* Chrome/Safari */
 }
 
 /* Optional: still allow scroll on elements with explicit class if needed */

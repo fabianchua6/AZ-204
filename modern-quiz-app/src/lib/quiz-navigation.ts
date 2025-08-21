@@ -36,7 +36,12 @@ export function createNavigationHandler(
   };
 
   const handleSubmitAnswer = () => {
-    if (actions.onSubmitAnswer && state.hasAnswers && !state.isSubmitting && !state.answerSubmitted) {
+    if (
+      actions.onSubmitAnswer &&
+      state.hasAnswers &&
+      !state.isSubmitting &&
+      !state.answerSubmitted
+    ) {
       actions.onSubmitAnswer();
     }
   };
@@ -54,7 +59,8 @@ export function getNavigationButtonStates(state: QuizNavigationState) {
     showAnswerDisabled: false,
     nextDisabled: !state.canGoNext || state.isSubmitting,
     previousDisabled: !state.canGoPrevious || state.isSubmitting,
-    submitDisabled: !state.hasAnswers || state.isSubmitting || state.answerSubmitted,
+    submitDisabled:
+      !state.hasAnswers || state.isSubmitting || state.answerSubmitted,
     showSubmitButton: !state.answerSubmitted && state.hasAnswers,
   };
 }

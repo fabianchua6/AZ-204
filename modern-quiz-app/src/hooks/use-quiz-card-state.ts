@@ -18,12 +18,16 @@ export function useQuizCardState({
   autoAdvanceDelay = 0,
   initialSubmissionState,
 }: UseQuizCardStateProps) {
-  const [showAnswer, setShowAnswer] = useState(initialSubmissionState?.showAnswer ?? false);
-  const [answerSubmitted, setAnswerSubmitted] = useState(initialSubmissionState?.isSubmitted ?? false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [lastSubmissionResult, setLastSubmissionResult] = useState<boolean | null>(
-    initialSubmissionState?.isCorrect ?? null
+  const [showAnswer, setShowAnswer] = useState(
+    initialSubmissionState?.showAnswer ?? false
   );
+  const [answerSubmitted, setAnswerSubmitted] = useState(
+    initialSubmissionState?.isSubmitted ?? false
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastSubmissionResult, setLastSubmissionResult] = useState<
+    boolean | null
+  >(initialSubmissionState?.isCorrect ?? null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Reset state when question changes - but preserve initial state if provided
@@ -61,13 +65,16 @@ export function useQuizCardState({
     setShowAnswer(prev => !prev);
   }, []);
 
-  const markAnswerSubmitted = useCallback((shouldShowAnswer: boolean = true, isCorrect?: boolean) => {
-    setAnswerSubmitted(true);
-    setShowAnswer(shouldShowAnswer);
-    if (isCorrect !== undefined) {
-      setLastSubmissionResult(isCorrect);
-    }
-  }, []);
+  const markAnswerSubmitted = useCallback(
+    (shouldShowAnswer: boolean = true, isCorrect?: boolean) => {
+      setAnswerSubmitted(true);
+      setShowAnswer(shouldShowAnswer);
+      if (isCorrect !== undefined) {
+        setLastSubmissionResult(isCorrect);
+      }
+    },
+    []
+  );
 
   const startSubmitting = useCallback(() => {
     setIsSubmitting(true);

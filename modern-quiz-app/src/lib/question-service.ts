@@ -26,7 +26,10 @@ export interface AppStatistics {
 }
 
 // Simple cache keyed by the array reference
-const statsCache = new WeakMap<Question[], { stats: AppStatistics; ts: number }>();
+const statsCache = new WeakMap<
+  Question[],
+  { stats: AppStatistics; ts: number }
+>();
 const CACHE_TTL_MS = 15_000; // 15s is enough for rapid navigation
 
 /**
@@ -35,7 +38,8 @@ const CACHE_TTL_MS = 15_000; // 15s is enough for rapid navigation
 export class QuestionService {
   private static instance: QuestionService;
   static getInstance(): QuestionService {
-    if (!QuestionService.instance) QuestionService.instance = new QuestionService();
+    if (!QuestionService.instance)
+      QuestionService.instance = new QuestionService();
     return QuestionService.instance;
   }
 
@@ -46,12 +50,23 @@ export class QuestionService {
   getFilteringStats(questions: Question[]) {
     const total = questions.length;
     const codeQuestions = questions.filter(q => q.hasCode).length;
-    const noOptionsQuestions = questions.filter(q => q.options.length === 0).length;
+    const noOptionsQuestions = questions.filter(
+      q => q.options.length === 0
+    ).length;
     const filtered = this.filterQuestions(questions).length;
-    return { total, codeQuestions, noOptionsQuestions, filtered, excluded: total - filtered };
+    return {
+      total,
+      codeQuestions,
+      noOptionsQuestions,
+      filtered,
+      excluded: total - filtered,
+    };
   }
 
-  async getAppStatistics(questions: Question[], { force = false }: { force?: boolean } = {}): Promise<AppStatistics> {
+  async getAppStatistics(
+    questions: Question[],
+    { force = false }: { force?: boolean } = {}
+  ): Promise<AppStatistics> {
     if (!force) {
       const cached = statsCache.get(questions);
       if (cached && Date.now() - cached.ts < CACHE_TTL_MS) return cached.stats;
@@ -61,7 +76,8 @@ export class QuestionService {
 
     const filteredQuestions = this.filterQuestions(questions);
     const leitnerStats = leitnerSystem.getStats(filteredQuestions);
-    const completionStats = leitnerSystem.getCompletionProgress(filteredQuestions);
+    const completionStats =
+      leitnerSystem.getCompletionProgress(filteredQuestions);
     const filteringStats = this.getFilteringStats(questions);
 
     const stats: AppStatistics = {
@@ -76,7 +92,7 @@ export class QuestionService {
       incorrectAnswers: completionStats.incorrectAnswers,
       completionAccuracy: completionStats.accuracy,
       filtering: filteringStats,
-      filteredQuestions
+      filteredQuestions,
     };
 
     statsCache.set(questions, { stats, ts: Date.now() });

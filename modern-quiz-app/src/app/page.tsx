@@ -1,15 +1,24 @@
 'use client';
 
+// React imports
 import { useState, useEffect, useCallback } from 'react';
+
+// Third-party imports
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Component imports
 import { Header } from '@/components/header';
 import { LeitnerQuizCard } from '@/components/leitner-quiz-card';
 import { QuizCard } from '@/components/quiz-card';
 import { TopicSelector } from '@/components/topic-selector';
 import { LoadingSpinner } from '@/components/loading-spinner';
+
+// Hook imports
 import { useQuizData } from '@/hooks/use-quiz-data';
 import { useQuizStateWithLeitner } from '@/hooks/use-quiz-state-leitner';
 import { useQuizState } from '@/hooks/use-quiz-state';
+
+// Utility imports
 import { saveToLocalStorage, loadFromLocalStorage } from '@/lib/utils';
 import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/lib/constants';
 
@@ -65,7 +74,6 @@ export default function Home() {
   const currentQuestionIndex = currentState.currentQuestionIndex;
   const filteredQuestions = currentState.filteredQuestions;
   const answers = currentState.answers;
-  const stats = currentState.stats;
 
   if (loading) {
     return (
@@ -142,11 +150,9 @@ export default function Home() {
                     onAnswerSelect={practiceState.actions.setAnswer}
                     onShowAnswer={practiceState.actions.toggleShowAnswer}
                     onNext={() => {
-                      console.debug('[Page] onNext clicked (Practice)');
                       practiceState.actions.nextQuestion();
                     }}
                     onPrevious={() => {
-                      console.debug('[Page] onPrevious clicked (Practice)');
                       practiceState.actions.previousQuestion();
                     }}
                     canGoNext={

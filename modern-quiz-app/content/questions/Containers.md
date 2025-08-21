@@ -302,10 +302,10 @@ properties:
     - name: mycontainer
       properties:
         environmentVariables:
-          - name: "EXPOSED"
-            value: "my-exposed-value"
-          - name: "SECRET"
-            secureValue: "my-secret-value"
+          - name: 'EXPOSED'
+            value: 'my-exposed-value'
+          - name: 'SECRET'
+            secureValue: 'my-secret-value'
   osType: Linux
   restartPolicy: Always
 tags: null

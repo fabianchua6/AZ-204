@@ -13,17 +13,17 @@ export function useQuizData() {
     const loadData = async () => {
       try {
         setLoading(true);
-        
+
         // Load topics
         const topicsResponse = await fetch('/data/topics.json');
         if (!topicsResponse.ok) throw new Error('Failed to load topics');
         const topicsData = await topicsResponse.json();
-        
+
         // Load questions
         const questionsResponse = await fetch('/data/questions.json');
         if (!questionsResponse.ok) throw new Error('Failed to load questions');
         const questionsData = await questionsResponse.json();
-        
+
         setTopics(topicsData);
         setQuestions(questionsData);
       } catch (err) {

@@ -13,25 +13,30 @@ interface EnhancedQuizStats {
   correctAnswers: number;
   incorrectAnswers: number;
   accuracy: number;
-  
+
   // Leitner-specific stats
   leitner: LeitnerStats;
 }
 
 export function useQuizStateWithLeitner(
-  questions: Question[], 
+  questions: Question[],
   selectedTopic: string | null,
   setSelectedTopic: (topic: string | null) => void
 ) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number[]>>({});
-  const [submissionStates, setSubmissionStates] = useState<Record<string, {
-    isSubmitted: boolean;
-    isCorrect: boolean;
-    showAnswer: boolean;
-    submittedAt: number;
-    submittedAnswers: number[]; // Add submitted answers to the type
-  }>>({});
+  const [submissionStates, setSubmissionStates] = useState<
+    Record<
+      string,
+      {
+        isSubmitted: boolean;
+        isCorrect: boolean;
+        showAnswer: boolean;
+        submittedAt: number;
+        submittedAnswers: number[]; // Add submitted answers to the type
+      }
+    >
+  >({});
   const [__forceTick, setForceTick] = useState(0); // diagnostics only
 
   // Simple in-place shuffle helper
@@ -65,7 +70,7 @@ export function useQuizStateWithLeitner(
     const updateQuestions = async () => {
       // Use centralized filtering instead of manual logic
       let baseQuestions = questionService.filterQuestions(questions);
-      
+
       if (selectedTopic) {
         baseQuestions = baseQuestions.filter(q => q.topic === selectedTopic);
       }
@@ -80,7 +85,8 @@ export function useQuizStateWithLeitner(
   // Calculate enhanced stats including Leitner data
   const stats: EnhancedQuizStats = useMemo(() => {
     const filteredQuestions = questionService.filterQuestions(questions);
-    const leitnerCompletion = leitnerSystem.getCompletionProgress(filteredQuestions);
+    const leitnerCompletion =
+      leitnerSystem.getCompletionProgress(filteredQuestions);
     const leitnerStats = leitnerSystem.getStats(filteredQuestions);
 
     return {
@@ -89,9 +95,9 @@ export function useQuizStateWithLeitner(
       correctAnswers: leitnerCompletion.correctAnswers,
       incorrectAnswers: leitnerCompletion.incorrectAnswers,
       accuracy: leitnerCompletion.accuracy,
-      leitner: leitnerStats
+      leitner: leitnerStats,
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questions, __forceTick]); // Depend on forceTick for updates
 
   // Reset current question index when topic changes
@@ -100,28 +106,31 @@ export function useQuizStateWithLeitner(
   }, [selectedTopic]);
 
   // Separate function for just updating selected answers (no Leitner processing)
-  const updateSelectedAnswers = useCallback((questionId: string, answerIndexes: number[]) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: answerIndexes
-    }));
-  }, []);
+  const updateSelectedAnswers = useCallback(
+    (questionId: string, answerIndexes: number[]) => {
+      setAnswers(prev => ({
+        ...prev,
+        [questionId]: answerIndexes,
+      }));
+    },
+    []
+  );
 
   // Sync Leitner progress with traditional answers state for progress tracking
   useEffect(() => {
     const syncAnswers = async () => {
       await leitnerSystem.ensureInitialized();
-      
+
       // Build map of questions that have progress (answered in Leitner system)
       const progressPlaceholders: Record<string, number[]> = {};
       questions.forEach(question => {
         const progress = leitnerSystem.getQuestionProgress(question.id);
         if (progress) {
           // Use correct answers ONLY as a placeholder if user never submitted/select any answers in this session
-            progressPlaceholders[question.id] = question.answerIndexes;
+          progressPlaceholders[question.id] = question.answerIndexes;
         }
       });
-      
+
       // Merge WITHOUT overwriting existing user selections (preserve wrong answers for feedback)
       setAnswers(prev => {
         const merged = { ...prev };
@@ -133,125 +142,134 @@ export function useQuizStateWithLeitner(
         return merged;
       });
     };
-    
+
     syncAnswers();
   }, [questions, __forceTick]); // Re-sync when forceTick changes (after new answers)
 
   // Actions - Memoized to prevent unnecessary re-renders
-  const actions = useMemo(() => ({
-    setSelectedTopic: (topic: string | null) => {
-      setSelectedTopic(topic);
-    },
-    
-    // For option selection (no Leitner processing)
-    updateAnswers: (questionId: string, answerIndexes: number[]) => {
-      updateSelectedAnswers(questionId, answerIndexes);
-    },
-    
-    // For answer submission (with Leitner processing)
-    submitAnswer: async (questionId: string, answerIndexes: number[]) => {
-      if (!questions || questions.length === 0) {
-        console.error('[Leitner] No questions available');
-        return;
-      }
+  const actions = useMemo(
+    () => ({
+      setSelectedTopic: (topic: string | null) => {
+        setSelectedTopic(topic);
+      },
 
-      // First update the local answers state for immediate UI feedback
-      setAnswers(prev => ({
-        ...prev,
-        [questionId]: answerIndexes
-      }));
+      // For option selection (no Leitner processing)
+      updateAnswers: (questionId: string, answerIndexes: number[]) => {
+        updateSelectedAnswers(questionId, answerIndexes);
+      },
 
-      // Find the question to check correctness
-      const question = questions.find(q => q.id === questionId);
-      if (!question) {
-        console.error('[Leitner] Question not found', { questionId });
-        return;
-      }
+      // For answer submission (with Leitner processing)
+      submitAnswer: async (questionId: string, answerIndexes: number[]) => {
+        if (!questions || questions.length === 0) {
+          console.error('[Leitner] No questions available');
+          return;
+        }
 
-      // Check if answer is correct
-      const isCorrect = answerIndexes.length === question.answerIndexes.length &&
-        answerIndexes.every(answer => question.answerIndexes.includes(answer));
-
-      // Store submission state with submitted answers
-      setSubmissionStates(prev => {
-        const newState = {
+        // First update the local answers state for immediate UI feedback
+        setAnswers(prev => ({
           ...prev,
-          [questionId]: {
-            isSubmitted: true,
-            isCorrect,
-            showAnswer: true,
-            submittedAt: Date.now(),
-            submittedAnswers: answerIndexes // Store the submitted answers
-          }
-        };
-        return newState;
-      });
+          [questionId]: answerIndexes,
+        }));
 
-      try {
-        // Process with Leitner system (synchronous operation)
-        const result = leitnerSystem.processAnswer(questionId, isCorrect);
-        
-        // Force stats recalculation immediately
+        // Find the question to check correctness
+        const question = questions.find(q => q.id === questionId);
+        if (!question) {
+          console.error('[Leitner] Question not found', { questionId });
+          return;
+        }
+
+        // Check if answer is correct
+        const isCorrect =
+          answerIndexes.length === question.answerIndexes.length &&
+          answerIndexes.every(answer =>
+            question.answerIndexes.includes(answer)
+          );
+
+        // Store submission state with submitted answers
+        setSubmissionStates(prev => {
+          const newState = {
+            ...prev,
+            [questionId]: {
+              isSubmitted: true,
+              isCorrect,
+              showAnswer: true,
+              submittedAt: Date.now(),
+              submittedAnswers: answerIndexes, // Store the submitted answers
+            },
+          };
+          return newState;
+        });
+
+        try {
+          // Process with Leitner system (synchronous operation)
+          const result = leitnerSystem.processAnswer(questionId, isCorrect);
+
+          // Force stats recalculation immediately
+          setForceTick(prev => prev + 1);
+          // processAnswer already records correctness; no separate record* calls needed
+
+          return result;
+        } catch (error) {
+          console.error('[Leitner] Failed to process answer:', error);
+          throw error;
+        }
+      },
+
+      // Legacy method for compatibility (now just updates answers)
+      setAnswer: (questionId: string, answerIndexes: number[]) => {
+        updateSelectedAnswers(questionId, answerIndexes);
+      },
+
+      nextQuestion: () => {
+        if (currentQuestionIndex < filteredQuestions.length - 1) {
+          setCurrentQuestionIndex(prev => prev + 1);
+        }
+      },
+
+      previousQuestion: () => {
+        if (currentQuestionIndex > 0) {
+          setCurrentQuestionIndex(prev => prev - 1);
+        }
+      },
+
+      goToQuestion: (index: number) => {
+        if (index >= 0 && index < filteredQuestions.length) {
+          setCurrentQuestionIndex(index);
+        }
+      },
+
+      clearAllProgress: () => {
+        leitnerSystem.clearProgress();
         setForceTick(prev => prev + 1);
-        // processAnswer already records correctness; no separate record* calls needed
-        
-        return result;
-      } catch (error) {
-        console.error('[Leitner] Failed to process answer:', error);
-        throw error;
-      }
-    },
+      },
 
-    // Legacy method for compatibility (now just updates answers)
-    setAnswer: (questionId: string, answerIndexes: number[]) => {
-      updateSelectedAnswers(questionId, answerIndexes);
-    },
-    
-    nextQuestion: () => {
-      if (currentQuestionIndex < filteredQuestions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-      }
-    },
-    
-    previousQuestion: () => {
-      if (currentQuestionIndex > 0) {
-        setCurrentQuestionIndex(prev => prev - 1);
-      }
-    },
-    
-    goToQuestion: (index: number) => {
-      if (index >= 0 && index < filteredQuestions.length) {
-        setCurrentQuestionIndex(index);
-      }
-    },
-    
-    clearAllProgress: () => {
-      leitnerSystem.clearProgress();
-      setForceTick(prev => prev + 1);
-    },
-    
-    // Expose submission state for a question (used by UI to highlight wrong selections)
-    getSubmissionState: (questionId: string) => {
-      return submissionStates[questionId] || null;
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [
-    setSelectedTopic,
-    updateSelectedAnswers,
-    currentQuestionIndex,
-    filteredQuestions,
-    questions,
-    submissionStates,
-  ]);
+      // Expose submission state for a question (used by UI to highlight wrong selections)
+      getSubmissionState: (questionId: string) => {
+        return submissionStates[questionId] || null;
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }),
+    [
+      setSelectedTopic,
+      updateSelectedAnswers,
+      currentQuestionIndex,
+      filteredQuestions,
+      questions,
+      submissionStates,
+    ]
+  );
 
   // Removed render debug log
 
   // Reactive question progress that updates when answers change
-  const getQuestionProgress = useCallback((questionId: string) => {
-    // This will be called fresh each time __forceTick changes
-    return leitnerSystem.getQuestionProgress(questionId);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [__forceTick]); // Re-create when forceTick changes
+  const getQuestionProgress = useCallback(
+    (questionId: string) => {
+      // This will be called fresh each time __forceTick changes
+      return leitnerSystem.getQuestionProgress(questionId);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [__forceTick]
+  ); // Re-create when forceTick changes
 
   return {
     currentQuestionIndex,
@@ -260,6 +278,6 @@ export function useQuizStateWithLeitner(
     answers,
     stats,
     actions,
-    getQuestionProgress
+    getQuestionProgress,
   };
 }

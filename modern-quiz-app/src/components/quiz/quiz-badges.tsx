@@ -1,6 +1,9 @@
 'use client';
 
+// Third-party imports
 import { Code2 } from 'lucide-react';
+
+// Type imports
 import type { Question } from '@/types/quiz';
 
 interface QuizBadgesProps {

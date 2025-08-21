@@ -537,7 +537,7 @@ How would you modify the Microsoft Entra ID application manifest file to meet th
 ```jsonc
 {
   "appId": "your-app-id-here",
-  "displayName": "Your App Name"
+  "displayName": "Your App Name",
   // Write related properties here
 }
 ```
@@ -549,7 +549,7 @@ Answer:
   "appId": "your-app-id-here",
   "displayName": "Your App Name",
   "groupMembershipClaims": "SecurityGroup",
-  "oauth2AllowImplicitFlow": true
+  "oauth2AllowImplicitFlow": true,
 }
 ```
 

@@ -15,7 +15,8 @@ export function useAnswerSelection({
   onAnswerChange,
   disabled = false,
 }: UseAnswerSelectionProps) {
-  const [selectedAnswers, setSelectedAnswers] = useState<number[]>(initialAnswers);
+  const [selectedAnswers, setSelectedAnswers] =
+    useState<number[]>(initialAnswers);
 
   // Update local state when external answers change
   useEffect(() => {
@@ -47,13 +48,7 @@ export function useAnswerSelection({
       setSelectedAnswers(newAnswers);
       onAnswerChange?.(questionId, newAnswers);
     },
-    [
-      disabled,
-      isMultipleChoice,
-      selectedAnswers,
-      questionId,
-      onAnswerChange,
-    ]
+    [disabled, isMultipleChoice, selectedAnswers, questionId, onAnswerChange]
   );
 
   const clearAnswers = useCallback(() => {
