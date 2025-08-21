@@ -6,15 +6,10 @@ interface QuizStatsProps {
 }
 
 export function QuizStats({ stats }: QuizStatsProps) {
-  const {
-    totalQuestions,
-    answeredQuestions,
-    correctAnswers,
-    accuracy,
-  } = stats;
+  const { totalQuestions, answeredQuestions, correctAnswers, accuracy } = stats;
 
   return (
-    <div className='rounded-lg bg-card/80 backdrop-blur-sm p-6'>
+    <div className='rounded-lg bg-card/80 p-6 backdrop-blur-sm'>
       <div className='mb-4 flex items-center gap-2'>
         <BarChart3 className='h-5 w-5 text-primary' />
         <h2 className='text-lg font-semibold'>Progress</h2>

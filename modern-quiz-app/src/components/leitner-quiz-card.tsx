@@ -216,6 +216,10 @@ export function LeitnerQuizCard({
           incorrectAnswers: stats.incorrectAnswers,
           accuracy: stats.accuracy,
         }}
+        leitnerStats={{
+          dueToday: stats.leitner.dueToday,
+          streakDays: stats.leitner.streakDays,
+        }}
       />
 
       {/* Main Quiz Card */}

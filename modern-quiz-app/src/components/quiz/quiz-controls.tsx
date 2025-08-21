@@ -15,6 +15,10 @@ interface QuizControlsProps {
   onTopicChange: (topic: string | null) => void;
   totalQuestions: number;
   stats: QuizStats;
+  leitnerStats?: {
+    dueToday: number;
+    streakDays: number;
+  };
 }
 
 export function QuizControls({
@@ -23,15 +27,12 @@ export function QuizControls({
   onTopicChange,
   totalQuestions,
   stats,
+  leitnerStats,
 }: QuizControlsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const progressPercentage =
     (stats.answeredQuestions / stats.totalQuestions) * 100;
-  const accuracyPercentage =
-    stats.answeredQuestions > 0
-      ? Math.round((stats.correctAnswers / stats.answeredQuestions) * 100)
-      : 0;
 
   return (
     <Card className='dark:border-border-light border border-border bg-card shadow-sm dark:shadow-sm'>
@@ -45,9 +46,19 @@ export function QuizControls({
                 {stats.answeredQuestions}/{stats.totalQuestions}
               </span>
             </div>
-            {stats.answeredQuestions > 0 && (
-              <span>{accuracyPercentage}% correct</span>
-            )}
+            <div className='flex items-center gap-3'>
+              {leitnerStats && leitnerStats.dueToday > 0 && (
+                <span className='flex items-center gap-1'>
+                  <span className='text-orange-600'>{leitnerStats.dueToday} left</span>
+                </span>
+              )}
+              {leitnerStats && leitnerStats.streakDays > 0 && (
+                <span className='flex items-center gap-0.5'>
+                  <span>🔥</span>
+                  <span>{leitnerStats.streakDays}</span>
+                </span>
+              )}
+            </div>
           </div>
           <div className='h-1.5 w-full overflow-hidden rounded-full bg-muted'>
             <motion.div

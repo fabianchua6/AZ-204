@@ -68,19 +68,44 @@ export function useQuizStateWithLeitner(
   // Update filtered questions when dependencies change
   useEffect(() => {
     const updateQuestions = async () => {
-      // Use centralized filtering instead of manual logic
+      await leitnerSystem.ensureInitialized();
+      
+      // Use centralized filtering first
       let baseQuestions = questionService.filterQuestions(questions);
 
       if (selectedTopic) {
         baseQuestions = baseQuestions.filter(q => q.topic === selectedTopic);
+        
+        // For topic mode, just randomize and show all questions in that topic
+        baseQuestions = shuffleArray(baseQuestions);
+        setFilteredQuestions(baseQuestions);
+      } else {
+        // For Leitner mode, get due questions from the Leitner system
+        const dueQuestions = await leitnerSystem.getDueQuestions(baseQuestions);
+        setFilteredQuestions(dueQuestions);
+        
+        // Clear answer state for all due questions to ensure fresh review
+        setAnswers(prev => {
+          const cleaned = { ...prev };
+          dueQuestions.forEach(question => {
+            delete cleaned[question.id];
+          });
+          return cleaned;
+        });
+        
+        // Also clear submission states for due questions
+        setSubmissionStates(prev => {
+          const cleaned = { ...prev };
+          dueQuestions.forEach(question => {
+            delete cleaned[question.id];
+          });
+          return cleaned;
+        });
       }
-      // Randomize order for variety
-      baseQuestions = shuffleArray(baseQuestions);
-      setFilteredQuestions(baseQuestions);
     };
 
     updateQuestions();
-  }, [questions, selectedTopic]);
+  }, [questions, selectedTopic, __forceTick]); // Add __forceTick to refresh after answers
 
   // Calculate enhanced stats including Leitner data
   const stats: EnhancedQuizStats = useMemo(() => {
@@ -105,6 +130,18 @@ export function useQuizStateWithLeitner(
     setCurrentQuestionIndex(0);
   }, [selectedTopic]);
 
+  // Clear answer state when the current question changes
+  useEffect(() => {
+    const currentQuestion = filteredQuestions[currentQuestionIndex];
+    if (currentQuestion) {
+      setAnswers(prev => {
+        const cleaned = { ...prev };
+        delete cleaned[currentQuestion.id];
+        return cleaned;
+      });
+    }
+  }, [currentQuestionIndex, filteredQuestions]);
+
   // Separate function for just updating selected answers (no Leitner processing)
   const updateSelectedAnswers = useCallback(
     (questionId: string, answerIndexes: number[]) => {
@@ -116,37 +153,31 @@ export function useQuizStateWithLeitner(
     []
   );
 
-  // Sync Leitner progress with traditional answers state for progress tracking
+  // Clear stale answers when questions change or after submissions
   useEffect(() => {
-    const syncAnswers = async () => {
-      await leitnerSystem.ensureInitialized();
-
-      // Do NOT pre-fill answers for Leitner questions!
-      // Each time a question appears for review, the user should answer fresh
-      // Only keep answers that have been actively selected in the current session
-      
-      // Clear any stale answer state for questions that need fresh review
-      setAnswers(prev => {
-        const cleaned = { ...prev };
-        
-        // Remove answers for questions that don't have fresh submission states
-        Object.keys(cleaned).forEach(questionId => {
-          const submissionState = submissionStates[questionId];
-          // Keep answers only if they were submitted in the current session recently (within 10 seconds)
-          const isRecentSubmission = submissionState?.submittedAt && 
-            (Date.now() - submissionState.submittedAt) < 10000;
-          
-          if (!isRecentSubmission) {
-            delete cleaned[questionId];
-          }
-        });
-        
-        return cleaned;
+    // Additional cleanup: remove any lingering answer state for questions not in current filtered list
+    const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
+    
+    setAnswers(prev => {
+      const cleaned = { ...prev };
+      Object.keys(cleaned).forEach(questionId => {
+        if (!currentQuestionIds.has(questionId)) {
+          delete cleaned[questionId];
+        }
       });
-    };
-
-    syncAnswers();
-  }, [questions, __forceTick, submissionStates]); // Include submissionStates to react to submissions
+      return cleaned;
+    });
+    
+    setSubmissionStates(prev => {
+      const cleaned = { ...prev };
+      Object.keys(cleaned).forEach(questionId => {
+        if (!currentQuestionIds.has(questionId)) {
+          delete cleaned[questionId];
+        }
+      });
+      return cleaned;
+    });
+  }, [filteredQuestions]); // Clean up when filtered questions change
 
   // Actions - Memoized to prevent unnecessary re-renders
   const actions = useMemo(
@@ -203,13 +234,32 @@ export function useQuizStateWithLeitner(
         });
 
         try {
+          // Ensure Leitner system is initialized first
+          await leitnerSystem.ensureInitialized();
+          
           // Process with Leitner system (synchronous operation)
           const result = leitnerSystem.processAnswer(questionId, isCorrect);
 
-          // Force stats recalculation immediately
+          // Force stats recalculation and due questions refresh
           setForceTick(prev => prev + 1);
-          // processAnswer already records correctness; no separate record* calls needed
-
+          
+          // Additional cleanup: if the question was answered incorrectly and will come back,
+          // ensure its answer state is cleared immediately
+          if (!isCorrect) {
+            setTimeout(() => {
+              setAnswers(prev => {
+                const cleaned = { ...prev };
+                delete cleaned[questionId];
+                return cleaned;
+              });
+              setSubmissionStates(prev => {
+                const cleaned = { ...prev };
+                delete cleaned[questionId];
+                return cleaned;
+              });
+            }, 100); // Small delay to allow the submission state to be used for UI feedback first
+          }
+          
           return result;
         } catch (error) {
           console.error('[Leitner] Failed to process answer:', error);
@@ -238,7 +288,7 @@ export function useQuizStateWithLeitner(
         if (index >= 0 && index < filteredQuestions.length) {
           setCurrentQuestionIndex(index);
           
-          // Clear answer state for the new question to ensure fresh review
+          // Always clear answer state for the new question to ensure fresh review
           const newQuestionId = filteredQuestions[index]?.id;
           if (newQuestionId) {
             setAnswers(prev => {
@@ -247,15 +297,11 @@ export function useQuizStateWithLeitner(
               return newAnswers;
             });
             
-            // Also clear submission state unless it's very recent
+            // Always clear submission state for fresh start
             setSubmissionStates(prev => {
-              const submissionState = prev[newQuestionId];
-              if (submissionState && (Date.now() - submissionState.submittedAt) > 5000) {
-                const newStates = { ...prev };
-                delete newStates[newQuestionId];
-                return newStates;
-              }
-              return prev;
+              const newStates = { ...prev };
+              delete newStates[newQuestionId];
+              return newStates;
             });
           }
         }

@@ -190,7 +190,9 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <Card className={`${stat.bgColor} shadow-sm backdrop-blur-sm border-0`}>
+            <Card
+              className={`${stat.bgColor} border-0 shadow-sm backdrop-blur-sm`}
+            >
               <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3'>
                 <CardTitle
                   className={`text-xs font-medium sm:text-sm ${stat.textColor}`}
@@ -269,7 +271,7 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
           </div>
           {/* Legend - 3 Box System */}
           <div className='flex flex-wrap gap-x-4 gap-y-1.5 text-xs'>
-            {[1, 2, 3].map((boxNumber) => {
+            {[1, 2, 3].map(boxNumber => {
               const questionCount = appStats.boxDistribution[boxNumber] || 0;
               const percentage =
                 appStats.totalQuestions > 0
