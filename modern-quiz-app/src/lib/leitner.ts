@@ -420,6 +420,7 @@ export class LeitnerSystem {
 
   // Get current statistics
   getStats(allQuestions: Question[]): LeitnerStats {
+    // Note: Expect pre-filtered questions from QuestionService
     const boxDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     let totalCorrect = 0;
     let totalAnswered = 0;
@@ -457,8 +458,8 @@ export class LeitnerSystem {
     const displayDueToday = Math.max(0, 60 - questionsAnsweredToday);
 
     return {
-      totalQuestions: allQuestions.length,
-      questionsStarted, // Add this to track how many questions have been attempted
+      totalQuestions: allQuestions.length, // Questions are pre-filtered upstream
+      questionsStarted, 
       boxDistribution,
       dueToday: displayDueToday,
       accuracyRate,
@@ -479,6 +480,7 @@ export class LeitnerSystem {
     incorrectAnswers: number;
     accuracy: number;
   } {
+    // Note: Expect pre-filtered questions from QuestionService
     let answeredQuestions = 0;
     let correctAnswers = 0;
     let totalCorrect = 0;
@@ -502,7 +504,7 @@ export class LeitnerSystem {
     const accuracy = totalAnswered > 0 ? totalCorrect / totalAnswered : 0;
 
     return {
-      totalQuestions: allQuestions.length,
+      totalQuestions: allQuestions.length, // Pre-filtered upstream
       answeredQuestions,
       correctAnswers,
       incorrectAnswers,
