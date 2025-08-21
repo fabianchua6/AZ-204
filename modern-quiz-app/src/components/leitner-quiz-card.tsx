@@ -1,7 +1,8 @@
 'use client';
 
 // React imports
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 
 // Third-party imports
 import { motion } from 'framer-motion';
@@ -100,12 +101,20 @@ export function LeitnerQuizCard({
   getSubmissionState,
 }: LeitnerQuizCardProps) {
   const isMultipleChoice = question.answerIndexes.length > 1;
+  
+  // Local state to force showing answer after submission
+  const [justSubmitted, setJustSubmitted] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState<boolean | null>(null);
+
+  // Reset local submission state when question changes
+  useEffect(() => {
+    setJustSubmitted(false);
+    setSubmissionResult(null);
+  }, [question.id]);
 
   // Use our modular hooks
   const cardState = useQuizCardState({
     questionId: question.id,
-    autoAdvanceOnCorrect: false,
-    autoAdvanceDelay: 0,
     initialSubmissionState: (() => {
       const submissionState = getSubmissionState?.(question.id);
       return submissionState
@@ -126,7 +135,7 @@ export function LeitnerQuizCard({
       }
 
       let newAnswers: number[];
-      
+
       if (isMultipleChoice) {
         // Multi-select: toggle the option
         if (externalSelectedAnswers.includes(optionIndex)) {
@@ -141,7 +150,13 @@ export function LeitnerQuizCard({
 
       onAnswerSelect(question.id, newAnswers);
     },
-    [cardState.answerSubmitted, onAnswerSelect, question.id, isMultipleChoice, externalSelectedAnswers]
+    [
+      cardState.answerSubmitted,
+      onAnswerSelect,
+      question.id,
+      isMultipleChoice,
+      externalSelectedAnswers,
+    ]
   );
 
   const handleSubmit = useCallback(async () => {
@@ -149,7 +164,8 @@ export function LeitnerQuizCard({
       !question.id ||
       !Array.isArray(externalSelectedAnswers) ||
       externalSelectedAnswers.length === 0 ||
-      cardState.answerSubmitted
+      cardState.answerSubmitted ||
+      justSubmitted
     ) {
       return;
     }
@@ -158,39 +174,43 @@ export function LeitnerQuizCard({
 
     try {
       const result = await onAnswerSubmit(question.id, externalSelectedAnswers);
+      
       if (result) {
-        // Mark as submitted and show answer feedback
-        cardState.markAnswerSubmitted(true, result.correct);
+        // Set local state immediately for instant feedback
+        setJustSubmitted(true);
+        setSubmissionResult(result.correct);
+        
+        // Also update the card state for consistency
+        flushSync(() => {
+          cardState.markAnswerSubmitted(true, result.correct);
+        });
       }
     } catch (error) {
       console.error('Failed to submit answer:', error);
     } finally {
       cardState.finishSubmitting();
     }
-  }, [question.id, externalSelectedAnswers, cardState, onAnswerSubmit]);
+  }, [question.id, externalSelectedAnswers, cardState, onAnswerSubmit, justSubmitted]);
 
   // Navigation handler with submission logic
   const handleNext = useCallback(async () => {
-    cardState.cancelAutoAdvance();
-    
     // If answer hasn't been submitted yet and user has selected answers, submit first
-    if (!cardState.answerSubmitted && externalSelectedAnswers.length > 0) {
+    if (!cardState.answerSubmitted && !justSubmitted && externalSelectedAnswers.length > 0) {
       await handleSubmit();
-      return; // Don't advance yet, let user see the feedback
+      return; // Stop here to show feedback
     }
-    
+
     // If answer is already submitted or no answers selected, advance to next question
     if (onNext) {
       onNext();
     }
-  }, [cardState, onNext, externalSelectedAnswers, handleSubmit]);
+  }, [cardState, onNext, externalSelectedAnswers, handleSubmit, justSubmitted]);
 
   const handlePrevious = useCallback(() => {
-    cardState.cancelAutoAdvance();
     if (onPrevious) {
       onPrevious();
     }
-  }, [cardState, onPrevious]);
+  }, [onPrevious]);
 
   // Custom button states for Leitner mode - don't disable navigation during submission
   const buttonStates = {
@@ -340,8 +360,8 @@ export function LeitnerQuizCard({
           {/* Answer Section */}
           <QuizAnswer
             answer={question.answer}
-            showAnswer={cardState.showAnswer}
-            isCorrect={cardState.lastSubmissionResult ?? true}
+            showAnswer={justSubmitted || cardState.showAnswer}
+            isCorrect={submissionResult ?? cardState.lastSubmissionResult ?? true}
           />
         </CardContent>
       </Card>

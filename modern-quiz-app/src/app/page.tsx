@@ -12,6 +12,7 @@ import { LeitnerQuizCard } from '@/components/leitner-quiz-card';
 import { QuizCard } from '@/components/quiz-card';
 import { TopicSelector } from '@/components/topic-selector';
 import { LoadingSpinner } from '@/components/loading-spinner';
+import { PWAInstallPrompt } from '@/components/pwa-install-prompt';
 
 // Hook imports
 import { useQuizData } from '@/hooks/use-quiz-data';
@@ -198,6 +199,9 @@ export default function Home() {
           </AnimatePresence>
         </div>
       </main>
+
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
     </div>
   );
 }

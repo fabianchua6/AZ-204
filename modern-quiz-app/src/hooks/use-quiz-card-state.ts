@@ -2,8 +2,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface UseQuizCardStateProps {
   questionId: string;
-  autoAdvanceOnCorrect?: boolean;
-  autoAdvanceDelay?: number;
   // Add persistence of submission state
   initialSubmissionState?: {
     isSubmitted: boolean;
@@ -14,8 +12,6 @@ interface UseQuizCardStateProps {
 
 export function useQuizCardState({
   questionId,
-  autoAdvanceOnCorrect = false,
-  autoAdvanceDelay = 0,
   initialSubmissionState,
 }: UseQuizCardStateProps) {
   const [showAnswer, setShowAnswer] = useState(
@@ -84,24 +80,6 @@ export function useQuizCardState({
     setIsSubmitting(false);
   }, []);
 
-  const scheduleAutoAdvance = useCallback(
-    (onAdvance: () => void) => {
-      if (autoAdvanceOnCorrect) {
-        timeoutRef.current = setTimeout(() => {
-          onAdvance();
-        }, autoAdvanceDelay);
-      }
-    },
-    [autoAdvanceOnCorrect, autoAdvanceDelay]
-  );
-
-  const cancelAutoAdvance = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-  }, []);
-
   return {
     showAnswer,
     answerSubmitted,
@@ -111,7 +89,5 @@ export function useQuizCardState({
     markAnswerSubmitted,
     startSubmitting,
     finishSubmitting,
-    scheduleAutoAdvance,
-    cancelAutoAdvance,
   };
 }

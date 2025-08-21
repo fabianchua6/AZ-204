@@ -239,6 +239,10 @@ export function useQuizStateWithLeitner(
               submittedAnswers: answerIndexes, // Store the submitted answers
             },
           };
+          
+          // Also immediately save to localStorage for mobile persistence
+          saveToLocalStorage('leitner-submission-states', newState);
+          
           return newState;
         });
 
@@ -249,26 +253,7 @@ export function useQuizStateWithLeitner(
           // Process with Leitner system (synchronous operation)
           const result = leitnerSystem.processAnswer(questionId, isCorrect);
 
-          // Force stats recalculation and due questions refresh
-          setForceTick(prev => prev + 1);
-          
-          // Additional cleanup: if the question was answered incorrectly and will come back,
-          // ensure its answer state is cleared immediately
-          if (!isCorrect) {
-            setTimeout(() => {
-              setAnswers(prev => {
-                const cleaned = { ...prev };
-                delete cleaned[questionId];
-                return cleaned;
-              });
-              setSubmissionStates(prev => {
-                const cleaned = { ...prev };
-                delete cleaned[questionId];
-                return cleaned;
-              });
-            }, 100); // Small delay to allow the submission state to be used for UI feedback first
-          }
-          
+          // Return result for UI feedback without auto-navigation
           return result;
         } catch (error) {
           console.error('[Leitner] Failed to process answer:', error);

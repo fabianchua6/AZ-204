@@ -49,7 +49,9 @@ export function QuizControls({
             <div className='flex items-center gap-3'>
               {leitnerStats && leitnerStats.dueToday > 0 && (
                 <span className='flex items-center gap-1'>
-                  <span className='text-orange-600'>{leitnerStats.dueToday} left</span>
+                  <span className='text-orange-600'>
+                    {leitnerStats.dueToday} left
+                  </span>
                 </span>
               )}
               {leitnerStats && leitnerStats.streakDays > 0 && (
