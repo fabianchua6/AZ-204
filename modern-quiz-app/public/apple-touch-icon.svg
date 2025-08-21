@@ -1,4 +1,5 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="180" height="180" rx="24" fill="#2563eb"/>
-  <text x="90" y="115" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="68" font-weight="bold">AZ</text>
+  <rect width="180" height="180" rx="24" fill="#2563eb" />
+  <text x="90" y="115" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="68"
+    font-weight="bold">AZ</text>
 </svg>

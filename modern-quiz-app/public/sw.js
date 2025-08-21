@@ -9,10 +9,7 @@ const DATA_CACHE_NAME = 'az-204-data-v2';
 const STATIC_ASSETS = [];
 
 // Optional assets to try caching (won't fail if they don't exist)
-const OPTIONAL_ASSETS = [
-  '/',
-  '/manifest.json',
-];
+const OPTIONAL_ASSETS = ['/', '/manifest.json'];
 
 // Install event - cache static assets
 self.addEventListener('install', event => {
@@ -23,24 +20,30 @@ self.addEventListener('install', event => {
       .open(STATIC_CACHE_NAME)
       .then(cache => {
         console.log('[ServiceWorker] Cache opened successfully');
-        
+
         // Skip essential assets if array is empty
         if (STATIC_ASSETS.length === 0) {
           console.log('[ServiceWorker] No essential assets to cache');
           return Promise.resolve();
         }
-        
+
         console.log('[ServiceWorker] Pre-caching essential assets');
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => {
-        console.log('[ServiceWorker] Essential assets done, trying optional assets');
+        console.log(
+          '[ServiceWorker] Essential assets done, trying optional assets'
+        );
         // Try to cache optional assets without failing
         return caches.open(STATIC_CACHE_NAME).then(cache => {
           return Promise.allSettled(
-            OPTIONAL_ASSETS.map(url => 
+            OPTIONAL_ASSETS.map(url =>
               cache.add(url).catch(err => {
-                console.warn('[ServiceWorker] Failed to cache optional asset:', url, err.message);
+                console.warn(
+                  '[ServiceWorker] Failed to cache optional asset:',
+                  url,
+                  err.message
+                );
                 return null;
               })
             )

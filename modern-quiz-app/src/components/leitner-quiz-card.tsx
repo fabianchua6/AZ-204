@@ -18,7 +18,6 @@ import { QuizAnswer } from '@/components/quiz/quiz-answer';
 import { QuizControls } from '@/components/quiz/quiz-controls';
 import { QuizBadges } from '@/components/quiz/quiz-badges';
 import { QuizQuestionContent } from '@/components/quiz/quiz-question-content';
-import { MultipleChoiceWarning } from '@/components/quiz/multiple-choice-warning';
 
 // Hook imports
 import { useQuizCardState } from '@/hooks/use-quiz-card-state';
@@ -101,10 +100,12 @@ export function LeitnerQuizCard({
   getSubmissionState,
 }: LeitnerQuizCardProps) {
   const isMultipleChoice = question.answerIndexes.length > 1;
-  
+
   // Local state to force showing answer after submission
   const [justSubmitted, setJustSubmitted] = useState(false);
-  const [submissionResult, setSubmissionResult] = useState<boolean | null>(null);
+  const [submissionResult, setSubmissionResult] = useState<boolean | null>(
+    null
+  );
 
   // Reset local submission state when question changes
   useEffect(() => {
@@ -174,12 +175,12 @@ export function LeitnerQuizCard({
 
     try {
       const result = await onAnswerSubmit(question.id, externalSelectedAnswers);
-      
+
       if (result) {
         // Set local state immediately for instant feedback
         setJustSubmitted(true);
         setSubmissionResult(result.correct);
-        
+
         // Also update the card state for consistency
         flushSync(() => {
           cardState.markAnswerSubmitted(true, result.correct);
@@ -190,12 +191,22 @@ export function LeitnerQuizCard({
     } finally {
       cardState.finishSubmitting();
     }
-  }, [question.id, externalSelectedAnswers, cardState, onAnswerSubmit, justSubmitted]);
+  }, [
+    question.id,
+    externalSelectedAnswers,
+    cardState,
+    onAnswerSubmit,
+    justSubmitted,
+  ]);
 
   // Navigation handler with submission logic
   const handleNext = useCallback(async () => {
     // If answer hasn't been submitted yet and user has selected answers, submit first
-    if (!cardState.answerSubmitted && !justSubmitted && externalSelectedAnswers.length > 0) {
+    if (
+      !cardState.answerSubmitted &&
+      !justSubmitted &&
+      externalSelectedAnswers.length > 0
+    ) {
       await handleSubmit();
       return; // Stop here to show feedback
     }
@@ -306,10 +317,6 @@ export function LeitnerQuizCard({
           {/* Options */}
           {question.options.length > 0 && (
             <div className='mb-4 space-y-2 sm:mb-6 sm:space-y-3'>
-              <MultipleChoiceWarning
-                show={isMultipleChoice && !cardState.answerSubmitted}
-              />
-
               {question.options.map((option, index) => {
                 // Get the submission state to access submitted answers
                 const submissionState = getSubmissionState?.(question.id);
@@ -361,7 +368,9 @@ export function LeitnerQuizCard({
           <QuizAnswer
             answer={question.answer}
             showAnswer={justSubmitted || cardState.showAnswer}
-            isCorrect={submissionResult ?? cardState.lastSubmissionResult ?? true}
+            isCorrect={
+              submissionResult ?? cardState.lastSubmissionResult ?? true
+            }
           />
         </CardContent>
       </Card>
