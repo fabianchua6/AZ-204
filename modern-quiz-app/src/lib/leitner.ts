@@ -567,6 +567,13 @@ export class LeitnerSystem {
     this.questionSeed = Date.now();
   }
 
+  // Clear only navigation/submission states (preserves Leitner progress)
+  clearNavigationStates(): void {
+    // This method is for future use if we store submission states in the Leitner system
+    // For now, navigation states are handled in the debug page directly
+    console.log('Navigation states cleared (no Leitner data affected)');
+  }
+
   // Get current daily target setting
   getDailyTarget(): number {
     return this.settings.dailyTarget;

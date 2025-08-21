@@ -49,18 +49,27 @@ export function useQuizStateWithLeitner(
     return copy;
   }
 
-  // Load saved state (excluding topic which is managed by parent)
+  // Load saved state (including submission states)
   // Use mode-specific localStorage key to avoid conflicts with practice mode
   useEffect(() => {
     const savedIndex = loadFromLocalStorage('leitner-quiz-index', 0);
     setCurrentQuestionIndex(savedIndex);
+    
+    // Load submission states
+    const savedSubmissionStates = loadFromLocalStorage('leitner-submission-states', {});
+    setSubmissionStates(savedSubmissionStates);
   }, []);
 
-  // Save state changes (excluding topic which is managed by parent)
+  // Save state changes (including submission states)
   // Use mode-specific localStorage key to avoid conflicts with practice mode
   useEffect(() => {
     saveToLocalStorage('leitner-quiz-index', currentQuestionIndex);
   }, [currentQuestionIndex]);
+
+  // Save submission states when they change
+  useEffect(() => {
+    saveToLocalStorage('leitner-submission-states', submissionStates);
+  }, [submissionStates]);
 
   // Filter and sort questions based on topic and Leitner system
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);

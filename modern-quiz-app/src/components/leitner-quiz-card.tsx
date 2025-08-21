@@ -159,7 +159,8 @@ export function LeitnerQuizCard({
     try {
       const result = await onAnswerSubmit(question.id, externalSelectedAnswers);
       if (result) {
-        // Update stats from result
+        // Mark as submitted and show answer feedback
+        cardState.markAnswerSubmitted(true, result.correct);
       }
     } catch (error) {
       console.error('Failed to submit answer:', error);
@@ -168,13 +169,21 @@ export function LeitnerQuizCard({
     }
   }, [question.id, externalSelectedAnswers, cardState, onAnswerSubmit]);
 
-  // Simplified navigation handlers - direct calls
-  const handleNext = useCallback(() => {
+  // Navigation handler with submission logic
+  const handleNext = useCallback(async () => {
     cardState.cancelAutoAdvance();
+    
+    // If answer hasn't been submitted yet and user has selected answers, submit first
+    if (!cardState.answerSubmitted && externalSelectedAnswers.length > 0) {
+      await handleSubmit();
+      return; // Don't advance yet, let user see the feedback
+    }
+    
+    // If answer is already submitted or no answers selected, advance to next question
     if (onNext) {
       onNext();
     }
-  }, [cardState, onNext]);
+  }, [cardState, onNext, externalSelectedAnswers, handleSubmit]);
 
   const handlePrevious = useCallback(() => {
     cardState.cancelAutoAdvance();
