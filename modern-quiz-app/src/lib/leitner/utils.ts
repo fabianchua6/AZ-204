@@ -149,18 +149,27 @@ export class ValidationUtils {
  */
 export class AlgorithmUtils {
   /**
-   * Stable pseudo-random function for consistent sorting
+   * Stable pseudo-random function for consistent sorting with improved distribution
    */
   static stableRandom(questionId: string, seed: number): number {
-    // Simple hash function for consistent randomization per question
-    let hash = 0;
-    const combined = questionId + seed;
-    for (let i = 0; i < combined.length; i++) {
-      const char = combined.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
+    // Improved hash function that creates better variation between seeds
+    let hash = seed; // Start with the seed value
+    
+    // Mix the seed with each character of the question ID
+    for (let i = 0; i < questionId.length; i++) {
+      const char = questionId.charCodeAt(i);
+      hash = ((hash << 5) - hash + char) & 0xffffffff; // Ensure 32-bit integer
+      hash = ((hash << 13) ^ hash) & 0xffffffff; // Additional mixing
+      hash = ((hash * 0x85ebca6b) ^ (hash >>> 16)) & 0xffffffff; // Multiply by prime and XOR
     }
-    return Math.abs(hash) / 2147483647; // Normalize to 0-1
+    
+    // Final mixing step to improve distribution
+    hash ^= hash >>> 16;
+    hash *= 0x9e3779b9; // Golden ratio constant
+    hash ^= hash >>> 16;
+    
+    // Ensure positive and normalize to 0-1
+    return (hash & 0x7fffffff) / 0x7fffffff;
   }
 
   /**

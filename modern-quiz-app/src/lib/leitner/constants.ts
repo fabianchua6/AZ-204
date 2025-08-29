@@ -25,7 +25,7 @@ export const LEITNER_CONFIG = {
     MAX_DAILY_TARGET: 500,
     CLEANUP_THRESHOLD_DAYS: 30,
     MIN_DUE_QUESTIONS: 20,
-    REVIEW_PROBABILITY: 0.1, // 10% chance to include box 3 questions for review
+    REVIEW_PROBABILITY: 0.25, // 25% chance to include box 3 questions for review (increased from 10%)
   } as const,
 
   // Performance settings

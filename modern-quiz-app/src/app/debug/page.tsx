@@ -269,6 +269,31 @@ export default function DebugPage() {
               )}
             </section>
 
+            {/* Question Randomization Controls */}
+            <section className='space-y-4'>
+              <h2 className='text-xl font-semibold'>Question Randomization</h2>
+              <Card className='p-4'>
+                <h3 className='mb-4 font-semibold'>Refresh Question Order</h3>
+                <p className='mb-4 text-sm text-muted-foreground'>
+                  If you're seeing the same questions repeatedly, click below to 
+                  shuffle the question order. This preserves your Leitner progress 
+                  but gives you a fresh randomization of which questions appear.
+                </p>
+                <div className='space-y-3'>
+                  <Button
+                    onClick={() => {
+                      leitnerSystem.refreshQuestionOrder();
+                      setClearResult('✅ Question order refreshed! You should see different questions now.');
+                    }}
+                    variant='outline'
+                    className='w-full'
+                  >
+                    🎲 Refresh Question Order
+                  </Button>
+                </div>
+              </Card>
+            </section>
+
             {/* Quiz Navigation Debug */}
             <section className='space-y-4'>
               <h2 className='text-xl font-semibold'>Quiz Navigation Debug</h2>
