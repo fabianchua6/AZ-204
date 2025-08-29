@@ -306,12 +306,27 @@ export class LeitnerSystem {
     await this.ensureInitialized();
 
     if (!Array.isArray(allQuestions) || allQuestions.length === 0) {
+      console.log('🔍 [DEBUG] No questions provided to getDueQuestions');
       return [];
     }
+
+    console.log(`🔍 [DEBUG] Starting getDueQuestions with ${allQuestions.length} total questions`);
 
     // Note: Questions are already filtered upstream by QuestionService.filterQuestions()
     // Don't double-filter - use all provided questions to maximize variety
     const currentDate = new Date();
+    console.log(`🔍 [DEBUG] Current date: ${currentDate.toISOString()}`);
+
+    // Analyze current progress state
+    const progressStats = {
+      total: this.progress.size,
+      box1: 0,
+      box2: 0,
+      box3: 0,
+      new: 0,
+      due: 0,
+      notDue: 0
+    };
 
     // Use map for O(1) lookups instead of repeated gets
     const questionsWithPriority: QuestionWithLeitner[] = allQuestions.map(
@@ -320,10 +335,18 @@ export class LeitnerSystem {
 
         if (!progress) {
           // New questions get highest priority (Box 1)
+          progressStats.new++;
           return { ...question, priority: 1, isDue: true, currentBox: 1 };
         }
 
+        progressStats[`box${progress.currentBox}` as keyof typeof progressStats]++;
         const isDue = this.isDateDue(progress.nextReviewDate, currentDate);
+        
+        if (isDue) {
+          progressStats.due++;
+        } else {
+          progressStats.notDue++;
+        }
 
         return {
           ...question,
@@ -334,6 +357,8 @@ export class LeitnerSystem {
         };
       }
     );
+
+    console.log('🔍 [DEBUG] Progress stats:', progressStats);
 
     // Filter to only questions that are due or new, plus some review questions
     const dueAndNewQuestions = questionsWithPriority.filter(q => {
@@ -346,14 +371,30 @@ export class LeitnerSystem {
       return false;
     });
 
+    console.log(`🔍 [DEBUG] Initial due/new questions: ${dueAndNewQuestions.length}`);
+    console.log(`🔍 [DEBUG] Box distribution in due questions:`, 
+      dueAndNewQuestions.reduce((acc, q) => {
+        acc[`box${q.currentBox}`] = (acc[`box${q.currentBox}`] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>)
+    );
+
     // If we have too few due questions, add more from all boxes to increase variety
     if (dueAndNewQuestions.length < LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS) {
+      console.log(`🔍 [DEBUG] Need more questions: ${dueAndNewQuestions.length} < ${LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS}`);
+      
       const additionalQuestions = questionsWithPriority
         .filter(q => !q.isDue) // Get non-due questions
         .sort(() => Math.random() - 0.5) // Shuffle for randomness
         .slice(0, LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS - dueAndNewQuestions.length);
+      
+      console.log(`🔍 [DEBUG] Adding ${additionalQuestions.length} additional questions`);
       dueAndNewQuestions.push(...additionalQuestions);
     }
+
+    console.log(`🔍 [DEBUG] Final question count before sorting: ${dueAndNewQuestions.length}`);
+
+    console.log(`🔍 [DEBUG] Final question count before sorting: ${dueAndNewQuestions.length}`);
 
     // Optimized sorting with early returns
     const sortedQuestions = dueAndNewQuestions.sort((a, b) => {
@@ -374,8 +415,29 @@ export class LeitnerSystem {
       return randomA - randomB;
     });
 
+    // Log sample of questions for debugging
+    console.log(`🔍 [DEBUG] Sample of sorted questions (first 10):`, 
+      sortedQuestions.slice(0, 10).map(q => ({
+        id: q.id.slice(-8),
+        topic: q.topic,
+        box: q.currentBox,
+        isDue: q.isDue,
+        timesIncorrect: q.timesIncorrect || 0
+      }))
+    );
+
     // Apply optimized interleaving by topic for better learning
-    return this.optimizedInterleaveByTopic(sortedQuestions);
+    const interleaved = this.optimizedInterleaveByTopic(sortedQuestions);
+    
+    console.log(`🔍 [DEBUG] Final interleaved questions: ${interleaved.length}`);
+    console.log(`🔍 [DEBUG] Topic distribution:`, 
+      interleaved.reduce((acc, q) => {
+        acc[q.topic] = (acc[q.topic] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>)
+    );
+
+    return interleaved;
   }
 
   // Optimized interleaving algorithm with better distribution
@@ -562,6 +624,102 @@ export class LeitnerSystem {
     // This method is for future use if we store submission states in the Leitner system
     // For now, navigation states are handled in the debug page directly
     console.log('Navigation states cleared (no Leitner data affected)');
+  }
+
+  // Debug method to analyze current question pool and distribution
+  async debugQuestionPool(allQuestions: Question[]): Promise<{
+    totalQuestions: number;
+    filteredQuestions: number;
+    progressStats: {
+      total: number;
+      box1: number;
+      box2: number;
+      box3: number;
+      new: number;
+      due: number;
+      notDue: number;
+    };
+    dueQuestions: number;
+    sampleDueQuestions: Array<{
+      id: string;
+      topic: string;
+      currentBox: number;
+      isDue: boolean;
+      nextReviewDate: string;
+      timesCorrect: number;
+      timesIncorrect: number;
+    }>;
+    topicDistribution: Record<string, number>;
+  }> {
+    await this.ensureInitialized();
+    
+    const currentDate = new Date();
+    const progressStats = {
+      total: this.progress.size,
+      box1: 0,
+      box2: 0,
+      box3: 0,
+      new: 0,
+      due: 0,
+      notDue: 0
+    };
+
+    const questionsWithProgress = allQuestions.map(question => {
+      const progress = this.progress.get(question.id);
+      
+      if (!progress) {
+        progressStats.new++;
+        return {
+          ...question,
+          currentBox: 1,
+          isDue: true,
+          nextReviewDate: 'new',
+          timesCorrect: 0,
+          timesIncorrect: 0
+        };
+      }
+
+      progressStats[`box${progress.currentBox}` as keyof typeof progressStats]++;
+      const isDue = this.isDateDue(progress.nextReviewDate, currentDate);
+      
+      if (isDue) {
+        progressStats.due++;
+      } else {
+        progressStats.notDue++;
+      }
+
+      return {
+        ...question,
+        currentBox: progress.currentBox,
+        isDue,
+        nextReviewDate: progress.nextReviewDate,
+        timesCorrect: progress.timesCorrect,
+        timesIncorrect: progress.timesIncorrect
+      };
+    });
+
+    const dueQuestions = questionsWithProgress.filter(q => q.isDue);
+    const topicDistribution = allQuestions.reduce((acc, q) => {
+      acc[q.topic] = (acc[q.topic] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      totalQuestions: allQuestions.length,
+      filteredQuestions: allQuestions.length, // Already filtered upstream
+      progressStats,
+      dueQuestions: dueQuestions.length,
+      sampleDueQuestions: dueQuestions.slice(0, 20).map(q => ({
+        id: q.id.slice(-8),
+        topic: q.topic,
+        currentBox: q.currentBox,
+        isDue: q.isDue,
+        nextReviewDate: q.nextReviewDate,
+        timesCorrect: q.timesCorrect,
+        timesIncorrect: q.timesIncorrect
+      })),
+      topicDistribution
+    };
   }
 
   // Get current daily target setting

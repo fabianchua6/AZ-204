@@ -3,10 +3,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { leitnerSystem } from '@/lib/leitner';
+import { useQuizData } from '@/hooks/use-quiz-data';
+import { questionService } from '@/lib/question-service';
 import { useEffect, useState } from 'react';
 
 export default function DebugPage() {
   const boxes = [1, 2, 3]; // 3-box system only
+  const { questions, topics, loading } = useQuizData();
+  
   const [timezoneDebug, setTimezoneDebug] = useState<{
     currentTime: string;
     localDate: string;
@@ -26,8 +30,43 @@ export default function DebugPage() {
     };
   } | null>(null);
 
+  const [questionPoolDebug, setQuestionPoolDebug] = useState<{
+    totalQuestions: number;
+    filteredQuestions: number;
+    progressStats: Record<string, number>;
+    dueQuestions: number;
+    sampleDueQuestions: Array<{
+      id: string;
+      topic: string;
+      currentBox: number;
+      isDue: boolean;
+      nextReviewDate: string;
+      timesCorrect: number;
+      timesIncorrect: number;
+    }>;
+    topicDistribution: Record<string, number>;
+  } | null>(null);
+  
   const [clearResult, setClearResult] = useState<string>('');
   const [isMounted, setIsMounted] = useState(false);
+
+  // Debug question pool
+  const debugQuestionPool = async () => {
+    if (loading || questions.length === 0) {
+      setClearResult('❌ Questions not loaded yet. Please wait...');
+      return;
+    }
+
+    try {
+      const filteredQuestions = questionService.filterQuestions(questions);
+      const debugData = await leitnerSystem.debugQuestionPool(filteredQuestions);
+      setQuestionPoolDebug(debugData);
+      setClearResult(`✅ Question pool analysis complete. Check console for detailed logs.`);
+    } catch (error) {
+      setClearResult(`❌ Error analyzing question pool: ${error}`);
+      console.error('Question pool debug error:', error);
+    }
+  };
 
   // Prevent hydration mismatch by only running after client mount
   useEffect(() => {
@@ -267,6 +306,81 @@ export default function DebugPage() {
                   </Card>
                 </div>
               )}
+            </section>
+
+            {/* Question Pool Debug */}
+            <section className='space-y-4'>
+              <h2 className='text-xl font-semibold'>Question Pool Analysis</h2>
+              <Card className='p-4'>
+                <h3 className='mb-4 font-semibold'>Analyze Current Question Pool</h3>
+                <p className='mb-4 text-sm text-muted-foreground'>
+                  Debug why you might be getting the same questions. This analyzes
+                  the current state of your question pool, box distribution, and
+                  due questions.
+                </p>
+                <div className='space-y-3'>
+                  <Button
+                    onClick={debugQuestionPool}
+                    variant='outline'
+                    className='w-full'
+                    disabled={loading}
+                  >
+                    🔍 Analyze Question Pool
+                  </Button>
+                  
+                  {questionPoolDebug && (
+                    <div className='space-y-4'>
+                      <Card className='p-4'>
+                        <h4 className='mb-2 font-semibold'>Pool Overview</h4>
+                        <div className='space-y-2 font-mono text-sm'>
+                          <div><strong>Total Questions:</strong> {questionPoolDebug.totalQuestions}</div>
+                          <div><strong>Filtered Questions:</strong> {questionPoolDebug.filteredQuestions}</div>
+                          <div><strong>Due Questions:</strong> {questionPoolDebug.dueQuestions}</div>
+                        </div>
+                      </Card>
+
+                      <Card className='p-4'>
+                        <h4 className='mb-2 font-semibold'>Progress Stats</h4>
+                        <div className='space-y-2 font-mono text-sm'>
+                          <div><strong>Total in Progress:</strong> {questionPoolDebug.progressStats.total}</div>
+                          <div><strong>Box 1 (Learning):</strong> {questionPoolDebug.progressStats.box1}</div>
+                          <div><strong>Box 2 (Practicing):</strong> {questionPoolDebug.progressStats.box2}</div>
+                          <div><strong>Box 3 (Mastered):</strong> {questionPoolDebug.progressStats.box3}</div>
+                          <div><strong>New Questions:</strong> {questionPoolDebug.progressStats.new}</div>
+                          <div><strong>Due Today:</strong> {questionPoolDebug.progressStats.due}</div>
+                          <div><strong>Not Due:</strong> {questionPoolDebug.progressStats.notDue}</div>
+                        </div>
+                      </Card>
+
+                      <Card className='p-4'>
+                        <h4 className='mb-2 font-semibold'>Sample Due Questions</h4>
+                        <div className='max-h-60 overflow-y-auto space-y-1 font-mono text-xs'>
+                          {questionPoolDebug.sampleDueQuestions.map((q, i) => (
+                            <div key={i} className='border-b pb-1'>
+                              <div><strong>ID:</strong> ...{q.id}</div>
+                              <div><strong>Topic:</strong> {q.topic}</div>
+                              <div><strong>Box:</strong> {q.currentBox} | <strong>Due:</strong> {q.isDue ? '✅' : '❌'}</div>
+                              <div><strong>Next Review:</strong> {q.nextReviewDate}</div>
+                              <div><strong>Correct/Incorrect:</strong> {q.timesCorrect}/{q.timesIncorrect}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </Card>
+
+                      <Card className='p-4'>
+                        <h4 className='mb-2 font-semibold'>Topic Distribution</h4>
+                        <div className='grid grid-cols-2 gap-2 font-mono text-xs'>
+                          {Object.entries(questionPoolDebug.topicDistribution).map(([topic, count]) => (
+                            <div key={topic}>
+                              <strong>{topic}:</strong> {count}
+                            </div>
+                          ))}
+                        </div>
+                      </Card>
+                    </div>
+                  )}
+                </div>
+              </Card>
             </section>
 
             {/* Quiz Navigation Debug */}
