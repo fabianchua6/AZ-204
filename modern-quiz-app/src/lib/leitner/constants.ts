@@ -3,11 +3,11 @@
 
 // Core system configuration
 export const LEITNER_CONFIG = {
-  // Box intervals in days (3-box system optimized for intensive study)
+  // Box intervals in days (3-box system with longer intervals for better retention)
   INTERVALS: {
     1: 1, // Box 1: 1 day (new/difficult questions)
-    2: 2, // Box 2: 2 days (improving questions)
-    3: 3, // Box 3: 3 days (mastered questions)
+    2: 4, // Box 2: 4 days (improving questions) - increased for better spacing
+    3: 7, // Box 3: 7 days (mastered questions) - increased for longer-term retention
   } as const,
 
   // Storage keys
@@ -24,8 +24,8 @@ export const LEITNER_CONFIG = {
     MIN_DAILY_TARGET: 1,
     MAX_DAILY_TARGET: 500,
     CLEANUP_THRESHOLD_DAYS: 30,
-    MIN_DUE_QUESTIONS: 20,
-    REVIEW_PROBABILITY: 0.1, // 10% chance to include box 3 questions for review
+    MIN_DUE_QUESTIONS: 100, // Increased from 20 to ensure more variety
+    REVIEW_PROBABILITY: 0.3, // Increased from 0.1 to 0.3 for more box 3 questions
   } as const,
 
   // Performance settings

@@ -248,11 +248,6 @@ export class LeitnerSystem {
     return DateUtils.isDateDue(reviewDateStr, currentDate);
   }
 
-  // Stable pseudo-random function for consistent sorting
-  private stableRandom(questionId: string): number {
-    return AlgorithmUtils.stableRandom(questionId, this.questionSeed);
-  }
-
   private moveQuestion(currentBox: number, wasCorrect: boolean): number {
     return AlgorithmUtils.moveQuestion(currentBox, wasCorrect);
   }
@@ -314,23 +309,12 @@ export class LeitnerSystem {
       return [];
     }
 
-    // Filter out code questions and questions with no select options
-    const filteredQuestions = allQuestions.filter(question => {
-      // Exclude questions with code examples
-      if (question.hasCode) {
-        return false;
-      }
-      // Exclude questions with no select options
-      if (question.options.length === 0) {
-        return false;
-      }
-      return true;
-    });
-
+    // Note: Questions are already filtered upstream by QuestionService.filterQuestions()
+    // Don't double-filter - use all provided questions to maximize variety
     const currentDate = new Date();
 
     // Use map for O(1) lookups instead of repeated gets
-    const questionsWithPriority: QuestionWithLeitner[] = filteredQuestions.map(
+    const questionsWithPriority: QuestionWithLeitner[] = allQuestions.map(
       question => {
         const progress = this.progress.get(question.id);
 
@@ -356,16 +340,17 @@ export class LeitnerSystem {
       // Include all due questions and new questions
       if (q.isDue) return true;
 
-      // Include some questions from box 3 for review (10% chance)
+      // Include some questions from box 3 for review (30% chance)
       if (q.currentBox === LEITNER_CONFIG.LIMITS.MAX_BOX && Math.random() < LEITNER_CONFIG.LIMITS.REVIEW_PROBABILITY) return true;
 
       return false;
     });
 
-    // If we have too few due questions, add some from lower boxes
+    // If we have too few due questions, add more from all boxes to increase variety
     if (dueAndNewQuestions.length < LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS) {
       const additionalQuestions = questionsWithPriority
-        .filter(q => !q.isDue && q.currentBox <= LEITNER_CONFIG.LIMITS.MAX_BOX)
+        .filter(q => !q.isDue) // Get non-due questions
+        .sort(() => Math.random() - 0.5) // Shuffle for randomness
         .slice(0, LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS - dueAndNewQuestions.length);
       dueAndNewQuestions.push(...additionalQuestions);
     }
@@ -382,9 +367,10 @@ export class LeitnerSystem {
       const failureDiff = (b.timesIncorrect || 0) - (a.timesIncorrect || 0);
       if (failureDiff !== 0) return failureDiff;
 
-      // For questions with same priority and failure count, use stable randomization
-      const randomA = this.stableRandom(a.id);
-      const randomB = this.stableRandom(b.id);
+      // For questions with same priority and failure count, use true randomization
+      // This ensures variety each time questions are selected
+      const randomA = Math.random();
+      const randomB = Math.random();
       return randomA - randomB;
     });
 
@@ -563,8 +549,12 @@ export class LeitnerSystem {
     }
     StorageUtils.safeRemoveItem(LEITNER_CONFIG.STORAGE.PROGRESS);
     StorageUtils.safeRemoveItem(LEITNER_CONFIG.STORAGE.STATS);
-    // Reset seed for new randomization
-    this.questionSeed = Date.now();
+  }
+
+  // Force refresh question randomization (useful for getting different question order)
+  refreshQuestionPool(): void {
+    // Simply trigger a re-randomization by calling getDueQuestions again
+    console.log('Question pool refreshed - next session will have different order');
   }
 
   // Clear only navigation/submission states (preserves Leitner progress)
