@@ -1167,9 +1167,29 @@ Question: You are developing an application using Azure Functions to handle HTTP
 - [x] Ruby on Rails server with a startup time of 55 seconds
 - [ ] Java Spring Boot server with a startup time of 70 seconds
 - [x] Go HTTP server with a startup time of 50 seconds
-- [ ] ArnoldC server with a startup time of 90 seconds
+- [ ] .NET Core server with a startup time of 90 seconds
 
-Answer: The requirement is to have a custom handler web server that starts up in less than 60 seconds.
+Answer: The requirement is to have a custom handler web server that starts up in less than 60 seconds. Azure Functions custom handlers must initialize within 60 seconds to be considered healthy.
+
+---
+
+Question: You need to quickly create an Azure Function for testing purposes while away from your development environment. What are the most efficient options for creating and deploying a simple Azure Function?
+
+- [ ] Use a local development machine with full SDK installation
+- [x] Use Azure Portal in a web browser
+- [ ] Install Visual Studio Code on any available computer
+- [ ] Set up a complete development environment with multiple SDKs
+- [x] Choose C# Script for in-portal editing
+- [ ] Choose Java which requires local compilation
+- [x] Create function.json for configuration
+- [x] Use PowerShell or JavaScript for scripting languages
+- [ ] Download and install Azure Functions Core Tools
+
+Answer: Azure Portal allows in-browser function creation and editing. Scripting languages like C# Script, JavaScript, Python, and PowerShell are natively supported for editing in the portal without requiring local compilation. The function.json file is required for configuration when using scripting languages.
+
+- Languages requiring compilation (like Java, .NET compiled) need local development tools
+- Portal-based development is ideal for quick prototyping and testing
+- Scripting languages provide the fastest path to deployment without tooling setup
 
 ---
 

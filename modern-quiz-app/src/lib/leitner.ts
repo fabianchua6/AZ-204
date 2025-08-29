@@ -166,19 +166,24 @@ export class LeitnerSystem {
   private performSave(): void {
     try {
       const data = Object.fromEntries(this.progress);
+      console.log(`🔍 [DEBUG] Saving ${this.progress.size} progress entries to localStorage`);
       StorageUtils.safeSetItem(LEITNER_CONFIG.STORAGE.PROGRESS, JSON.stringify(data));
+      console.log(`🔍 [DEBUG] Successfully saved progress to localStorage`);
     } catch (error) {
+      console.error(`🔍 [DEBUG] ERROR saving to localStorage:`, error);
       if (error instanceof DOMException && error.code === 22) {
         // Storage quota exceeded - cleanup old data
+        console.log(`🔍 [DEBUG] Storage quota exceeded, cleaning up old data`);
         this.cleanupOldData();
         try {
           const data = Object.fromEntries(this.progress);
           StorageUtils.safeSetItem(LEITNER_CONFIG.STORAGE.PROGRESS, JSON.stringify(data));
+          console.log(`🔍 [DEBUG] Successfully saved after cleanup`);
         } catch (retryError) {
-          console.error('Failed to save even after cleanup:', retryError);
+          console.error('🔍 [DEBUG] Failed to save even after cleanup:', retryError);
         }
       } else {
-        console.error('Failed to save Leitner progress:', error);
+        console.error('🔍 [DEBUG] Failed to save Leitner progress:', error);
       }
     }
   }
@@ -256,26 +261,39 @@ export class LeitnerSystem {
     questionId: string,
     wasCorrect: boolean
   ): LeitnerAnswerResult {
+    console.log(`🔍 [DEBUG] processAnswer called: questionId=${questionId.slice(-8)}, wasCorrect=${wasCorrect}`);
+    
     // Remove async since this is synchronous
     if (!this.initialized) {
+      console.error('🔍 [DEBUG] ERROR: Leitner system not initialized!');
       throw new Error('Leitner system not initialized. Call ensureInitialized() first.');
     }
 
     if (!questionId || typeof wasCorrect !== 'boolean') {
+      console.error('🔍 [DEBUG] ERROR: Invalid parameters for processAnswer');
       throw new Error('Invalid parameters for processAnswer');
     }
 
     let progress = this.progress.get(questionId);
+    console.log(`🔍 [DEBUG] Existing progress for question:`, progress ? {
+      currentBox: progress.currentBox,
+      timesCorrect: progress.timesCorrect,
+      timesIncorrect: progress.timesIncorrect,
+      lastReviewed: progress.lastReviewed
+    } : 'NEW QUESTION');
 
     // Initialize if question hasn't been seen before
     if (!progress) {
       progress = this.initializeQuestion(questionId);
+      console.log(`🔍 [DEBUG] Initialized new question in box ${progress.currentBox}`);
     }
 
     const currentBox = progress.currentBox;
     const newBox = this.moveQuestion(currentBox, wasCorrect);
     const now = new Date();
     const nextReview = this.calculateNextReviewDate(newBox, now);
+
+    console.log(`🔍 [DEBUG] Question movement: Box ${currentBox} → Box ${newBox}, Next review: ${nextReview.toISOString()}`);
 
     // Update progress with optimized object creation
     const updatedProgress: LeitnerProgress = {
@@ -289,7 +307,10 @@ export class LeitnerSystem {
     };
 
     this.progress.set(questionId, updatedProgress);
+    console.log(`🔍 [DEBUG] Updated progress stored. Total progress entries: ${this.progress.size}`);
+    
     this.saveToStorage();
+    console.log(`🔍 [DEBUG] Progress saved to localStorage`);
 
     return {
       correct: wasCorrect,
@@ -328,17 +349,19 @@ export class LeitnerSystem {
       notDue: 0
     };
 
+    // Separate new questions from questions with progress
+    const newQuestions: QuestionWithLeitner[] = [];
+    const questionsWithProgress: QuestionWithLeitner[] = [];
+
     // Use map for O(1) lookups instead of repeated gets
-    const questionsWithPriority: QuestionWithLeitner[] = allQuestions.map(
-      question => {
-        const progress = this.progress.get(question.id);
+    allQuestions.forEach(question => {
+      const progress = this.progress.get(question.id);
 
-        if (!progress) {
-          // New questions get highest priority (Box 1)
-          progressStats.new++;
-          return { ...question, priority: 1, isDue: true, currentBox: 1 };
-        }
-
+      if (!progress) {
+        // New questions get highest priority (Box 1)
+        progressStats.new++;
+        newQuestions.push({ ...question, priority: 1, isDue: true, currentBox: 1 });
+      } else {
         progressStats[`box${progress.currentBox}` as keyof typeof progressStats]++;
         const isDue = this.isDateDue(progress.nextReviewDate, currentDate);
         
@@ -348,42 +371,56 @@ export class LeitnerSystem {
           progressStats.notDue++;
         }
 
-        return {
+        questionsWithProgress.push({
           ...question,
           priority: progress.currentBox,
           isDue,
           currentBox: progress.currentBox,
           timesIncorrect: progress.timesIncorrect,
-        };
+        });
       }
-    );
-
-    console.log('🔍 [DEBUG] Progress stats:', progressStats);
-
-    // Filter to only questions that are due or new, plus some review questions
-    const dueAndNewQuestions = questionsWithPriority.filter(q => {
-      // Include all due questions and new questions
-      if (q.isDue) return true;
-
-      // Include some questions from box 3 for review (30% chance)
-      if (q.currentBox === LEITNER_CONFIG.LIMITS.MAX_BOX && Math.random() < LEITNER_CONFIG.LIMITS.REVIEW_PROBABILITY) return true;
-
-      return false;
     });
 
-    console.log(`🔍 [DEBUG] Initial due/new questions: ${dueAndNewQuestions.length}`);
-    console.log(`🔍 [DEBUG] Box distribution in due questions:`, 
+    console.log('🔍 [DEBUG] Progress stats:', progressStats);
+    console.log(`🔍 [DEBUG] New questions available: ${newQuestions.length}`);
+    console.log(`🔍 [DEBUG] Questions with progress: ${questionsWithProgress.length}`);
+
+    // Start with due questions from existing progress
+    const dueProgressQuestions = questionsWithProgress.filter(q => q.isDue);
+    
+    // Add some non-due questions for review (higher probability now)
+    const reviewQuestions = questionsWithProgress
+      .filter(q => !q.isDue && q.currentBox === LEITNER_CONFIG.LIMITS.MAX_BOX && Math.random() < LEITNER_CONFIG.LIMITS.REVIEW_PROBABILITY);
+
+    // Limit new questions per session to prevent overwhelming
+    const limitedNewQuestions = newQuestions
+      .sort(() => Math.random() - 0.5) // Shuffle new questions
+      .slice(0, LEITNER_CONFIG.LIMITS.MAX_NEW_QUESTIONS_PER_SESSION);
+
+    console.log(`🔍 [DEBUG] Due progress questions: ${dueProgressQuestions.length}`);
+    console.log(`🔍 [DEBUG] Review questions added: ${reviewQuestions.length}`);
+    console.log(`🔍 [DEBUG] New questions (limited): ${limitedNewQuestions.length}/${newQuestions.length}`);
+
+    // Combine all question types
+    const dueAndNewQuestions = [
+      ...dueProgressQuestions,
+      ...reviewQuestions,
+      ...limitedNewQuestions
+    ];
+
+    console.log(`🔍 [DEBUG] Initial question selection: ${dueAndNewQuestions.length}`);
+    console.log(`🔍 [DEBUG] Box distribution in selected questions:`, 
       dueAndNewQuestions.reduce((acc, q) => {
         acc[`box${q.currentBox}`] = (acc[`box${q.currentBox}`] || 0) + 1;
         return acc;
       }, {} as Record<string, number>)
     );
 
-    // If we have too few due questions, add more from all boxes to increase variety
+    // If we still need more questions, add some non-due questions
     if (dueAndNewQuestions.length < LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS) {
       console.log(`🔍 [DEBUG] Need more questions: ${dueAndNewQuestions.length} < ${LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS}`);
       
-      const additionalQuestions = questionsWithPriority
+      const additionalQuestions = questionsWithProgress
         .filter(q => !q.isDue) // Get non-due questions
         .sort(() => Math.random() - 0.5) // Shuffle for randomness
         .slice(0, LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS - dueAndNewQuestions.length);

@@ -247,16 +247,22 @@ export function useQuizStateWithLeitner(
         });
 
         try {
+          console.log(`🔍 [DEBUG] submitAnswer called: questionId=${questionId.slice(-8)}, answerIndexes=[${answerIndexes.join(',')}]`);
+          
           // Ensure Leitner system is initialized first
           await leitnerSystem.ensureInitialized();
+          
+          console.log(`🔍 [DEBUG] Leitner system initialized, processing answer: isCorrect=${isCorrect}`);
           
           // Process with Leitner system (synchronous operation)
           const result = leitnerSystem.processAnswer(questionId, isCorrect);
 
+          console.log(`🔍 [DEBUG] Leitner processAnswer result:`, result);
+
           // Return result for UI feedback without auto-navigation
           return result;
         } catch (error) {
-          console.error('[Leitner] Failed to process answer:', error);
+          console.error('🔍 [DEBUG] [Leitner] Failed to process answer:', error);
           throw error;
         }
       },
