@@ -51,6 +51,10 @@ export class LeitnerSystem {
       try {
         await this.loadFromStorage();
         await this.loadSettings();
+        
+        // Periodic cleanup of old daily attempts data
+        this.clearOldDailyAttempts();
+        
         this.initialized = true;
       } catch (error) {
         console.error('Failed to initialize Leitner system:', error);
@@ -257,6 +261,103 @@ export class LeitnerSystem {
     return AlgorithmUtils.moveQuestion(currentBox, wasCorrect);
   }
 
+  // Daily attempts tracking for daily target calculation
+  private incrementDailyAttempts(): void {
+    const today = this.getLocalDateString(new Date());
+    const key = `leitner-daily-attempts-${today}`;
+    
+    try {
+      // Use atomic increment to prevent race conditions
+      let attempts = 0;
+      const current = StorageUtils.safeGetItem(key);
+      if (current) {
+        attempts = parseInt(current, 10);
+        if (isNaN(attempts)) attempts = 0; // Handle corrupted data
+      }
+      
+      StorageUtils.safeSetItem(key, String(attempts + 1));
+    } catch (error) {
+      console.error('Failed to update daily attempts:', error);
+      // Fallback: try to set to 1 if increment fails
+      try {
+        StorageUtils.safeSetItem(key, '1');
+      } catch (fallbackError) {
+        console.error('Failed to set fallback daily attempts:', fallbackError);
+      }
+    }
+  }
+
+  private getDailyAttempts(): number {
+    const today = this.getLocalDateString(new Date());
+    const key = `leitner-daily-attempts-${today}`;
+    
+    try {
+      const current = StorageUtils.safeGetItem(key);
+      return current ? parseInt(current, 10) : 0;
+    } catch (error) {
+      console.error('Failed to get daily attempts:', error);
+      return 0;
+    }
+  }
+
+  // Cleanup all daily attempts data (for reset and memory management)
+  private clearAllDailyAttempts(): void {
+    try {
+      // Clear today's attempts
+      const today = this.getLocalDateString(new Date());
+      const todayKey = `leitner-daily-attempts-${today}`;
+      StorageUtils.safeRemoveItem(todayKey);
+      
+      // Clean up old daily attempts keys (older than 7 days)
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('leitner-daily-attempts-')) {
+          const dateStr = key.replace('leitner-daily-attempts-', '');
+          try {
+            const keyDate = new Date(dateStr + 'T00:00:00');
+            const daysDiff = (Date.now() - keyDate.getTime()) / (1000 * 60 * 60 * 24);
+            
+            // Remove keys older than 7 days or invalid dates
+            if (daysDiff > 7 || isNaN(daysDiff)) {
+              StorageUtils.safeRemoveItem(key);
+            }
+          } catch {
+            // Remove invalid date keys
+            StorageUtils.safeRemoveItem(key);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to clear daily attempts:', error);
+    }
+  }
+
+  // Periodic cleanup of old daily attempts (keeps only last 7 days)
+  private clearOldDailyAttempts(): void {
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('leitner-daily-attempts-')) {
+          const dateStr = key.replace('leitner-daily-attempts-', '');
+          try {
+            const keyDate = new Date(dateStr + 'T00:00:00');
+            const daysDiff = (Date.now() - keyDate.getTime()) / (1000 * 60 * 60 * 24);
+            
+            // Remove keys older than 7 days
+            if (daysDiff > 7 || isNaN(daysDiff)) {
+              StorageUtils.safeRemoveItem(key);
+            }
+          } catch {
+            // Remove invalid date keys
+            StorageUtils.safeRemoveItem(key);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to cleanup old daily attempts:', error);
+    }
+  }
+
   processAnswer(
     questionId: string,
     wasCorrect: boolean
@@ -308,6 +409,9 @@ export class LeitnerSystem {
 
     this.progress.set(questionId, updatedProgress);
     console.log(`🔍 [DEBUG] Updated progress stored. Total progress entries: ${this.progress.size}`);
+    
+    // Track daily attempts for daily target calculation
+    this.incrementDailyAttempts();
     
     this.saveToStorage();
     console.log(`🔍 [DEBUG] Progress saved to localStorage`);
@@ -569,16 +673,8 @@ export class LeitnerSystem {
     // Calculate streak (simplified - just check if user has been active)
     const streakDays = this.calculateStreakDays();
 
-    // Calculate due today based on personal daily target vs. questions answered today
-    const todayStr = this.getLocalDateString(new Date());
-    const questionsAnsweredToday = Array.from(this.progress.values()).filter(progress => {
-      try {
-        const reviewedDateStr = this.getLocalDateFromStoredDate(progress.lastReviewed);
-        return reviewedDateStr === todayStr;
-      } catch {
-        return false;
-      }
-    }).length;
+    // Calculate due today based on daily target vs. total attempts today
+    const questionsAnsweredToday = this.getDailyAttempts();
     
     // Calculate remaining questions to reach daily target
     const remainingToday = Math.max(0, this.settings.dailyTarget - questionsAnsweredToday);
@@ -648,6 +744,9 @@ export class LeitnerSystem {
     }
     StorageUtils.safeRemoveItem(LEITNER_CONFIG.STORAGE.PROGRESS);
     StorageUtils.safeRemoveItem(LEITNER_CONFIG.STORAGE.STATS);
+    
+    // Clear all daily attempts data to prevent stale counts
+    this.clearAllDailyAttempts();
   }
 
   // Force refresh question randomization (useful for getting different question order)

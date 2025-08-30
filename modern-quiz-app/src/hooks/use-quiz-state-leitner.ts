@@ -37,7 +37,24 @@ export function useQuizStateWithLeitner(
       }
     >
   >({});
-  const [__forceTick, setForceTick] = useState(0); // diagnostics only
+  const [__forceTick, setForceTick] = useState(0); // Keep for clearAllProgress only
+  
+  // Initialize stats with safe defaults to prevent null reference errors
+  const [stats, setStats] = useState<EnhancedQuizStats>(() => ({
+    totalQuestions: 0,
+    answeredQuestions: 0,
+    correctAnswers: 0,
+    incorrectAnswers: 0,
+    accuracy: 0,
+    leitner: {
+      totalQuestions: 0,
+      questionsStarted: 0,
+      boxDistribution: {},
+      dueToday: 0,
+      accuracyRate: 0,
+      streakDays: 0,
+    },
+  }));
 
   // Simple in-place shuffle helper
   function shuffleArray<T>(arr: T[]): T[] {
@@ -102,37 +119,64 @@ export function useQuizStateWithLeitner(
           return cleaned;
         });
         
-        // Also clear submission states for due questions
-        setSubmissionStates(prev => {
-          const cleaned = { ...prev };
-          dueQuestions.forEach(question => {
-            delete cleaned[question.id];
-          });
-          return cleaned;
-        });
+        // DO NOT clear submission states - this destroys user progress!
+        // Submission states should persist to track completion progress
+        // Only clear them explicitly when user chooses to reset progress
       }
     };
 
     updateQuestions();
   }, [questions, selectedTopic, __forceTick]); // Add __forceTick to refresh after answers
 
-  // Calculate enhanced stats including Leitner data
-  const stats: EnhancedQuizStats = useMemo(() => {
-    const filteredQuestions = questionService.filterQuestions(questions);
-    const leitnerCompletion =
-      leitnerSystem.getCompletionProgress(filteredQuestions);
-    const leitnerStats = leitnerSystem.getStats(filteredQuestions);
+  // Initialize and update stats when questions, topic, or force refresh change
+  // Note: We don't include submissionStates here to avoid excessive recalculation
+  useEffect(() => {
+    if (questions.length > 0) {
+      try {
+        const filteredQs = questionService.filterQuestions(questions);
+        const leitnerCompletion = leitnerSystem.getCompletionProgress(filteredQs);
+        const leitnerStats = leitnerSystem.getStats(filteredQs);
 
-    return {
-      totalQuestions: leitnerCompletion.totalQuestions,
-      answeredQuestions: leitnerCompletion.answeredQuestions,
-      correctAnswers: leitnerCompletion.correctAnswers,
-      incorrectAnswers: leitnerCompletion.incorrectAnswers,
-      accuracy: leitnerCompletion.accuracy,
-      leitner: leitnerStats,
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questions, __forceTick]); // Depend on forceTick for updates
+        setStats({
+          totalQuestions: leitnerCompletion.totalQuestions,
+          answeredQuestions: leitnerCompletion.answeredQuestions,
+          correctAnswers: leitnerCompletion.correctAnswers,
+          incorrectAnswers: leitnerCompletion.incorrectAnswers,
+          accuracy: leitnerCompletion.accuracy,
+          leitner: leitnerStats,
+        });
+      } catch (error) {
+        console.error('Failed to update stats:', error);
+        // Keep existing stats on error - don't update
+      }
+    }
+  }, [questions, selectedTopic, __forceTick]); // Removed submissionStates for performance
+
+  // Separate effect to update stats when submissions change (debounced)
+  useEffect(() => {
+    if (questions.length === 0) return;
+
+    const timeoutId = setTimeout(() => {
+      try {
+        const filteredQs = questionService.filterQuestions(questions);
+        const leitnerCompletion = leitnerSystem.getCompletionProgress(filteredQs);
+        const leitnerStats = leitnerSystem.getStats(filteredQs);
+
+        setStats({
+          totalQuestions: leitnerCompletion.totalQuestions,
+          answeredQuestions: leitnerCompletion.answeredQuestions,
+          correctAnswers: leitnerCompletion.correctAnswers,
+          incorrectAnswers: leitnerCompletion.incorrectAnswers,
+          accuracy: leitnerCompletion.accuracy,
+          leitner: leitnerStats,
+        });
+      } catch (error) {
+        console.error('Failed to update stats after submission:', error);
+      }
+    }, 100); // 100ms debounce to avoid excessive calculations
+
+    return () => clearTimeout(timeoutId);
+  }, [submissionStates, questions, selectedTopic]);
 
   // Reset current question index when topic changes
   useEffect(() => {
@@ -162,9 +206,10 @@ export function useQuizStateWithLeitner(
     []
   );
 
-  // Clear stale answers when questions change or after submissions
+  // Clear stale answer selections (but preserve submission history for progress tracking)
   useEffect(() => {
-    // Additional cleanup: remove any lingering answer state for questions not in current filtered list
+    // Only clean current answer selections, NOT submission states
+    // This prevents memory leaks while preserving user progress
     const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
     
     setAnswers(prev => {
@@ -177,15 +222,8 @@ export function useQuizStateWithLeitner(
       return cleaned;
     });
     
-    setSubmissionStates(prev => {
-      const cleaned = { ...prev };
-      Object.keys(cleaned).forEach(questionId => {
-        if (!currentQuestionIds.has(questionId)) {
-          delete cleaned[questionId];
-        }
-      });
-      return cleaned;
-    });
+    // DO NOT clean submission states - they contain valuable progress data
+    // that should persist across topic switches and sessions
   }, [filteredQuestions]); // Clean up when filtered questions change
 
   // Actions - Memoized to prevent unnecessary re-renders
@@ -240,7 +278,7 @@ export function useQuizStateWithLeitner(
             },
           };
           
-          // Also immediately save to localStorage for mobile persistence
+          // Save to localStorage for mobile persistence
           saveToLocalStorage('leitner-submission-states', newState);
           
           return newState;
@@ -258,6 +296,9 @@ export function useQuizStateWithLeitner(
           const result = leitnerSystem.processAnswer(questionId, isCorrect);
 
           console.log(`🔍 [DEBUG] Leitner processAnswer result:`, result);
+
+          // Stats are updated inline with submission state to prevent race conditions
+          // No separate updateStatsAfterSubmission call needed
 
           // Return result for UI feedback without auto-navigation
           return result;
@@ -288,7 +329,8 @@ export function useQuizStateWithLeitner(
         if (index >= 0 && index < filteredQuestions.length) {
           setCurrentQuestionIndex(index);
           
-          // Always clear answer state for the new question to ensure fresh review
+          // Only clear current answer selection, NOT submission state
+          // This preserves progress while allowing fresh answer selection
           const newQuestionId = filteredQuestions[index]?.id;
           if (newQuestionId) {
             setAnswers(prev => {
@@ -297,12 +339,8 @@ export function useQuizStateWithLeitner(
               return newAnswers;
             });
             
-            // Always clear submission state for fresh start
-            setSubmissionStates(prev => {
-              const newStates = { ...prev };
-              delete newStates[newQuestionId];
-              return newStates;
-            });
+            // DO NOT delete submission states - preserve progress!
+            // The user should see their previous submission if they navigate back
           }
         }
       },
