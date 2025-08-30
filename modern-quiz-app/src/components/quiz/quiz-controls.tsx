@@ -47,10 +47,18 @@ export function QuizControls({
               </span>
             </div>
             <div className='flex items-center gap-3'>
-              {leitnerStats && leitnerStats.dueToday > 0 && (
+              {leitnerStats && (
                 <span className='flex items-center gap-1'>
-                  <span className='text-orange-600'>
-                    {leitnerStats.dueToday} left
+                  <span
+                    className={
+                      leitnerStats.dueToday > 0
+                        ? 'text-orange-600'
+                        : 'text-green-600'
+                    }
+                  >
+                    {leitnerStats.dueToday > 0
+                      ? `${leitnerStats.dueToday} left`
+                      : 'Good job 🥳'}
                   </span>
                 </span>
               )}
