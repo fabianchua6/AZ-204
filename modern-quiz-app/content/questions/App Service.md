@@ -1360,4 +1360,3 @@ Question: Which of the following won't trigger a restart?
 Answer: Storage failover requires app restart or remounting of Azure Storage.
 
 ---
-

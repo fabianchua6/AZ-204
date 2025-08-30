@@ -970,4 +970,3 @@ Question: You are developing an application using Azure Functions to handle HTTP
 Answer: The requirement is to have a custom handler web server that starts up in less than 60 seconds. Azure Functions custom handlers must initialize within 60 seconds to be considered healthy.
 
 ---
-
