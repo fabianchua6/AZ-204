@@ -24,23 +24,6 @@ Presentation Layer is part of the Open Systems Interconnection model and is not 
 
 ---
 
-Question: You're designing a cloud-based microservice architecture using Azure Functions. One of the functions requires access to sensitive configuration data stored in Azure Key Vault. To maintain a high level of security, you want to ensure that only the Azure Function has the ability to retrieve secrets from the Key Vault. How should you configure access to the sensitive information in the Key Vault?
-
-- [ ] Create an Microsoft Entra ID application, assign it 'get' and 'list' permissions for the Key Vault, and embed the application's client ID and client secret in function's environment variables.
-- [ ] Generate a User-assigned Managed Identity, assign it 'get' and 'list' permissions for the Key Vault, and embed the identity's client ID and client secret in function's environment variables.
-- [x] Enable a System-assigned Managed Identity for the function and assign it 'get' and 'list' permissions for the Key Vault.
-- [ ] Generate an access token to the Key Vault, and store the Key Vault's URI and the access token in the function's environment variables.
-- [ ] Store the Key Vault's URI in the function's environment variables and use a shared access signature (SAS) token to authenticate.
-- [ ] Create a service principal, assign it 'get' and 'list' permissions for the Key Vault, and store the service principal's credentials in the function's environment variables.
-- [ ] Enable Entra ID authentication for the function and assign the function's user identity 'get' and 'list' permissions for the Key Vault.
-- [ ] Use Entra ID B2C to create a user identity, assign it 'get' and 'list' permissions for the Key Vault, and store the user identity's credentials in the function's environment variables.
-
-Answer: Enable a System-assigned Managed Identity for 'mySensitiveFunction' and assign it 'get' and 'list' permissions for the Key Vault.
-
-System-assigned Managed Identities are automatically managed by Azure and provide an identity for your Azure resource. This ensures that only the Azure resource can access the secrets in the Key Vault, without any risk of credential exposure. The other options involve storing sensitive information in environment variables, which can potentially be accessed by unauthorized users, thus they are not secure.
-
----
-
 Question: You have downloaded an Azure Functions codebase that is set to be triggered by an HTTP request. This function needs to access a database, and for that, it requires a connection string. You need to ensure the connection string is not stored in plain text within the code or configuration files. You are preparing to create the necessary components to achieve your goal. Which of the following should you create to achieve your goal? Answer by selecting the correct options from the list below.
 
 - [x] Azure Key Vault
@@ -112,22 +95,6 @@ CryptographyClient cryptoClient = client.GetCryptographyClient(key.Name, key.Pro
 EncryptResult encryptResult = cryptoClient.Encrypt(encryptionAlgorithm, Encoding.UTF8.GetBytes(plaintext + secretValue));
 DecryptResult decryptResult = cryptoClient.Decrypt(encryptionAlgorithm, encryptResult.Ciphertext);
 ```
-
----
-
-Question: You are an Azure administrator responsible for managing a Key Vault named 'SecureVault'. A new application needs to securely store, retrieve, and manage cryptographic keys within 'SecureVault'. The application must be able to encrypt keys before storing them, decrypt keys when retrieving them, and also have the ability to retrieve key information. You need to configure the appropriate permissions for the application's managed identity using the az keyvault set-policy command. Which permissions should you grant to the application's managed identity in the Key Vault's access policy?
-
-- [x] WRAP
-- [x] UNWRAP
-- [x] GET
-- [ ] LIST
-- [ ] UPDATE
-- [ ] RECOVER
-- [ ] RESTORE
-- [ ] SIGN
-- [ ] VERIFY
-
-Answer: `az keyvault set-policy --name 'SecureVault' --object-id 'applicationObjectId' --key-permissions wrapKey unwrapKey get`
 
 ---
 

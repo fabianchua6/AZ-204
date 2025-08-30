@@ -195,37 +195,6 @@ Committing a write operation to the primary location before replicating it using
 
 ---
 
-Question: Which of the following statements are true about Azure Storage redundancy options: LRS, ZRS, GRS, GRS-RA, GZRS, GZRS-RA? Select all that apply.
-
-- [x] ZRS copies data synchronously across multiple data centers within the primary region.
-- [x] GRS copies your data asynchronously to a single physical location in a secondary region.
-- [x] GRS-RA allows read access to your data from the secondary region.
-- [x] GZRS copies data asynchronously to a secondary region and synchronously across three Azure availability zones in the primary region.
-- [ ] GZRS does not replicate data across availability zones in the primary region, only to the secondary.
-- [ ] GZRS replicates data across availability zones in the primary and the secondary regions.
-- [ ] GRS-RA allows read and write operations from the secondary region.
-- [ ] All redundancy options replicate data within the primary region, but LRS and ZRS replicates it synchronously, while GRS and GZRS only use asynchronous replication.
-- [ ] GZRS copies your data asynchronously across three Azure availability zones in the secondary region.
-- [ ] Both ZRS and GZRS copy your data asynchronously across three Azure availability zones in the primary region.
-- [ ] If one of datacenters is temporary offline, ZRS will skip it
-- [x] Both GRS and GZRS use LRS in the secondary region
-- [x] GRS and GZRS are not always up to date with the primary region
-- [ ] During failover, GZRS ensures data is always available
-- [ ] Changing redundancy options may cause data loss
-
-Answer:
-
-- **Locally redundant storage (LRS)**: LRS replicates data within a single data center in the primary region. It does not replicate across multiple data centers, so it is incorrect to say that all redundancy options replicate data within the primary region.
-- **Zone-redundant storage (ZRS)**: ZRS copies data synchronously across multiple data centers within the primary region. If one of the data centers is temporarily offline, ZRS will not skip it; instead, it ensures that all writes are committed to the durable storage within the zone before being acknowledged to the client.
-- **Geo-redundant storage (GRS)**: GRS copies your data asynchronously to a secondary region, making it correct to say that GRS is not always up to date with the primary region. However, GRS does not provide read access to your data from the secondary region, so it's incorrect to say GRS-RA allows read and write operations from the secondary region.
-- **Read-access geo-redundant storage (GRS-RA)**: GRS-RA extends GRS by providing read access to the data in the secondary region. It doesn't, however, allow write operations from the secondary region, contrary to the false statement.
-- **Geo-zone-redundant storage (GZRS)**: GZRS combines the features of GRS and ZRS. It replicates data asynchronously to a secondary region (like GRS) and synchronously across three Azure availability zones in the primary region (like ZRS). However, it does not replicate data across availability zones in the secondary region, nor does it guarantee data availability during failover.
-- **Read-access geo-zone-redundant storage (GZRS-RA)**: GZRS-RA is the read-access variant of GZRS. It provides the same functionality as GZRS, with the added benefit of read access from the secondary region.
-
-Finally, both GRS and GZRS use LRS in the secondary region for data storage, and changing redundancy options could potentially lead to increased cost or affect data durability but it doesn't directly cause data loss.
-
----
-
 Question: You are an engineer at Omega Corp, a company that heavily relies on Azure services. Currently, the company's Azure Storage account `omegaStorageAccount` within the resource group `omegaRG` is set up with Locally Redundant Storage (LRS) for data replication.
 
 Recently, there have been growing concerns about the company's disaster recovery strategy. The business is expanding rapidly, serving customers globally, leading to a requirement for high availability, even in the event of a regional failure.

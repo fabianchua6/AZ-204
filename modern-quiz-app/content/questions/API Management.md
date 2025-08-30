@@ -112,46 +112,6 @@ Answer: All sizes are in KB
 
 ---
 
-Question: You are developing an API that needs to restrict a single client IP address to only 10 calls every minute, with a total of 100 calls and 100 MB of bandwidth per hour. Which policies should you implement to achieve this requirement?
-
-- [x] `<rate-limit-by-key calls="10" renewal-period="60" counter-key="@(context.Request.IpAddress)" />`
-- [ ] `<rate-limit-by-key calls="10" renewal-period="1" counter-key="@(context.Request.IpAddress)" />`
-- [ ] `<rate-limit calls="10" renewal-period="60" />`
-- [ ] `<rate-limit calls="10" renewal-period="1" />`
-- [x] `<quota-by-key calls="100" bandwidth="100000" renewal-period="3600" counter-key="@(context.Request.IpAddress)" />`
-- [ ] `<quota-by-key calls="100" bandwidth="100" renewal-period="60" counter-key="@(context.Request.IpAddress)" />`
-- [ ] `<quota-by-key calls="100" bandwidth="100" renewal-period="3600" counter-key="@(context.Request.IpAddress)" />`
-- [ ] `<quota-by-key calls="100" bandwidth="100000" renewal-period="60" counter-key="@(context.Request.IpAddress)" />`
-- [ ] `<quota calls="100" bandwidth="100000" renewal-period="3600" />`
-- [ ] `<quota calls="100" bandwidth="100" renewal-period="60" />`
-- [ ] `<quota calls="100" bandwidth="100" renewal-period="3600" />`
-- [ ] `<quota calls="100" bandwidth="100000" renewal-period="60" />`
-- [ ] `<ip-filter action="forbid"><address>"@(context.Request.IpAddress)"</address></ip-filter>`
-- [ ] `<ip-filter action="allow"><address>"@(context.Request.IpAddress)"</address></ip-filter>`
-
-Answer: `rate-limit-by-key` and `quota-by-key`, units in seconds and KB, `counter-key="@(context.Request.IpAddress)"`.
-
----
-
-Question: You are working on an API where an end user is authenticated, and you need to generate a throttling key based on information that uniquely identifies that user. The requirement is to limit the calls to 10 every minute, with a total of 100 calls and 100 MB of bandwidth per hour. Which policies should you implement to achieve this requirement?
-
-- [x] `<rate-limit-by-key calls="10" renewal-period="60" counter-key="@(context.Request.Headers.GetValueOrDefault(\"Authorization\",\"").AsJwt()?.Subject)" />`
-- [ ] `<rate-limit-by-key calls="10" renewal-period="1" counter-key="@(context.Request.Headers.GetValueOrDefault(\"Authorization\",\"").AsJwt()?.Subject)" />`
-- [ ] `<rate-limit calls="10" renewal-period="60" />`
-- [ ] `<rate-limit calls="10" renewal-period="1" />`
-- [x] `<quota-by-key calls="100" bandwidth="100000" renewal-period="3600" counter-key="@(context.Request.Headers.GetValueOrDefault(\"Authorization\",\"").AsJwt()?.Subject)" />`
-- [ ] `<quota-by-key calls="100" bandwidth="100" renewal-period="60" counter-key="@(context.Request.Headers.GetValueOrDefault(\"Authorization\",\"").AsJwt()?.Subject)" />`
-- [ ] `<quota-by-key calls="100" bandwidth="100" renewal-period="3600" counter-key="@(context.Request.Headers.GetValueOrDefault(\"Authorization\",\"").AsJwt()?.Subject)" />`
-- [ ] `<quota-by-key calls="100" bandwidth="100000" renewal-period="60" counter-key="@(context.Request.Headers.GetValueOrDefault(\"Authorization\",\"").AsJwt()?.Subject)" />`
-- [ ] `<quota calls="100" bandwidth="100000" renewal-period="3600" />`
-- [ ] `<quota calls="100" bandwidth="100" renewal-period="60" />`
-- [ ] `<quota calls="100" bandwidth="100" renewal-period="3600" />`
-- [ ] `<quota calls="100" bandwidth="100000" renewal-period="60" />`
-
-Answer: `rate-limit-by-key` and `quota-by-key`, units in seconds and KB, `counter-key="@(context.Request.Headers.GetValueOrDefault(\"Authorization\",\"").AsJwt()?.Subject)"`.
-
----
-
 Question: An API is integrated into an Azure API Management (APIM) gateway and is utilized by client applications worldwide. You are tasked with granting access to 10 new operations exclusively to a select group of 200 beta developers around the world. How can you enable these developers to test the new operations using the existing API URL?
 
 - [ ] Implement a revision in Azure API Management.
@@ -161,32 +121,6 @@ Question: An API is integrated into an Azure API Management (APIM) gateway and i
 - [ ] Create separate gateways.
 
 Answer: Header-based versioning uses custom HTTP headers to determine the version of the API to be accessed. This allows different versions of the API to be accessed through the same URL.
-
----
-
-Question: You establish an API Management (APIM) gateway and incorporate an existing App Services API app within it. Your goal is to limit each client application to a maximum of 1000 calls to the API on an hourly basis.". Which policies could achieve this requirement?
-
-- [ ] `<rate-limit-by-key calls="1000" renewal-period="3600" counter-key="@(context.Subscription.Id)" />`
-- [x] `<rate-limit-by-key calls="80" renewal-period="300" counter-key="@(context.Subscription.Id)" />`
-- [ ] `<rate-limit-by-key calls="1000" renewal-period="60" counter-key="@(context.Subscription.Id)" />`
-- [ ] `<rate-limit-by-key calls="1000" renewal-period="3600" />`
-- [ ] `<rate-limit-by-key calls="80" renewal-period="5" />`
-- [ ] `<rate-limit-by-key calls="1000" renewal-period="60" />`
-- [x] `<quota-by-key calls="1000" renewal-period="3600" counter-key="@(context.Subscription.Id)" />`
-- [ ] `<quota-by-key calls="1000" renewal-period="60" counter-key="@(context.Subscription.Id)" />`
-- [ ] `<quota-by-key calls="15" renewal-period="60" counter-key="@(context.Subscription.Id)" />`
-- [ ] `<quota-by-key calls="1000" renewal-period="3600" />`
-- [ ] `<quota-by-key calls="1000" renewal-period="60" />`
-- [ ] `<quota-by-key calls="15" renewal-period="60" />`
-
-Answer: To enforce a per-client limit of **1000 API calls per hour**, a combination of [rate-limit-by-key](https://learn.microsoft.com/en-us/azure/api-management/rate-limit-by-key-policy) and [quota-by-key](https://learn.microsoft.com/en-us/azure/api-management/quota-by-key-policy) policies is required:
-
-- `rate-limit-by-key` is used to control short-term bursts. However, this policy has a **maximum renewal period of 300 seconds (5 minutes)**. To approximate an hourly rate, the hour is divided into 12 intervals. By allowing **80 calls per 5 minutes**, the effective cap becomes 960 calls per hour, which satisfies the requirement of **not exceeding** 1000 calls/hour.
-- `quota-by-key` sets a hard cap on total usage. This policy allows a **minimum renewal period of 300 seconds**, so setting it to **1000 calls per 3600 seconds (1 hour)** provides a strict upper boundary per client.
-
-`counter-key` is required if you want the policy to apply per client (e.g., per subscription, per user, per IP). If you omit counter-key, the policy applies globally to all clients combined, which is rarely useful for rate-limiting or quotas in multi-tenant APIs.
-
-Together, these policies ensure both **rate smoothing** and **strict quota enforcement**. All other options either violate APIM policy constraints (e.g., invalid renewal periods), omit required keys, or fail to distribute traffic safely within allowed limits.
 
 ---
 
@@ -286,37 +220,6 @@ Question: You are setting up an API Management instance to manage your organizat
 - [ ] Set up a self-hosted gateway between the internal network and Azure.
 
 Answer: OpenAPI specification enables Azure API Management to automatically discover the endpoints and methods supported by the API.
-
----
-
-Question: Your company has a complex environment with APIs hosted both on-premises and in different cloud providers. You are tasked with centralizing the management of these APIs using Azure API Management, while ensuring low-latency access for local users. What actions should you take to accomplish this task?
-
-- [x] Upgrade to the Premium tier of Azure API Management.
-- [x] Implement a self-hosted gateway to manage on-premises APIs and APIs across multiple clouds.
-- [ ] Migrate all APIs to Azure App Service.
-- [ ] Generate OpenAPI specifications for all APIs.
-- [ ] Configure a VPN connection between the internal network and Azure.
-
-Answer: The Premium tier is required to deploy self-hosted gateways, which are essential for managing APIs across different environments. Self-hosted gateways are containerized versions of managed gateways, suitable for hybrid and multicloud environments.  
-Migrating all APIs to Azure App Service is not necessary for managing APIs across different environments.  
-Generating OpenAPI specifications is not directly related to managing APIs across multiple clouds and on-premises.  
-Configuring a VPN connection is not relevant to the scenario described.
-
----
-
-Here's the modified question using generic Azure CLI commands instead of PowerShell:
-
-Your team has developed an application API based on the OpenAPI specification. You have to ensure that the API can be accessed via an Azure API management service instance. Which of the following Azure CLI commands would you run?
-
-- [ ] `az apim api import`
-- [ ] `az apim backend create`
-- [x] `az apim create`
-- [ ] `az apim backend proxy create`
-
-Answer: First, you need to create a new API management instance using `az apim create`.  
-`az apim api import` imports an API into an existing API Management service instance.  
-`az apim backend create` creates a new backend entity in API Management.
-`az apim backend proxy create` is for creating a proxy backend, not an API Management instance.
 
 ---
 

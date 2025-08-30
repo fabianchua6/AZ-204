@@ -140,23 +140,6 @@ Answer: The `TrackDependency` method is used to log calls to external dependenci
 
 ---
 
-Question: You have a very old Azure function app and you want to integrate it with Application Insights to save informational log data. Which tasks should you perform?
-
-- [x] Call the `LogInformation` method of the `ILogger` class.
-- [x] Manually enable Application Insights in the function app.
-- [x] Store the name of the instrumentation key in an app setting named `APPINSIGHTS_INSTRUMENTATIONKEY`.
-- [ ] Call the `TrackEvent` method of the `TelemetryClient` class.
-- [ ] Disable built-in logging in the function app.
-- [ ] Add the Azure App Insights into function App using RBAC.
-- [ ] Add the function App into Azure App Insights using RBAC.
-- [ ] Add Azure App Insights Service Principle Id to the App settings.
-- [ ] Store a key named `APPINSIGHTS_INSTRUMENTATIONKEY` as a secret named applicationinsights in an Azure Key Vault.
-
-Answer: Application Insights may have to be manually enabled for old functions. To send data, you need the key named `APPINSIGHTS_INSTRUMENTATIONKEY`. `ILogger` is used to log to Application Insights (not `TelemetryClient`!).  
-Azure function apps use app settings to find the Application Insights key, not secrets from the Key Vault.
-
----
-
 Question: In your organization, you are working on an ASP.NET web application that is hosted on a development server within the company's internal network. Before transitioning the application to the production server, you must gather performance data from various global locations. What action should you take?
 
 - [x] Implement a URL ping test using Application Insights.
@@ -239,81 +222,6 @@ Answer: Funnels are used to track how users move through different stages of a w
 
 ---
 
-Question: As a marketing analyst, you're tasked with determining how website performance and user characteristics are affecting sales conversions on your online store. Which feature in Azure Insights would you utilize to analyze these factors?
-
-- [ ] Users
-- [ ] Sessions
-- [ ] Events
-- [ ] Funnels
-- [ ] Cohorts
-- [x] Impact
-- [ ] Retention
-- [ ] User Flows
-
-Answer: Impact is the feature that helps you understand how different factors, such as load times and user properties, influence conversion rates in various parts of the app. It provides insights into what affects user behavior and conversion.
-
----
-
-Question: You're leading a team that's launching a new feature, and you want to analyze how different segments of users are interacting with it. Which Azure Insights feature would you use to group users based on their interaction with this new feature?
-
-- [ ] Users
-- [ ] Sessions
-- [ ] Events
-- [ ] Funnels
-- [x] Cohorts
-- [ ] Impact
-- [ ] Retention
-- [ ] User Flows
-
-Answer: Cohorts are used to group and analyze sets of users, sessions, events, or operations that have something in common. This feature helps in understanding specific groups or segments within the user base.
-
----
-
-Question: As a community manager for an online gaming platform, you want to understand player loyalty and how often they return to play after specific achievements or failures. Which Azure Insights feature would you employ to track this information?
-
-- [ ] Users
-- [ ] Sessions
-- [ ] Events
-- [ ] Funnels
-- [ ] Cohorts
-- [ ] Impact
-- [x] Retention
-- [ ] User Flows
-
-Answer: Retention is the feature that helps you understand how many users return to your app and how often they engage with specific tasks or goals. It provides insights into user loyalty and repeated engagement with the app.
-
----
-
-Question: You are a digital marketing manager and want to assess the impact of a recent marketing campaign on your website. You need to determine how many people used your application. Which Azure Insights feature would you use to analyze this information?
-
-- [x] Users
-- [ ] Sessions
-- [ ] Events
-- [ ] Funnels
-- [ ] Cohorts
-- [ ] Impact
-- [ ] Retention
-- [ ] User Flows
-
-Answer: Users helps you understand the number of people who have used your application. It provides insights into the demographics and interests of the users, allowing you to assess the reach of your campaign.
-
----
-
-Question: You're a UX designer working on improving the navigation of a content-rich website. You want to understand the paths users take through the site, where they tend to exit, and if there are any repetitive actions that might indicate a usability issue. Which Azure Insights feature would you use to analyze these navigation patterns?
-
-- [ ] Users
-- [ ] Sessions
-- [ ] Events
-- [ ] Funnels
-- [ ] Cohorts
-- [ ] Impact
-- [ ] Retention
-- [x] User Flows
-
-Answer: You would use the "User Flows" feature in Azure Insights to analyze these navigation patterns.
-
----
-
 Question: What is the primary purpose of the connection string in Application Insights?
 
 - [ ] Authenticates the Application Insights SDK
@@ -330,7 +238,7 @@ Question: As an Azure Developer, you are tasked with integrating Azure Applicati
 
 - [ ] Exception
 - [ ] Events
-- [ ] Session Id
+- [x] Session Id
 - [ ] Trace
 
 Answer: Application Insights already takes care of this for you. Manually capturing it would be redundant and could interfere with the automatically generated Session Ids.

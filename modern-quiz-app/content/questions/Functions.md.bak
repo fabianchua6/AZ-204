@@ -232,9 +232,70 @@ az functionapp config set --name $functionAppName --resource-group $resourceGrou
 
 ---
 
+Question: Your company is deploying an Azure Function that will be requiring advanced features like Azure Virtual Network (VNet) for secure and reliable network connectivity to Azure resources. Which of the following plans support VNet?
+
+- [x] EP1
+- [x] EP2
+- [x] EP3
+- [ ] F1
+- [ ] D1
+- [ ] B1
+- [ ] B2
+- [ ] B3
+- [x] S1
+- [x] P1V2
+- [x] P2V2
+- [x] P3V2
+- [x] P1V3
+- [x] P2V3
+- [x] P3V3
+- [x] I1
+- [x] I2
+- [x] I3
+- [x] I1V2
+- [x] I2V2
+- [x] I3V2
+
+Answer:
+
+Supports:
+
+- Premium plan: `EP1`, `EP2`, `EP3`
+- Standard App Service plan: `S1`
+- Premium App Service plan: `P1V2`, `P2V2`, `P3V2`, `P1V3`, `P2V3`, `P3V3`
+- Isolated App Service plan: `I1`, `I2`, `I3`, `I1V2`, `I2V2`, `I3V2`
+
+Does not support:
+
+- Free App Service plan: `F1`
+- Shared App Service plan: `D1`
+- Basic App Service plan: `B1`, `B2`, `B3`
+
+---
+
 Question: What is the difference in terms of cost between `Consumption` and `Premium` plans and any of the App Service plans?
 
 Answer: `Consumption` and `Premium` plans can be more cost-efficient if you have sporadic usage patterns. App Service plans could be more predictable in terms of cost and potentially cheaper for continuous heavy usage.
+
+---
+
+Question: Which triggers in Azure Functions are supported on Consumption plan:
+
+- [x] Blob storage
+- [x] Azure Cosmos DB
+- [x] Event Grid
+- [x] Event Hubs
+- [x] IoT Hub
+- [ ] Notification Hubs
+- [x] Queue storage
+- [x] Service Bus
+- [ ] RabbitMQ
+- [x] SignalR
+- [ ] Kafka
+- [ ] Table storage
+- [x] Timer
+
+Answer: `Table storage` and `Notification Hubs` are not valid triggers. `RabbitMQ` and `Kafka` are not supported on Consumption plan.
 
 ---
 
@@ -269,6 +330,69 @@ Question: Which of the following choices supports both the `in` and `out` direct
 - [ ] Connection value
 
 Answer: Input and output bindings use `in` and `out`.
+
+---
+
+Question: Which of the following can trigger an Azure Function:
+
+- [x] Blob storage
+- [x] Azure Cosmos DB
+- [x] Event Grid
+- [x] Event Hubs
+- [x] HTTP & webhooks
+- [x] IoT Hub
+- [ ] Mobile Apps
+- [ ] Notification Hubs
+- [x] Queue storage
+- [ ] SendGrid
+- [x] Service Bus
+- [x] SignalR
+- [ ] Table storage
+- [x] Timer
+
+Answer: `Table storage`, `Mobile Apps`, `Notification Hubs`, `SendGrid`, and `Twilio` are not valid triggers.
+
+---
+
+Question: Which of the following can be input binding in an Azure Function:
+
+- [x] Blob storage
+- [x] Azure Cosmos DB
+- [ ] Event Grid
+- [ ] Event Hubs
+- [ ] HTTP & webhooks
+- [ ] IoT Hub
+- [x] Mobile Apps
+- [ ] Notification Hubs
+- [ ] Queue storage
+- [ ] SendGrid
+- [ ] Service Bus
+- [x] SignalR
+- [x] Table storage
+- [ ] Timer
+
+Answer: You can only read from objects that store data, not queues.
+
+---
+
+Question: Which of the following can be output binding in an Azure Function:
+
+- [x] Blob storage
+- [x] Azure Cosmos DB
+- [x] Event Grid
+- [x] Event Hubs
+- [x] HTTP & webhooks
+- [ ] IoT Hub
+- [x] Mobile Apps
+- [x] Notification Hubs
+- [x] Queue storage
+- [x] SendGrid
+- [x] Service Bus
+- [x] SignalR
+- [x] Table storage
+- [ ] Timer
+
+Answer: Everything but `Timer` and `IoT Hub`.
 
 ---
 
@@ -904,6 +1028,59 @@ Answer: 30 \*/2 1-15 6-8 1-5
 
 ---
 
+Question: You need to create an Azure Function that is triggered every 5 minutes. Which of the following cron schedules can be used?
+
+- [x] `0 */5 * * * *`
+- [x] `*/5 * * * *`
+- [ ] `*/5 * * * * *`
+- [ ] `* */5 * * *`
+- [ ] `0 5 * * * *`
+- [ ] `5 * * * *`
+- [ ] `5 * * * * *`
+- [ ] `* 5 * * *`
+
+Answer: Cron schedules supports both 5 and 6 fields (`{minute} {hour} {day} {month} {day-of-week}` or `{second} {minute} {hour} {day} {month} {day-of-week}`). To make them run at every 5 minutes, `*/5` is used.
+
+---
+
+Question: In your e-commerce system, you've built two Azure Functions to handle order processing and retrieval. The `OrderProcessingFunction` is triggered when an order is placed by a customer. The details of this order are then processed and stored into a cloud storage system for later reference. Configuration for the service is stored into Cosmos DB database. The `OrderRetrievalFunction` is invoked on-demand via a web request, which fetches and returns the previously stored order details.
+
+Given this setup, which triggers and bindings would you use in the `OrderProcessingFunction`? There may be more than one correct answer.
+
+- [x] ServiceBus trigger binding
+- [ ] HTTP trigger binding
+- [ ] Blob trigger binding
+- [ ] Cosmos DB trigger binding
+- [ ] Blob input binding
+- [x] Blob output binding
+- [ ] Blob input output binding
+- [x] Cosmos DB input binding
+- [ ] Cosmos DB output binding
+- [ ] Cosmos DB input output binding
+
+Answer: The `OrderProcessingFunction` uses the ServiceBus trigger binding because it is triggered by new messages (orders) arriving in the Azure Service Bus. Configuration for the service is stored in a Cosmos DB database, so a Cosmos DB input binding is required. Function uses the Blob output binding to store the processed order details into Azure Blob Storage, a cloud storage system.
+
+---
+
+Question: In your e-commerce system, you've built two Azure Functions to handle order processing and retrieval. The `OrderProcessingFunction` is triggered when an order is placed by a customer. The details of this order are then processed and stored into a cloud storage system for later reference. Configuration for the service is stored into Cosmos DB database. The `OrderRetrievalFunction` is invoked on-demand via a web request, which fetches and returns the previously stored order details.
+
+Given this setup, which bindings are you most likely to use in the `OrderRetrievalFunction`? There may be more than one correct answer.
+
+- [ ] ServiceBus trigger binding
+- [x] HTTP trigger binding
+- [ ] Blob trigger binding
+- [ ] Cosmos DB trigger binding
+- [x] Blob input binding
+- [ ] Blob output binding
+- [ ] Blob input output binding
+- [ ] Cosmos DB input binding
+- [ ] Cosmos DB output binding
+- [ ] Cosmos DB input output binding
+
+Answer: The `OrderRetrievalFunction` is invoked on-demand via a web request, which corresponds to the HTTP trigger binding. This function fetches the stored order details from a cloud storage system, which corresponds to the Blob input binding.
+
+---
+
 Question: How often are new instances allocated for HTTP triggers?
 
 - [ ] As soon as there is a demand for them
@@ -932,6 +1109,31 @@ Question: What method should you use to create a function key, example: `https:/
 - [x] PUT
 
 Answer: `PUT`, huh...
+
+---
+
+Question: How do you configure custom handlers in Azure Functions?
+
+- [x] Modify `host.json` to include the `customHandler` property with the executable path and arguments.
+- [ ] Modify `local.settings.json` to include the `customHandler` property with the executable path and arguments.
+- [ ] Add `"FUNCTIONS_WORKER_RUNTIME": "node"` in `local.settings.json`.
+- [x] Set `"FUNCTIONS_WORKER_RUNTIME": "custom"` in `local.settings.json`.
+- [ ] Add `"FUNCTIONS_WORKER_RUNTIME": "node"` in `host.json`.
+- [ ] Set `"FUNCTIONS_WORKER_RUNTIME": "custom"` in `host.json`.
+- [ ] Add `"FUNCTIONS_RUNTIME": "node"` in `local.settings.json`.
+- [ ] Set `"FUNCTIONS_RUNTIME": "custom"` in `local.settings.json`.
+- [ ] Add `"FUNCTIONS_RUNTIME": "node"` in `host.json`.
+- [ ] Set `"FUNCTIONS_RUNTIME": "custom"` in `host.json`.
+- [ ] Add `"WORKER_RUNTIME": "node"` in `local.settings.json`.
+- [ ] Set `"WORKER_RUNTIME": "custom"` in `local.settings.json`.
+- [ ] Add `"WORKER_RUNTIME": "node"` in `host.json`.
+- [ ] Set `"WORKER_RUNTIME": "custom"` in `host.json`.
+- [ ] Use Azure Portal to set the custom handler settings.
+
+Answer:
+
+- Modify `host.json` to include the `customHandler` property with the executable path and arguments.
+- Set `"FUNCTIONS_WORKER_RUNTIME": "custom"` in `local.settings.json`.
 
 ---
 
@@ -971,3 +1173,42 @@ Answer: The requirement is to have a custom handler web server that starts up in
 
 ---
 
+Question: You need to quickly create an Azure Function for testing purposes while away from your development environment. What are the most efficient options for creating and deploying a simple Azure Function?
+
+- [ ] Use a local development machine with full SDK installation
+- [x] Use Azure Portal in a web browser
+- [ ] Install Visual Studio Code on any available computer
+- [ ] Set up a complete development environment with multiple SDKs
+- [x] Choose C# Script for in-portal editing
+- [ ] Choose Java which requires local compilation
+- [x] Create function.json for configuration
+- [x] Use PowerShell or JavaScript for scripting languages
+- [ ] Download and install Azure Functions Core Tools
+
+Answer: Azure Portal allows in-browser function creation and editing. Scripting languages like C# Script, JavaScript, Python, and PowerShell are natively supported for editing in the portal without requiring local compilation. The function.json file is required for configuration when using scripting languages.
+
+- Languages requiring compilation (like Java, .NET compiled) need local development tools
+- Portal-based development is ideal for quick prototyping and testing
+- Scripting languages provide the fastest path to deployment without tooling setup
+
+---
+
+Questions: It’s Christmas at Grandma’s, and just as you’re savoring your third glass of wine, work calls with an “urgent” issue. Instead of launching into full-blown tech mode, you decide to cobble together an Azure Function - because nothing says “holiday spirit” like a little on-the-fly coding. What’s your go-to approach for resolving this with minimal fuss?
+
+- [ ] Use you poor grandma's Pentium II computer.
+- [x] Use your phone's browser.
+- [ ] Install vim.
+- [ ] Install bunch of SDKs.
+- [x] Choose `C# Script` because you are drunk.
+- [ ] Choose `Java` because you are REALLY drunk.
+- [ ] Create `host.json` file.
+- [x] Create `function.json`.
+- [ ] None of these is applicable, you have to go back to the office and break everyone's hearts.
+
+Answer: You can use your phone to access Azure Portal. Languages like `C# Script`, `JavaScript`, `Python`, `PowerShell` are natively supported for editing in the portal. Because you use a scripting language, you must also create `function.json`.
+
+- Grandma’s ancient computer? Probably best left for playing solitaire.
+- Installing an SDK and editor on that dinosaur will be akin to climbing Everest with slippers on.
+- If you choose Java, you have to use an editor, thus a computer - not the best option here.
+
+---

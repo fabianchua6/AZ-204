@@ -158,36 +158,6 @@ Answer: The request fails because `User.Read` is a scope for Microsoft Graph and
 
 ---
 
-Question: Which of the following authorization flows are primarily utilized by Public client applications:
-
-- [x] Authorization code
-- [ ] Client credentials
-- [x] On-behalf-of
-- [x] Implicit
-- [x] Device code
-- [x] Integrated Windows
-- [x] Interactive
-- [x] Username/password
-
-Answer: User-facing apps without the ability to securely store secrets
-
----
-
-Question: Which of the following authorization flows are primarily utilized by Confidential client applications:
-
-- [ ] Authorization code
-- [x] Client credentials
-- [x] On-behalf-of
-- [ ] Implicit
-- [ ] Device code
-- [x] Integrated Windows
-- [ ] Interactive
-- [x] Username/password
-
-Answer: Server-based apps that can securely handle secrets
-
----
-
 Question: You are tasked to build an application that will run on mobile devices and web browsers. This application needs to securely obtain tokens in the name of the user, using an Authorization Code flow. Which application builder should you use?
 
 - [x] `PublicClientApplicationBuilder`
@@ -203,22 +173,6 @@ Question: Your company is developing a service application that will run without
 - [x] `ConfidentialClientApplicationBuilder`
 
 Answer: Server-based apps that can securely handle secrets
-
----
-
-Question: Which of the following is NOT a function of the Microsoft Authentication Library (MSAL)?
-
-- [ ] Manages token cache and automatically refreshes tokens when needed.
-- [ ] Assists in multi-factor authentication process.
-- [x] Provides proactive security threat alerts for user accounts.
-- [ ] Obtains tokens for users or applications when applicable.
-- [ ] Assists with application setup from configuration files.
-- [ ] Enables Single Sign-On (SSO) across multiple applications.
-- [ ] Supports application to application communication through On-Behalf-Of (OBO) flow.
-- [x] Automatically resolves API versioning conflicts.
-- [x] Provides optimized API depending on the platform (.Net, Node, Android, Python, etc.)
-
-Answer: MSAL does not provide proactive security threat alerts as this is typically handled by dedicated security tools or systems, and it doesn't automatically resolve API versioning conflicts as this is typically a function of the API management or the individual application logic. The API is unified across platforms.
 
 ---
 
@@ -421,25 +375,6 @@ Answer:
 Microsoft Graph: Set `User.Read` to "Delegate" to allow application to read the user's profile only when the user is signed in.
 
 Azure Storage: Set `user_impersonation` to "Delegate" to allow the application to access Azure Storage only when the user is signed in.
-
----
-
-Question: You are developing a web application using ASP.Net Core. The application needs to authenticate users via Microsoft Entra ID and also access Azure Blob Storage on behalf of the authenticated users. Which of the following permissions should be set to "Delegated" in the Azure Portal to meet these requirements?
-
-- [x] `Microsoft Graph > User.Read`
-- [ ] `Microsoft Graph > User.ReadWrite`
-- [ ] `Microsoft Graph > user_impersonation`
-- [ ] `Microsoft Graph > Microsoft Greaph Reader`
-- [x] `Azure Storage > user_impersonation`
-- [ ] `Azure Storage > Storage Blob Data Reader`
-- [ ] `Azure Storage > Files.Read`
-- [ ] `Microsoft Graph > Files.Read`
-
-Answer:
-
-Microsoft Graph > User.Read should be set to "Delegated". This allows the application to authenticate users and read their basic profile on their behalf.
-
-Azure Storage > user_impersonation should be set to "Delegated". This allows the application to access Azure Blob Storage on behalf of the authenticated users.
 
 ---
 

@@ -521,39 +521,6 @@ Answer: Cosmos DB internally stores data in a JSON-like format, regardless of th
 
 ---
 
-Question: Given the following statements about Azure Cosmos DB's Change Feed, identify which ones are true:
-
-- [x] Change Feed in Azure Cosmos DB is automatically enabled upon creation of a container.
-- [x] The Change Feed presents changes to a container in a chronological sequence.
-- [ ] Change Feed natively displays all modifications, including inserts, updates, and deletions.
-- [ ] There is only one interaction model with Change Feed, which is the push model.
-- [x] A soft-delete pattern is supported in Azure Cosmos DB where a "deleted" attribute can be appended to items intended for deletion.
-- [x] In the push model, the Change Feed processor independently dispatches tasks to a client.
-- [ ] Change Feed functionality is available across all API models in Azure Cosmos DB.
-- [x] The pull model in Change Feed allows for manual checkpointing and control over processing speed.
-- [x] Items can have a time-to-live (TTL) value attached for automatic deletion.
-- [ ] Change Feed functionality is limited to the SQL (Core) API in Azure Cosmos DB.
-- [ ] In the push model, the Change Feed processor requires manual intervention to dispatch tasks to a client.
-- [x] Change Feed shows all inserts and updates, excluding deletions.
-- [x] The Change Feed feature isn't compatible with Azure Cosmos DB's Table and PostgreSQL APIs.
-- [ ] Change Feed doesn't have a provision for distributing processing tasks across multiple instances.
-- [ ] The Change Feed feature is an add-on and comes with an additional cost.
-- [x] Change Feed allows microservices to independently react to data changes.
-- [x] Change Feed supports reading changes from a specific partition key.
-- [ ] The Change Feed retains the changes indefinitely until they are consumed.
-- [x] Change Feed can be used to implement event sourcing patterns where the stream of events in Change Feed forms the source of truth and can be used to materialize the application’s state.
-- [ ] Change Feed cannot be used in scenarios that require triggering a function or a logic app, real-time processing, or distributed database updates.
-- [x] With Change Feed, you can create low-latency, real-time data processing solutions.
-- [ ] Change feed guarantees order across the partition key values.
-
-Answer:
-
-The retention time depends on the configured time-to-live of the items and the change feed retention period set on the container, by default it's 7 days.  
-Change Feed is used in scenarios that require triggering a function or a logic app, real-time processing, or distributed database updates.  
-In the change feed, order is guaranteed within each logical partition key value, but not across them.
-
----
-
 Question: Your organization has deployed a multi-region Azure Cosmos DB database to ensure high availability. Each region can simultaneously read from and write to the database. There is a chance that the same document is updated concurrently in different regions, potentially leading to conflicts. To handle this, you've decided to use the automatic conflict resolution policy provided by Azure Cosmos DB. Based on your understanding of this policy, which strategy best describes how Azure Cosmos DB would resolve these conflicts?
 
 - [ ] The update from the region that first modified the document is always retained.

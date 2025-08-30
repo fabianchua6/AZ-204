@@ -263,22 +263,7 @@ The LockDuration property is used to define how long a message is locked for pro
 
 ---
 
-Question: Which of the following strategies would be effective for optimizing a high-throughput queue in Azure Service Bus?
-
-- [x] Use asynchronous operations.
-- [ ] Use synchronous operations.
-- [x] Use multiple message factories per process.
-- [ ] Use single message factories per process.
-- [x] Enable batched store access.
-- [ ] Disable batched store access.
-- [x] Set a high prefetch count.
-- [ ] Disable prefetching.
-
-Answer: Per [best practices](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-performance-improvements?tabs=net-standard-sdk-2#high-throughput-queue)
-
----
-
-Answer: Which of the following would be effective for optimizing multiple high-throughput queues?
+Question: Which of the following would be effective for optimizing multiple high-throughput queues?
 
 - [ ] Use a single message factory for all queues.
 - [x] Use different factories for clients interacting with different queues.
@@ -316,36 +301,6 @@ Question: What strategies would minimize latency for a queue with small or moder
 - [x] Set the prefetch count to 0.
 
 Answer: Per [best practices](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-performance-improvements?tabs=net-standard-sdk-2#low-latency-queue)
-
----
-
-Question: Which strategies would be effective for a queue with a large number of senders?
-
-- [x] Use a single factory per process for each sender.
-- [ ] Use multiple factories per process for each sender.
-- [ ] Disable batched store access.
-- [x] Enable batched store access.
-- [x] Use asynchronous operations.
-- [ ] Use synchronous operations.
-- [x] Set the prefetch count to 20 times the processing rate of the sender.
-- [ ] Set a low prefetch count.
-
-Answer: Per [best practices](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-performance-improvements?tabs=net-standard-sdk-2#queue-with-a-large-number-of-senders)
-
----
-
-Question: What strategies would be effective for a queue with a large number of receivers?
-
-- [x] Use a single factory per process for each receiver.
-- [ ] Use multiple factories per process for each receiver.
-- [ ] Disable batched store access.
-- [x] Enable batched store access.
-- [x] Use asynchronous operations.
-- [ ] Use synchronous operations.
-- [x] Set a low prefetch count (e.g., 10).
-- [ ] Set the prefetch count to 20 times the processing rate of the receiver.
-
-Answer: Per [best practices](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-performance-improvements?tabs=net-standard-sdk-2#queue-with-a-large-number-of-receivers)
 
 ---
 
