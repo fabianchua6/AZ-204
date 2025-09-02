@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "build-pdf-questions": "node scripts/parse-pdf-questions.js && cp src/data/pdf-questions.json public/data/",
+    "prebuild": "npm run build-pdf-questions"
+  }
+}

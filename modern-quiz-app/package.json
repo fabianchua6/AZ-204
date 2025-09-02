@@ -24,7 +24,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "npm run seed && next build",
+    "build": "npm run seed && npm run build-pdf-questions && next build",
     "start": "next start",
     "lint": "next lint --fix",
     "lint:check": "next lint",
@@ -33,7 +33,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "seed": "node scripts/seed.mjs",
-    "predev": "npm run seed",
+    "build-pdf-questions": "node scripts/parse-pdf-questions.js && cp src/data/pdf-questions.json public/data/",
+    "predev": "npm run seed && npm run build-pdf-questions",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "analyze": "cross-env ANALYZE=true npm run build",

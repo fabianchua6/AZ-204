@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import type { Question, QuizStats } from '@/types/quiz';
+import { isPdfQuestion } from '@/types/quiz';
 import {
   saveToLocalStorage,
   loadFromLocalStorage,
@@ -54,8 +55,23 @@ export function useQuizState(
       return true;
     });
 
-    if (!selectedTopic) return baseQuestions;
-    return baseQuestions.filter(q => q.topic === selectedTopic);
+    if (selectedTopic) {
+      baseQuestions = baseQuestions.filter(q => q.topic === selectedTopic);
+    }
+    
+    // Sort to prioritize PDF questions first
+    baseQuestions.sort((a, b) => {
+      // PDF questions come first (handle undefined safely)
+      const aIsPdf = isPdfQuestion(a);
+      const bIsPdf = isPdfQuestion(b);
+      
+      if (aIsPdf && !bIsPdf) return -1;
+      if (!aIsPdf && bIsPdf) return 1;
+      // Within same type (PDF or regular), maintain original order
+      return 0;
+    });
+    
+    return baseQuestions;
   }, [questions, selectedTopic]);
 
   // Calculate stats

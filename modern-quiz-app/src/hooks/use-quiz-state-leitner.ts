@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { Question } from '@/types/quiz';
+import { isPdfQuestion } from '@/types/quiz';
 import { leitnerSystem, type LeitnerStats } from '@/lib/leitner';
 import { questionService } from '@/lib/question-service';
 import { saveToLocalStorage, loadFromLocalStorage } from '@/lib/utils';
@@ -102,12 +103,32 @@ export function useQuizStateWithLeitner(
       if (selectedTopic) {
         baseQuestions = baseQuestions.filter(q => q.topic === selectedTopic);
         
-        // For topic mode, just randomize and show all questions in that topic
-        baseQuestions = shuffleArray(baseQuestions);
+        // Sort to prioritize PDF questions first, then shuffle within each group
+        const pdfQuestions = baseQuestions.filter(q => isPdfQuestion(q));
+        const regularQuestions = baseQuestions.filter(q => !isPdfQuestion(q));
+        
+        // Shuffle each group separately, then combine with PDF questions first
+        const shuffledPdf = shuffleArray(pdfQuestions);
+        const shuffledRegular = shuffleArray(regularQuestions);
+        baseQuestions = [...shuffledPdf, ...shuffledRegular];
+        
         setFilteredQuestions(baseQuestions);
       } else {
         // For Leitner mode, get due questions from the Leitner system
         const dueQuestions = await leitnerSystem.getDueQuestions(baseQuestions);
+        
+        // Sort due questions to prioritize PDF questions first
+        dueQuestions.sort((a, b) => {
+          // PDF questions come first (handle undefined safely)
+          const aIsPdf = isPdfQuestion(a);
+          const bIsPdf = isPdfQuestion(b);
+          
+          if (aIsPdf && !bIsPdf) return -1;
+          if (!aIsPdf && bIsPdf) return 1;
+          // Within same type (PDF or regular), maintain Leitner system order
+          return 0;
+        });
+        
         setFilteredQuestions(dueQuestions);
         
         // Clear answer state for all due questions to ensure fresh review
