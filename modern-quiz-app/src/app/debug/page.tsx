@@ -11,6 +11,11 @@ export default function DebugPage() {
   const boxes = [1, 2, 3]; // 3-box system only
   const { questions, topics, loading } = useQuizData();
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'Debug Console - AZ-204 Developer Tools';
+  }, []);
+
   const [timezoneDebug, setTimezoneDebug] = useState<{
     currentTime: string;
     localDate: string;

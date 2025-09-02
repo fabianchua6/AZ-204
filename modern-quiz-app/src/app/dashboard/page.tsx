@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/header';
 import { DashboardStats } from '@/components/dashboard-stats';
@@ -9,6 +10,15 @@ import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/lib/constants';
 
 export default function DashboardPage() {
   const { questions, loading, error } = useQuizData();
+
+  // Set dynamic page title with question count
+  useEffect(() => {
+    if (questions.length > 0) {
+      document.title = `Analytics Dashboard (${questions.length} Questions) - AZ-204`;
+    } else {
+      document.title = 'Analytics Dashboard - AZ-204 Certification';
+    }
+  }, [questions.length]);
 
   if (loading) {
     return (

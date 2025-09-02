@@ -28,6 +28,15 @@ export default function Home() {
   // Shared topic state - this is the single source of truth
   const [selectedTopic, setSelectedTopicState] = useState<string | null>(null);
 
+  // Set dynamic page title based on selected topic
+  useEffect(() => {
+    if (selectedTopic) {
+      document.title = `${selectedTopic} Quiz - AZ-204 Certification`;
+    } else {
+      document.title = 'Practice Quiz - AZ-204 Certification';
+    }
+  }, [selectedTopic]);
+
   // Load saved topic state
   useEffect(() => {
     const savedTopic = loadFromLocalStorage('quiz-topic', null);

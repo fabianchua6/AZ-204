@@ -1,7 +1,7 @@
 # AZ-204 PDF Processed Questions - Complete Collection
 
-*Last updated: 2024-03-31*
-*Source: ExamTopics AZ-204 Exam Questions*
+_Last updated: 2024-03-31_
+_Source: ExamTopics AZ-204 Exam Questions_
 
 ## [PDF] Question 1
 
@@ -1838,6 +1838,7 @@ E. Create a new Azure AD tenant
 **Correct Answer: A, B, C**
 
 **Explanation:** Register a new application using the Azure portal
+
 1. Sign in to the Azure portal using either a work or school account or a personal Microsoft account.
 2. If your account gives you access to more than one tenant, select your account in the upper right corner. Set your portal session to the Azure AD tenant that you want.
 3. Search for and select Azure Active Directory. Under Manage, select App registrations.
@@ -1867,6 +1868,7 @@ E. In Azure AD conditional access, enable the baseline policy.
 
 **Explanation:** B: MFA Enabled by conditional access policy. It is the most flexible means to enable two-step verification for your users. Enabling using conditional access policy only works for Azure MFA in the cloud and is a premium feature of Azure AD.
 C: Multi-Factor Authentication comes as part of the following offerings:
+
 - Azure Active Directory Premium licenses - Full featured use of Azure Multi-Factor Authentication Service (Cloud) or Azure Multi-Factor Authentication Server (On-premises).
 - Multi-Factor Authentication for Office 365
 - Azure Active Directory Global Administrators
@@ -1899,6 +1901,7 @@ D. Grant all developers access to the Azure Blob storage account by assigning ro
 You manage a data processing application that receives requests from an Azure Storage queue.
 
 You need to manage access to the queue. You have the following requirements:
+
 - Provide other applications access to the Azure queue.
 - Ensure that you can revoke access to the queue without having to regenerate the storage account keys.
 - Specify access at the queue level and not at the storage account level.
@@ -1925,7 +1928,7 @@ You need to ensure the Azure Function can access to the token. Which value shoul
 
 A. KeyVault:mykeyvault;Secret:token
 B. App:Settings:Secret:mykeyvault:token
-C. AZUREKVCONNSTR_https://mykeyveult.vault.ezure.net/secrets/token/
+C. AZUREKVCONNSTR\_https://mykeyveult.vault.ezure.net/secrets/token/
 D. @Microsoft.KeyVault(SecretUri=https://mykeyvault.vault.azure.net/secrets/token/)
 
 **Correct Answer: D**
