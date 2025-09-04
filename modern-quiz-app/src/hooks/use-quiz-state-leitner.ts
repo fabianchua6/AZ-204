@@ -69,31 +69,69 @@ export function useQuizStateWithLeitner(
 
   // Load saved state (including submission states)
   // Use mode-specific localStorage key to avoid conflicts with practice mode
+  // Only initialize if we're in Leitner mode (selectedTopic === null)
   useEffect(() => {
+    if (selectedTopic !== null) {
+      // Not in Leitner mode - don't initialize or interfere with state
+      return;
+    }
+    
     const savedIndex = loadFromLocalStorage('leitner-quiz-index', 0);
     setCurrentQuestionIndex(savedIndex);
     
     // Load submission states
     const savedSubmissionStates = loadFromLocalStorage('leitner-submission-states', {});
     setSubmissionStates(savedSubmissionStates);
-  }, []);
+  }, [selectedTopic]); // Re-run when mode changes
 
   // Save state changes (including submission states)
   // Use mode-specific localStorage key to avoid conflicts with practice mode
+  // Only save if we're in Leitner mode
   useEffect(() => {
-    saveToLocalStorage('leitner-quiz-index', currentQuestionIndex);
-  }, [currentQuestionIndex]);
+    if (selectedTopic === null) {
+      saveToLocalStorage('leitner-quiz-index', currentQuestionIndex);
+    }
+  }, [currentQuestionIndex, selectedTopic]);
 
-  // Save submission states when they change
+  // Save submission states when they change - only in Leitner mode
   useEffect(() => {
-    saveToLocalStorage('leitner-submission-states', submissionStates);
-  }, [submissionStates]);
+    if (selectedTopic === null) {
+      saveToLocalStorage('leitner-submission-states', submissionStates);
+    }
+  }, [submissionStates, selectedTopic]);
 
   // Filter and sort questions based on topic and Leitner system
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
 
   // Update filtered questions when dependencies change
   useEffect(() => {
+    // Only run Leitner system logic when in Leitner mode
+    if (selectedTopic !== null) {
+      // In Practice mode - just use regular filtering without Leitner system
+      const baseQuestions = questions.filter(question => {
+        // Filter out code questions and questions with no select options
+        if (question.hasCode) return false;
+        if (question.options.length === 0) return false;
+        return true;
+      });
+      
+      // Filter by topic
+      const topicFiltered = baseQuestions.filter(q => q.topic === selectedTopic);
+      
+      // Sort to prioritize PDF questions first (same as practice mode)
+      topicFiltered.sort((a, b) => {
+        const aIsPdf = isPdfQuestion(a);
+        const bIsPdf = isPdfQuestion(b);
+        
+        if (aIsPdf && !bIsPdf) return -1;
+        if (!aIsPdf && bIsPdf) return 1;
+        return 0;
+      });
+      
+      setFilteredQuestions(topicFiltered);
+      return;
+    }
+
     const updateQuestions = async () => {
       await leitnerSystem.ensureInitialized();
       
@@ -215,6 +253,31 @@ export function useQuizStateWithLeitner(
       });
     }
   }, [currentQuestionIndex, filteredQuestions]);
+
+  // Clear submission states when switching topics (but preserve for 'All Topics' mode)
+  useEffect(() => {
+    if (selectedTopic !== null) {
+      // When switching to a specific topic, clear submission states to prevent
+      // cross-contamination between Leitner mode and Practice mode
+      setSubmissionStates(prev => {
+        const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
+        const cleaned = { ...prev };
+        
+        // Only clean submission states for questions in the current filtered set
+        // This prevents Practice mode from being affected by Leitner submission states
+        Object.keys(cleaned).forEach(questionId => {
+          if (currentQuestionIds.has(questionId)) {
+            delete cleaned[questionId];
+          }
+        });
+        
+        // Update localStorage to reflect the cleaned state
+        saveToLocalStorage('leitner-submission-states', cleaned);
+        
+        return cleaned;
+      });
+    }
+  }, [selectedTopic, filteredQuestions]); // Run when topic or questions change
 
   // Separate function for just updating selected answers (no Leitner processing)
   const updateSelectedAnswers = useCallback(

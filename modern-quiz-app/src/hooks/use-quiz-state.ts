@@ -20,23 +20,34 @@ export function useQuizState(
 
   // Load saved state (excluding topic which is managed by parent)
   // Use mode-specific localStorage keys to avoid conflicts with Leitner mode
+  // Only initialize if we're in Practice mode (selectedTopic !== null)
   useEffect(() => {
+    if (selectedTopic === null) {
+      // Not in Practice mode - don't initialize or interfere with state
+      return;
+    }
+    
     const savedAnswers = loadFromLocalStorage('practice-quiz-answers', {});
     const savedIndex = loadFromLocalStorage('practice-quiz-index', 0);
 
     setAnswers(savedAnswers);
     setCurrentQuestionIndex(savedIndex);
-  }, []);
+  }, [selectedTopic]); // Re-run when mode changes
 
   // Save state changes (excluding topic which is managed by parent)
   // Use mode-specific localStorage keys to avoid conflicts with Leitner mode
+  // Only save if we're in Practice mode
   useEffect(() => {
-    saveToLocalStorage('practice-quiz-answers', answers);
-  }, [answers]);
+    if (selectedTopic !== null) {
+      saveToLocalStorage('practice-quiz-answers', answers);
+    }
+  }, [answers, selectedTopic]);
 
   useEffect(() => {
-    saveToLocalStorage('practice-quiz-index', currentQuestionIndex);
-  }, [currentQuestionIndex]);
+    if (selectedTopic !== null) {
+      saveToLocalStorage('practice-quiz-index', currentQuestionIndex);
+    }
+  }, [currentQuestionIndex, selectedTopic]);
 
   // Filter questions by topic and exclude code examples and questions with no options
   const filteredQuestions = useMemo(() => {
@@ -108,7 +119,48 @@ export function useQuizState(
   useEffect(() => {
     setCurrentQuestionIndex(0);
     setShowAnswer(false);
-  }, [selectedTopic]);
+    
+    // CRITICAL: When entering Practice mode, clear all Leitner contamination
+    // This prevents cross-contamination between the two quiz systems
+    if (selectedTopic !== null && filteredQuestions.length > 0) {
+      // Clear any Leitner submission states that might interfere with Practice mode
+      const leitnerSubmissionStates = loadFromLocalStorage('leitner-submission-states', {} as Record<string, {
+        isSubmitted: boolean;
+        isCorrect: boolean;
+        showAnswer: boolean;
+        submittedAt: number;
+        submittedAnswers: number[];
+      }>);
+      
+      if (Object.keys(leitnerSubmissionStates).length > 0) {
+        // Clean submission states for current topic questions to prevent interference
+        const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
+        const cleaned = { ...leitnerSubmissionStates };
+        
+        Object.keys(cleaned).forEach(questionId => {
+          if (currentQuestionIds.has(questionId)) {
+            delete cleaned[questionId];
+          }
+        });
+        
+        saveToLocalStorage('leitner-submission-states', cleaned);
+      }
+      
+      // Also clear any lingering practice answers from this topic to ensure fresh start
+      setAnswers(prev => {
+        const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
+        const cleaned = { ...prev };
+        
+        Object.keys(cleaned).forEach(questionId => {
+          if (currentQuestionIds.has(questionId)) {
+            delete cleaned[questionId];
+          }
+        });
+        
+        return cleaned;
+      });
+    }
+  }, [selectedTopic, filteredQuestions]);
 
   // Actions - Memoized to prevent unnecessary re-renders
   const actions = useMemo(
