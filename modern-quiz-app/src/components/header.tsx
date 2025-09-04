@@ -2,7 +2,7 @@
 
 import { useTheme } from 'next-themes';
 import { usePathname } from 'next/navigation';
-import { Moon, Sun, BookOpen, BarChart3, Brain } from 'lucide-react';
+import { Moon, Sun, BookOpen, BarChart3, Brain, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -19,6 +19,7 @@ export function Header() {
     );
 
   const isOnDashboard = pathname?.startsWith('/dashboard') ?? false;
+  const isOnDebug = pathname?.startsWith('/debug') ?? false;
   const navigationButton = isOnDashboard
     ? { href: '/', icon: Brain, srText: 'Go to Quiz' }
     : { href: '/dashboard', icon: BarChart3, srText: 'Dashboard' };
@@ -55,6 +56,20 @@ export function Header() {
                   <BarChart3 className='h-4 w-4' />
                 )}
                 <span className='sr-only'>{navigationButton.srText}</span>
+              </Link>
+            </Button>
+
+            <Button
+              variant='ghost'
+              size='sm'
+              asChild
+              className={`relative h-9 w-9 border border-border bg-background/50 p-0 transition-colors hover:bg-accent ${
+                isOnDebug ? 'bg-accent' : ''
+              }`}
+            >
+              <Link href='/debug'>
+                <Settings className='h-4 w-4' />
+                <span className='sr-only'>Debug & Settings</span>
               </Link>
             </Button>
 
