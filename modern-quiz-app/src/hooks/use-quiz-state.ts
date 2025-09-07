@@ -120,33 +120,59 @@ export function useQuizState(
     setCurrentQuestionIndex(0);
     setShowAnswer(false);
     
-    // CRITICAL: When entering Practice mode, clear all Leitner contamination
+    // CRITICAL: When entering Practice mode, clear ALL Leitner contamination
     // This prevents cross-contamination between the two quiz systems
     if (selectedTopic !== null && filteredQuestions.length > 0) {
-      // Clear any Leitner submission states that might interfere with Practice mode
-      const leitnerSubmissionStates = loadFromLocalStorage('leitner-submission-states', {} as Record<string, {
-        isSubmitted: boolean;
-        isCorrect: boolean;
-        showAnswer: boolean;
-        submittedAt: number;
-        submittedAnswers: number[];
-      }>);
+      // Clear ALL Leitner-related localStorage that could interfere with Practice mode
+      const leitnerKeys = [
+        'leitner-submission-states',
+        'leitner-progress',        // ⭐ THIS WAS THE MISSING KEY!
+        'leitner-settings',
+        'leitner-quiz-index',
+      ];
       
-      if (Object.keys(leitnerSubmissionStates).length > 0) {
-        // Clean submission states for current topic questions to prevent interference
-        const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
-        const cleaned = { ...leitnerSubmissionStates };
-        
-        Object.keys(cleaned).forEach(questionId => {
-          if (currentQuestionIds.has(questionId)) {
-            delete cleaned[questionId];
+      leitnerKeys.forEach(key => {
+        const existingData = loadFromLocalStorage(key, null);
+        if (existingData) {
+          // For progress data, only clear questions relevant to current topic
+          if (key === 'leitner-progress' && existingData && typeof existingData === 'object') {
+            const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
+            const cleaned = { ...(existingData as Record<string, unknown>) };
+            
+            Object.keys(cleaned).forEach(questionId => {
+              if (currentQuestionIds.has(questionId)) {
+                delete cleaned[questionId];
+              }
+            });
+            
+            saveToLocalStorage(key, cleaned);
           }
-        });
-        
-        saveToLocalStorage('leitner-submission-states', cleaned);
-      }
+          // For submission states, clear topic-specific data
+          else if (key === 'leitner-submission-states' && existingData && typeof existingData === 'object') {
+            const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
+            const cleaned = { ...(existingData as Record<string, unknown>) };
+            
+            Object.keys(cleaned).forEach(questionId => {
+              if (currentQuestionIds.has(questionId)) {
+                delete cleaned[questionId];
+              }
+            });
+            
+            saveToLocalStorage(key, cleaned);
+          }
+          // For other keys, clear completely when entering Practice mode
+          else {
+            localStorage.removeItem(key);
+          }
+        }
+      });
       
-      // Also clear any lingering practice answers from this topic to ensure fresh start
+      // Also clear any daily attempt keys for today to reset question availability
+      const today = new Date().toISOString().split('T')[0];
+      const dailyKey = `leitner-daily-attempts-${today}`;
+      localStorage.removeItem(dailyKey);
+      
+      // Clear any lingering practice answers from this topic to ensure fresh start
       setAnswers(prev => {
         const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
         const cleaned = { ...prev };

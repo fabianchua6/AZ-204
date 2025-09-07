@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 export default function DebugPage() {
   const boxes = [1, 2, 3]; // 3-box system only
-  const { questions, topics, loading } = useQuizData();
+  const { questions, loading } = useQuizData();
 
   // Set page title
   useEffect(() => {
@@ -50,6 +50,38 @@ export default function DebugPage() {
       timesIncorrect: number;
     }>;
     topicDistribution: Record<string, number>;
+  } | null>(null);
+
+  // Add new state for navigation debug info
+  const [navigationDebug, setNavigationDebug] = useState<{
+    currentTopic: string | null;
+    practiceState: {
+      currentIndex: number;
+      totalAnswered: number;
+      showAnswer: boolean;
+      lastUpdated: string;
+    };
+    leitnerState: {
+      currentIndex: number;
+      totalSubmissions: number;
+      lastActivity: string;
+      dueToday: number;
+    };
+    localStorage: {
+      practiceKeys: Array<{
+        key: string;
+        size: string;
+        value?: string;
+        lastModified?: string;
+      }>;
+      leitnerKeys: Array<{
+        key: string;
+        size: string;
+        value?: string;
+        lastModified?: string;
+      }>;
+      otherKeys: Array<{ key: string; size: string }>;
+    };
   } | null>(null);
 
   const [clearResult, setClearResult] = useState<string>('');
@@ -95,8 +127,8 @@ export default function DebugPage() {
     try {
       // Clear any quiz-related localStorage items that might be causing navigation issues
       const keysToRemove = [
-        'leitner-quiz-index',
-        'leitner-submission-states',
+        'practice-quiz-answers',
+        'practice-quiz-index',
         'quiz-navigation-state',
         'quiz-current-question',
         'quiz-submission-states',
@@ -112,26 +144,176 @@ export default function DebugPage() {
         }
       });
 
-      // Also look for any keys that might be question-specific submission states
-      // or daily attempts data
+      // Clear any dynamic quiz-related keys
+      const keysToScan = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
+        if (key) keysToScan.push(key);
+      }
+
+      keysToScan.forEach(key => {
         if (
-          key &&
-          (key.startsWith('submission-') ||
-            key.startsWith('card-state-') ||
-            key.startsWith('leitner-daily-attempts-'))
+          key.startsWith('submission-') ||
+          key.startsWith('card-state-') ||
+          key.startsWith('practice-')
         ) {
           localStorage.removeItem(key);
           clearedCount++;
         }
-      }
+      });
 
       setClearResult(
         `✅ Cleared ${clearedCount} navigation state items. Your Leitner progress is preserved. Please refresh the page.`
       );
     } catch (error) {
-      setClearResult(`❌ Error clearing states: ${error}`);
+      setClearResult(`❌ Error clearing navigation states: ${error}`);
+    }
+  };
+
+  // New function to analyze current navigation state
+  const analyzeNavigationState = async () => {
+    try {
+      await leitnerSystem.ensureInitialized();
+
+      // Get current topic
+      const currentTopic = localStorage.getItem('quiz-topic');
+
+      // Analyze practice state
+      const practiceAnswers = JSON.parse(
+        localStorage.getItem('practice-quiz-answers') || '{}'
+      );
+      const practiceIndex = parseInt(
+        localStorage.getItem('practice-quiz-index') || '0'
+      );
+
+      // Analyze leitner state
+      const leitnerIndex = parseInt(
+        localStorage.getItem('leitner-quiz-index') || '0'
+      );
+      const leitnerSubmissions = JSON.parse(
+        localStorage.getItem('leitner-submission-states') || '{}'
+      );
+
+      // Get due questions count
+      const filteredQuestions = questionService.filterQuestions(questions);
+      const dueQuestions =
+        await leitnerSystem.getDueQuestions(filteredQuestions);
+
+      // Analyze localStorage keys
+      const allKeys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) {
+          const value = localStorage.getItem(key) || '';
+          const size = new Blob([value]).size;
+          allKeys.push({
+            key,
+            size: `${(size / 1024).toFixed(2)} KB`,
+            value: value.length > 100 ? value.substring(0, 100) + '...' : value,
+            lastModified: new Date().toISOString(),
+          });
+        }
+      }
+
+      const practiceKeys = allKeys.filter(
+        item =>
+          item.key.startsWith('practice-') ||
+          (item.key.includes('quiz') && !item.key.includes('leitner'))
+      );
+
+      const leitnerKeys = allKeys.filter(
+        item => item.key.includes('leitner') || item.key.startsWith('leitner-')
+      );
+
+      const otherKeys = allKeys.filter(
+        item =>
+          !practiceKeys.some(pk => pk.key === item.key) &&
+          !leitnerKeys.some(lk => lk.key === item.key)
+      );
+
+      setNavigationDebug({
+        currentTopic,
+        practiceState: {
+          currentIndex: practiceIndex,
+          totalAnswered: Object.keys(practiceAnswers).length,
+          showAnswer: false, // This would need to be read from component state
+          lastUpdated: new Date().toISOString(),
+        },
+        leitnerState: {
+          currentIndex: leitnerIndex,
+          totalSubmissions: Object.keys(leitnerSubmissions).length,
+          lastActivity: new Date().toISOString(),
+          dueToday: dueQuestions.length,
+        },
+        localStorage: {
+          practiceKeys,
+          leitnerKeys,
+          otherKeys,
+        },
+      });
+    } catch (error) {
+      setClearResult(`❌ Error analyzing navigation state: ${error}`);
+    }
+  }; // COMPREHENSIVE STATE CLEARING - This is what the user needs
+  const clearAllQuizStates = () => {
+    try {
+      const keysToRemove = [
+        // Practice mode keys
+        'practice-quiz-answers',
+        'practice-quiz-index',
+
+        // Leitner mode keys
+        'leitner-quiz-index',
+        'leitner-submission-states',
+
+        // Leitner system core data (THIS was missing!)
+        'leitner-progress',
+        'leitner-settings',
+
+        // Topic selection
+        'quiz-topic',
+
+        // Navigation states
+        'quiz-navigation-state',
+        'quiz-current-question',
+        'quiz-submission-states',
+        'quiz-selected-answers',
+        'quiz-card-states',
+      ];
+
+      let clearedCount = 0;
+      keysToRemove.forEach(key => {
+        if (localStorage.getItem(key)) {
+          localStorage.removeItem(key);
+          clearedCount++;
+        }
+      });
+
+      // Clear all daily attempt keys and any other dynamic keys
+      const keysToScan = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) keysToScan.push(key);
+      }
+
+      keysToScan.forEach(key => {
+        if (
+          key.startsWith('leitner-daily-attempts-') ||
+          key.startsWith('submission-') ||
+          key.startsWith('card-state-') ||
+          key.includes('quiz') ||
+          key.includes('leitner')
+        ) {
+          localStorage.removeItem(key);
+          clearedCount++;
+        }
+      });
+
+      setClearResult(
+        `🚀 COMPLETE RESET! Cleared ${clearedCount} total items. All quiz states cleared. Refresh the page for a fresh start.`
+      );
+    } catch (error) {
+      setClearResult(`❌ Error clearing all states: ${error}`);
     }
   };
 
@@ -446,14 +628,205 @@ export default function DebugPage() {
 
             {/* Quiz Navigation Debug */}
             <section className='space-y-4'>
-              <h2 className='text-xl font-semibold'>Quiz Navigation Debug</h2>
+              <h2 className='text-xl font-semibold'>
+                🧭 Quiz Navigation Debug
+              </h2>
               <Card className='p-4'>
-                <h3 className='mb-4 font-semibold'>Clear Navigation States</h3>
+                <h3 className='mb-4 font-semibold'>
+                  Navigation State Analysis
+                </h3>
                 <p className='mb-4 text-sm text-muted-foreground'>
-                  If you're experiencing issues with quiz navigation (can't go
-                  back/forward, answers not showing), click below to clear
-                  navigation states. This preserves your Leitner progress and
-                  stats.
+                  Analyze current quiz navigation state, localStorage contents,
+                  and debug navigation issues.
+                </p>
+
+                <div className='space-y-3'>
+                  <Button
+                    onClick={analyzeNavigationState}
+                    variant='outline'
+                    className='w-full'
+                    disabled={loading}
+                  >
+                    🔍 Analyze Current Navigation State
+                  </Button>
+
+                  {navigationDebug && (
+                    <div className='space-y-4'>
+                      {/* Current State Overview */}
+                      <Card className='bg-blue-50 p-4 dark:bg-blue-950/20'>
+                        <h4 className='mb-2 font-semibold text-blue-800 dark:text-blue-200'>
+                          📊 Current State Overview
+                        </h4>
+                        <div className='space-y-2 font-mono text-sm'>
+                          <div>
+                            <strong>Active Mode:</strong>{' '}
+                            <span
+                              className={
+                                navigationDebug.currentTopic === null
+                                  ? 'text-purple-600'
+                                  : 'text-green-600'
+                              }
+                            >
+                              {navigationDebug.currentTopic === null
+                                ? '🎯 Leitner (All Topics)'
+                                : `📚 Practice (${navigationDebug.currentTopic})`}
+                            </span>
+                          </div>
+                          <div>
+                            <strong>Last Analysis:</strong>{' '}
+                            {new Date().toLocaleTimeString()}
+                          </div>
+                        </div>
+                      </Card>
+
+                      {/* Practice State */}
+                      <Card className='p-4'>
+                        <h4 className='mb-2 font-semibold text-green-700 dark:text-green-300'>
+                          📚 Practice Mode State
+                        </h4>
+                        <div className='grid grid-cols-2 gap-4 font-mono text-sm'>
+                          <div>
+                            <strong>Current Question:</strong> #
+                            {navigationDebug.practiceState.currentIndex + 1}
+                          </div>
+                          <div>
+                            <strong>Questions Answered:</strong>{' '}
+                            {navigationDebug.practiceState.totalAnswered}
+                          </div>
+                          <div className='col-span-2'>
+                            <strong>Practice Keys in localStorage:</strong>{' '}
+                            {navigationDebug.localStorage.practiceKeys.length}
+                          </div>
+                        </div>
+
+                        {navigationDebug.localStorage.practiceKeys.length >
+                          0 && (
+                          <details className='mt-3'>
+                            <summary className='cursor-pointer text-sm font-medium text-muted-foreground'>
+                              📋 Practice localStorage Keys (
+                              {navigationDebug.localStorage.practiceKeys.length}
+                              )
+                            </summary>
+                            <div className='mt-2 space-y-1 font-mono text-xs'>
+                              {navigationDebug.localStorage.practiceKeys.map(
+                                (item, idx) => (
+                                  <div
+                                    key={idx}
+                                    className='rounded bg-gray-100 p-2 dark:bg-gray-800'
+                                  >
+                                    <div>
+                                      <strong>{item.key}</strong> ({item.size})
+                                    </div>
+                                    <div className='truncate text-muted-foreground'>
+                                      {JSON.stringify(
+                                        item.value || 'null'
+                                      ).substring(0, 100)}
+                                      ...
+                                    </div>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </details>
+                        )}
+                      </Card>
+
+                      {/* Leitner State */}
+                      <Card className='p-4'>
+                        <h4 className='mb-2 font-semibold text-purple-700 dark:text-purple-300'>
+                          🎯 Leitner Mode State
+                        </h4>
+                        <div className='grid grid-cols-2 gap-4 font-mono text-sm'>
+                          <div>
+                            <strong>Current Question:</strong> #
+                            {navigationDebug.leitnerState.currentIndex + 1}
+                          </div>
+                          <div>
+                            <strong>Questions Submitted:</strong>{' '}
+                            {navigationDebug.leitnerState.totalSubmissions}
+                          </div>
+                          <div>
+                            <strong>Due Today:</strong>{' '}
+                            {navigationDebug.leitnerState.dueToday}
+                          </div>
+                          <div>
+                            <strong>Leitner Keys:</strong>{' '}
+                            {navigationDebug.localStorage.leitnerKeys.length}
+                          </div>
+                        </div>
+
+                        {navigationDebug.localStorage.leitnerKeys.length >
+                          0 && (
+                          <details className='mt-3'>
+                            <summary className='cursor-pointer text-sm font-medium text-muted-foreground'>
+                              📋 Leitner localStorage Keys (
+                              {navigationDebug.localStorage.leitnerKeys.length})
+                            </summary>
+                            <div className='mt-2 space-y-1 font-mono text-xs'>
+                              {navigationDebug.localStorage.leitnerKeys.map(
+                                (item, idx) => (
+                                  <div
+                                    key={idx}
+                                    className='rounded bg-gray-100 p-2 dark:bg-gray-800'
+                                  >
+                                    <div>
+                                      <strong>{item.key}</strong> ({item.size})
+                                    </div>
+                                    <div className='truncate text-muted-foreground'>
+                                      {JSON.stringify(
+                                        item.value || 'null'
+                                      ).substring(0, 100)}
+                                      ...
+                                    </div>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </details>
+                        )}
+                      </Card>
+
+                      {/* Other localStorage Keys */}
+                      {navigationDebug.localStorage.otherKeys.length > 0 && (
+                        <Card className='p-4'>
+                          <h4 className='mb-2 font-semibold text-gray-700 dark:text-gray-300'>
+                            🗃️ Other localStorage Keys
+                          </h4>
+                          <details>
+                            <summary className='cursor-pointer text-sm font-medium text-muted-foreground'>
+                              Show all other keys (
+                              {navigationDebug.localStorage.otherKeys.length})
+                            </summary>
+                            <div className='mt-2 max-h-40 space-y-1 overflow-y-auto font-mono text-xs'>
+                              {navigationDebug.localStorage.otherKeys.map(
+                                (item, idx) => (
+                                  <div
+                                    key={idx}
+                                    className='rounded bg-gray-50 p-2 dark:bg-gray-900'
+                                  >
+                                    <div>
+                                      <strong>{item.key}</strong> ({item.size})
+                                    </div>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </details>
+                        </Card>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </Card>
+
+              <Card className='p-4'>
+                <h3 className='mb-4 font-semibold'>
+                  🛠️ Navigation State Controls
+                </h3>
+                <p className='mb-4 text-sm text-muted-foreground'>
+                  If you're experiencing navigation issues (stuck on a question,
+                  wrong mode, etc.), use these controls to reset specific parts
+                  of the navigation state.
                 </p>
                 <div className='space-y-3'>
                   <Button
@@ -461,15 +834,52 @@ export default function DebugPage() {
                     variant='outline'
                     className='w-full'
                   >
-                    🧹 Clear Quiz Navigation States
+                    🧹 Clear Practice Navigation Only
                   </Button>
+
+                  <Button
+                    onClick={() => {
+                      localStorage.removeItem('quiz-topic');
+                      setClearResult(
+                        '✅ Cleared current topic selection. App will default to Leitner mode.'
+                      );
+                    }}
+                    variant='outline'
+                    className='w-full'
+                  >
+                    🔄 Reset Topic Selection
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      localStorage.removeItem('practice-quiz-index');
+                      localStorage.removeItem('leitner-quiz-index');
+                      setClearResult(
+                        '✅ Reset question indices. You will start from question #1 in both modes.'
+                      );
+                    }}
+                    variant='outline'
+                    className='w-full'
+                  >
+                    ⏮️ Reset Question Indices
+                  </Button>
+
+                  <Button
+                    onClick={clearAllQuizStates}
+                    variant='destructive'
+                    className='w-full'
+                  >
+                    🚀 COMPLETE RESET - Clear All Quiz States
+                  </Button>
+
                   <Button
                     onClick={showStorageDebug}
                     variant='ghost'
                     className='w-full'
                   >
-                    🔍 Show Storage Debug Info
+                    🔍 Show Raw Storage Debug Info
                   </Button>
+
                   {clearResult && (
                     <div className='rounded-md bg-muted p-3 text-sm'>
                       {clearResult}

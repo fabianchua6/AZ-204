@@ -80,6 +80,8 @@ export default function Home() {
 
   // Get current state based on mode
   const currentState = isLeitnerMode ? leitnerState : practiceState;
+
+  // Extract commonly used values
   const currentQuestionIndex = currentState.currentQuestionIndex;
   const filteredQuestions = currentState.filteredQuestions;
   const answers = currentState.answers;
