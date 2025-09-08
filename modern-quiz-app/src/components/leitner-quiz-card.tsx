@@ -1,12 +1,12 @@
 'use client';
 
 // React imports
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
 import { flushSync } from 'react-dom';
 
 // Third-party imports
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Package } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Package, X } from 'lucide-react';
 
 // UI component imports
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -81,6 +81,13 @@ interface LeitnerQuizCardProps {
     submittedAt: number;
     submittedAnswers: number[]; // Add submitted answers to the type
   } | null;
+  // 🎯 Session control props
+  sessionProgress?: {
+    current: number;
+    total: number;
+    isActive: boolean;
+  };
+  onEndSession?: () => void;
 }
 
 export function LeitnerQuizCard({
@@ -98,6 +105,8 @@ export function LeitnerQuizCard({
   stats,
   questionProgress,
   getSubmissionState,
+  sessionProgress,
+  onEndSession,
 }: LeitnerQuizCardProps) {
   const isMultipleChoice = question.answerIndexes.length > 1;
 
@@ -199,23 +208,12 @@ export function LeitnerQuizCard({
     justSubmitted,
   ]);
 
-  // Navigation handler with submission logic
-  const handleNext = useCallback(async () => {
-    // If answer hasn't been submitted yet and user has selected answers, submit first
-    if (
-      !cardState.answerSubmitted &&
-      !justSubmitted &&
-      externalSelectedAnswers.length > 0
-    ) {
-      await handleSubmit();
-      return; // Stop here to show feedback
-    }
-
-    // If answer is already submitted or no answers selected, advance to next question
+  // Navigation handlers - keep navigation simple and independent of submission
+  const handleNext = useCallback(() => {
     if (onNext) {
       onNext();
     }
-  }, [cardState, onNext, externalSelectedAnswers, handleSubmit, justSubmitted]);
+  }, [onNext]);
 
   const handlePrevious = useCallback(() => {
     if (onPrevious) {
@@ -224,17 +222,23 @@ export function LeitnerQuizCard({
   }, [onPrevious]);
 
   // Custom button states for Leitner mode - don't disable navigation during submission
-  const buttonStates = {
+  const buttonStates = useMemo(() => ({
     showAnswerDisabled: false,
-    nextDisabled: !canGoNext, // Remove isSubmitting check for navigation
-    previousDisabled: !canGoPrevious, // Remove isSubmitting check for navigation
+    nextDisabled: !canGoNext,
+    previousDisabled: !canGoPrevious,
     submitDisabled:
       externalSelectedAnswers.length === 0 ||
       cardState.isSubmitting ||
       cardState.answerSubmitted,
     showSubmitButton:
       !cardState.answerSubmitted && externalSelectedAnswers.length > 0,
-  };
+  }), [
+    canGoNext, 
+    canGoPrevious, 
+    externalSelectedAnswers.length, 
+    cardState.isSubmitting, 
+    cardState.answerSubmitted
+  ]);
 
   // Get box styling using CSS classes
   const currentBox = questionProgress?.currentBox || 1;
@@ -283,26 +287,41 @@ export function LeitnerQuizCard({
             {/* Navigation */}
             <div className='flex-shrink-0'>
               <div className='flex items-center gap-2'>
-                {canGoPrevious && (
-                  <Button
-                    variant='outline'
-                    size='sm'
-                    onClick={handlePrevious}
-                    className='h-8 w-8 p-0'
-                    disabled={buttonStates.previousDisabled}
-                  >
-                    <ChevronLeft className='h-4 w-4' />
-                  </Button>
+                {/* Question Counter */}
+                {sessionProgress && (
+                  <div className='ml-2 text-sm font-medium text-muted-foreground'>
+                    {sessionProgress.current}/{sessionProgress.total}
+                  </div>
                 )}
-                {canGoNext && (
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={handlePrevious}
+                  className='h-8 w-8 p-0'
+                  disabled={!canGoPrevious}
+                >
+                  <ChevronLeft className='h-4 w-4' />
+                </Button>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={handleNext}
+                  className='h-8 w-8 p-0'
+                  disabled={!canGoNext}
+                >
+                  <ChevronRight className='h-4 w-4' />
+                </Button>
+
+                {/* End Session Button */}
+                {sessionProgress?.isActive && onEndSession && (
                   <Button
                     variant='outline'
                     size='sm'
-                    onClick={handleNext}
-                    className='h-8 w-8 p-0'
-                    disabled={buttonStates.nextDisabled}
+                    onClick={onEndSession}
+                    className='h-8 w-8 border-red-200 p-0 text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:border-red-700 dark:hover:bg-red-950/20'
+                    title='End Session'
                   >
-                    <ChevronRight className='h-4 w-4' />
+                    <X className='h-4 w-4' />
                   </Button>
                 )}
               </div>
@@ -354,7 +373,7 @@ export function LeitnerQuizCard({
                   <Button
                     onClick={handleSubmit}
                     disabled={buttonStates.submitDisabled}
-                    className='w-full sm:w-auto'
+                    className='smw-auto w-full'
                     size='lg'
                   >
                     {cardState.isSubmitting ? 'Processing...' : 'Submit Answer'}

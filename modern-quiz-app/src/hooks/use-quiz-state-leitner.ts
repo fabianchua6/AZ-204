@@ -7,6 +7,14 @@ import { leitnerSystem, type LeitnerStats } from '@/lib/leitner';
 import { questionService } from '@/lib/question-service';
 import { saveToLocalStorage, loadFromLocalStorage } from '@/lib/utils';
 
+interface SubmissionState {
+  isSubmitted: boolean;
+  isCorrect: boolean;
+  showAnswer: boolean;
+  submittedAt: number;
+  submittedAnswers: number[];
+}
+
 interface EnhancedQuizStats {
   // Traditional stats
   totalQuestions: number;
@@ -26,19 +34,8 @@ export function useQuizStateWithLeitner(
 ) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number[]>>({});
-  const [submissionStates, setSubmissionStates] = useState<
-    Record<
-      string,
-      {
-        isSubmitted: boolean;
-        isCorrect: boolean;
-        showAnswer: boolean;
-        submittedAt: number;
-        submittedAnswers: number[]; // Add submitted answers to the type
-      }
-    >
-  >({});
-  const [__forceTick, setForceTick] = useState(0); // Keep for clearAllProgress only
+  const [submissionStates, setSubmissionStates] = useState<Record<string, SubmissionState>>({});
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // Trigger for forcing re-evaluation of due questions
   
   // Initialize stats with safe defaults to prevent null reference errors
   const [stats, setStats] = useState<EnhancedQuizStats>(() => ({
@@ -102,6 +99,50 @@ export function useQuizStateWithLeitner(
 
   // Filter and sort questions based on topic and Leitner system
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
+
+  // 🎯 Session state tracking for end session functionality
+  const isSessionComplete = useMemo(() => {
+    if (selectedTopic !== null || filteredQuestions.length === 0) return false;
+    
+    // Check if all questions in current session have been submitted
+    const submittedCount = Object.keys(submissionStates).filter(questionId => 
+      filteredQuestions.some(q => q.id === questionId) && submissionStates[questionId]?.isSubmitted
+    ).length;
+    
+    return submittedCount === filteredQuestions.length && filteredQuestions.length > 0;
+  }, [selectedTopic, filteredQuestions, submissionStates]);
+
+  // Session results for end session display
+  const sessionResults = useMemo(() => {
+    if (!isSessionComplete) return null;
+    
+    const results = filteredQuestions.map(q => ({
+      question: q,
+      submission: submissionStates[q.id]
+    }));
+    
+    const correct = results.filter(r => r.submission?.isCorrect).length;
+    const incorrect = results.length - correct;
+    
+    return { correct, incorrect, total: results.length, results };
+  }, [isSessionComplete, filteredQuestions, submissionStates]);
+
+  // Session progress tracking
+  const sessionProgress = useMemo(() => {
+    if (selectedTopic !== null || filteredQuestions.length === 0) {
+      return { current: 0, total: 0, isActive: false };
+    }
+    
+    const submittedCount = Object.keys(submissionStates).filter(questionId => 
+      filteredQuestions.some(q => q.id === questionId) && submissionStates[questionId]?.isSubmitted
+    ).length;
+    
+    return {
+      current: currentQuestionIndex + 1, // Which question we're currently on (1-based)
+      total: filteredQuestions.length,
+      isActive: filteredQuestions.length > 0 && submittedCount < filteredQuestions.length
+    };
+  }, [selectedTopic, filteredQuestions, submissionStates, currentQuestionIndex]);
 
   // Update filtered questions when dependencies change
   useEffect(() => {
@@ -167,7 +208,10 @@ export function useQuizStateWithLeitner(
           return 0;
         });
         
-        setFilteredQuestions(dueQuestions);
+        // 🎯 SESSION-BASED: Limit to 20 most due questions per session
+        const sessionQuestions = dueQuestions.slice(0, 20);
+        
+        setFilteredQuestions(sessionQuestions);
         
         // Clear answer state for all due questions to ensure fresh review
         setAnswers(prev => {
@@ -185,7 +229,7 @@ export function useQuizStateWithLeitner(
     };
 
     updateQuestions();
-  }, [questions, selectedTopic, __forceTick]); // Add __forceTick to refresh after answers
+  }, [questions, selectedTopic, refreshTrigger]); // Add refreshTrigger to refresh after clearing progress
 
   // Initialize and update stats when questions, topic, or force refresh change
   // Note: We don't include submissionStates here to avoid excessive recalculation
@@ -209,7 +253,7 @@ export function useQuizStateWithLeitner(
         // Keep existing stats on error - don't update
       }
     }
-  }, [questions, selectedTopic, __forceTick]); // Removed submissionStates for performance
+  }, [questions, selectedTopic, refreshTrigger]); // Removed submissionStates for performance
 
   // Separate effect to update stats when submissions change (debounced)
   useEffect(() => {
@@ -242,17 +286,24 @@ export function useQuizStateWithLeitner(
     setCurrentQuestionIndex(0);
   }, [selectedTopic]);
 
-  // Clear answer state when the current question changes
+  // Clear stale answer state (for questions no longer in current session)
   useEffect(() => {
-    const currentQuestion = filteredQuestions[currentQuestionIndex];
-    if (currentQuestion) {
-      setAnswers(prev => {
-        const cleaned = { ...prev };
-        delete cleaned[currentQuestion.id];
-        return cleaned;
+    if (filteredQuestions.length === 0) return;
+    
+    // Only clean answers for questions that are NOT in the current filtered set
+    // This prevents memory leaks while preserving current user selections
+    const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
+    
+    setAnswers(prev => {
+      const cleaned = { ...prev };
+      Object.keys(cleaned).forEach(questionId => {
+        if (!currentQuestionIds.has(questionId)) {
+          delete cleaned[questionId]; // Only delete answers for questions not in current session
+        }
       });
-    }
-  }, [currentQuestionIndex, filteredQuestions]);
+      return cleaned;
+    });
+  }, [filteredQuestions]); // Only run when filtered questions change, not on navigation
 
   // Clear submission states when switching topics (but preserve for 'All Topics' mode)
   useEffect(() => {
@@ -413,30 +464,55 @@ export function useQuizStateWithLeitner(
         if (index >= 0 && index < filteredQuestions.length) {
           setCurrentQuestionIndex(index);
           
-          // Only clear current answer selection, NOT submission state
-          // This preserves progress while allowing fresh answer selection
-          const newQuestionId = filteredQuestions[index]?.id;
-          if (newQuestionId) {
-            setAnswers(prev => {
-              const newAnswers = { ...prev };
-              delete newAnswers[newQuestionId];
-              return newAnswers;
-            });
-            
-            // DO NOT delete submission states - preserve progress!
-            // The user should see their previous submission if they navigate back
-          }
+          // Don't clear any states - preserve both answer selections and submission states
+          // This allows users to navigate freely while maintaining their progress
         }
       },
 
       clearAllProgress: () => {
         leitnerSystem.clearProgress();
-        setForceTick(prev => prev + 1);
+        setRefreshTrigger(prev => prev + 1);
       },
 
       // Expose submission state for a question (used by UI to highlight wrong selections)
       getSubmissionState: (questionId: string) => {
         return submissionStates[questionId] || null;
+      },
+
+      // 🎯 Start new session function  
+      startNewSession: () => {
+        setCurrentQuestionIndex(0);
+        setAnswers({}); // Clear all answer selections
+        setSubmissionStates({}); // Clear all submission states
+        setRefreshTrigger(prev => prev + 1); // Force refresh of due questions
+        
+        // Also clear localStorage states to ensure completely fresh start
+        saveToLocalStorage('leitner-quiz-index', 0);
+        saveToLocalStorage('leitner-submission-states', {});
+      },
+
+      // 🎯 End current session early
+      endCurrentSession: () => {
+        // Clear any current answer selections immediately
+        setAnswers({});
+        
+        // Mark all remaining questions as "session ended" to trigger session complete
+        const remainingQuestions = filteredQuestions.filter(q => 
+          !submissionStates[q.id]?.isSubmitted
+        );
+        
+        const endSessionStates = { ...submissionStates };
+        remainingQuestions.forEach(q => {
+          endSessionStates[q.id] = {
+            isSubmitted: true,
+            isCorrect: false, // Mark as incorrect for stats purposes
+            showAnswer: false,
+            submittedAt: Date.now(),
+            submittedAnswers: [],
+          };
+        });
+        
+        setSubmissionStates(endSessionStates);
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }),
@@ -455,10 +531,10 @@ export function useQuizStateWithLeitner(
   // Reactive question progress that updates when answers change
   const getQuestionProgress = useCallback(
     (questionId: string) => {
-      // This will be called fresh each time __forceTick changes
+      // This will be called fresh each time refreshTrigger changes
       return leitnerSystem.getQuestionProgress(questionId);
     },
-    [] // Remove __forceTick dependency as it's not actually needed
+    [] // Remove refreshTrigger dependency as it's not actually needed
   );
 
   return {
@@ -469,5 +545,9 @@ export function useQuizStateWithLeitner(
     stats,
     actions,
     getQuestionProgress,
+    // 🎯 Session-based functionality
+    isSessionComplete,
+    sessionResults,
+    sessionProgress,
   };
 }

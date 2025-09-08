@@ -12,6 +12,10 @@ import { LeitnerQuizCard } from '@/components/leitner-quiz-card';
 import { QuizCard } from '@/components/quiz-card';
 import { TopicSelector } from '@/components/topic-selector';
 import { LoadingSpinner } from '@/components/loading-spinner';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { QuizControls } from '@/components/quiz/quiz-controls';
+import { LeitnerBoxDistribution } from '@/components/leitner-box-distribution';
 
 // Hook imports
 import { useQuizData } from '@/hooks/use-quiz-data';
@@ -80,8 +84,6 @@ export default function Home() {
 
   // Get current state based on mode
   const currentState = isLeitnerMode ? leitnerState : practiceState;
-
-  // Extract commonly used values
   const currentQuestionIndex = currentState.currentQuestionIndex;
   const filteredQuestions = currentState.filteredQuestions;
   const answers = currentState.answers;
@@ -117,7 +119,110 @@ export default function Home() {
         <div className='mx-auto max-w-4xl'>
           {/* Quiz Card - Primary Focus */}
           <AnimatePresence mode='wait'>
-            {currentQuestion ? (
+            {/* Session Complete State - Show results when all 20 questions done */}
+            {isLeitnerMode &&
+            leitnerState.isSessionComplete &&
+            leitnerState.sessionResults ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.02 }}
+                transition={{
+                  duration: ANIMATION_DURATIONS.CARD_TRANSITION,
+                  ease: ANIMATION_EASINGS.EASE_OUT_QUART,
+                }}
+              >
+                {/* Session Results Card - Same structure as quiz cards */}
+                <div className='space-y-4'>
+                  {/* Contextual Toolbar */}
+                  <QuizControls
+                    topics={topics}
+                    selectedTopic={selectedTopic}
+                    onTopicChange={setSelectedTopic}
+                    totalQuestions={leitnerState.stats.totalQuestions}
+                    stats={{
+                      totalQuestions: leitnerState.stats.totalQuestions,
+                      answeredQuestions: leitnerState.stats.answeredQuestions,
+                      correctAnswers: leitnerState.stats.correctAnswers,
+                      incorrectAnswers: leitnerState.stats.incorrectAnswers,
+                      accuracy: leitnerState.stats.accuracy,
+                    }}
+                    leitnerStats={{
+                      dueToday: leitnerState.stats.leitner.dueToday,
+                      streakDays: leitnerState.stats.leitner.streakDays,
+                    }}
+                  />
+
+                  {/* Main Results Card */}
+                  <Card className='relative border border-border bg-card shadow-sm dark:shadow-sm'>
+                    {/* Header */}
+                    <CardHeader className='px-4 pb-3 pt-4 sm:pt-6'>
+                      <div className='flex items-center justify-center gap-3'>
+                        <div className='flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20'>
+                          <span className='text-2xl'>🎉</span>
+                        </div>
+                        <div className='text-center'>
+                          <h2 className='text-xl font-bold'>
+                            Session Complete!
+                          </h2>
+                          <p className='text-sm text-muted-foreground'>
+                            {leitnerState.sessionResults.total} questions
+                            completed
+                          </p>
+                        </div>
+                      </div>
+                    </CardHeader>
+
+                    {/* Results Content */}
+                    <CardContent className='px-4 pb-4 pt-0 sm:pb-6'>
+                      {/* Main Stats - Simple attempts/correct/wrong */}
+                      <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-3'>
+                        <div className='rounded-lg border bg-card p-4'>
+                          <div className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
+                            {leitnerState.sessionResults.total}
+                          </div>
+                          <div className='text-sm text-muted-foreground'>
+                            Total Attempts
+                          </div>
+                        </div>
+                        <div className='rounded-lg border bg-card p-4'>
+                          <div className='text-2xl font-bold text-green-600 dark:text-green-400'>
+                            {leitnerState.sessionResults.correct}
+                          </div>
+                          <div className='text-sm text-muted-foreground'>
+                            Correct
+                          </div>
+                        </div>
+                        <div className='rounded-lg border bg-card p-4'>
+                          <div className='text-2xl font-bold text-red-600 dark:text-red-400'>
+                            {leitnerState.sessionResults.total - leitnerState.sessionResults.correct}
+                          </div>
+                          <div className='text-sm text-muted-foreground'>
+                            Wrong
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Box distribution - Use dedicated component */}
+                      <div className='mb-6'>
+                        <LeitnerBoxDistribution questions={questions} />
+                      </div>
+
+                      {/* Action Button */}
+                      <Button
+                        onClick={() => leitnerState.actions.startNewSession()}
+                        size='lg'
+                        className='w-full'
+                      >
+                        {leitnerState.stats.leitner.dueToday > 0
+                          ? `Continue Learning (${leitnerState.stats.leitner.dueToday} left)`
+                          : 'Start New Session'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </motion.div>
+            ) : currentQuestion ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -152,6 +257,9 @@ export default function Home() {
                       currentQuestion.id
                     )}
                     getSubmissionState={leitnerState.actions.getSubmissionState}
+                    // 🎯 Session control props
+                    sessionProgress={leitnerState.sessionProgress}
+                    onEndSession={leitnerState.actions.endCurrentSession}
                   />
                 ) : (
                   <QuizCard
@@ -190,19 +298,94 @@ export default function Home() {
                   </div>
                   <div>
                     <h2 className='mb-2 text-xl font-semibold'>
-                      Ready to start?
+                      {isLeitnerMode
+                        ? 'All Questions Complete!'
+                        : 'Ready to start?'}
                     </h2>
                     <p className='text-muted-foreground'>
-                      Choose a topic to begin your AZ-204 practice
+                      {isLeitnerMode
+                        ? 'No questions are due for review right now. Great job!'
+                        : 'Choose a topic to begin your AZ-204 practice'}
                     </p>
                   </div>
-                  <TopicSelector
-                    topics={topics}
-                    selectedTopic={selectedTopic}
-                    onTopicChange={setSelectedTopic}
-                    questionCount={filteredQuestions.length}
-                    compact={false}
-                  />
+
+                  {/* Show stats when in Leitner mode */}
+                  {isLeitnerMode && leitnerState.stats && (
+                    <div className='mx-auto max-w-2xl'>
+                      <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-3'>
+                        <div className='rounded-lg border bg-card p-4'>
+                          <div className='text-2xl font-bold text-primary'>
+                            {leitnerState.stats.leitner.questionsStarted}
+                          </div>
+                          <div className='text-sm text-muted-foreground'>
+                            Questions Started
+                          </div>
+                        </div>
+                        <div className='rounded-lg border bg-card p-4'>
+                          <div className='text-2xl font-bold text-green-600'>
+                            {leitnerState.stats.leitner.accuracyRate.toFixed(0)}
+                            %
+                          </div>
+                          <div className='text-sm text-muted-foreground'>
+                            Accuracy Rate
+                          </div>
+                        </div>
+                        <div className='rounded-lg border bg-card p-4'>
+                          <div className='text-2xl font-bold text-blue-600'>
+                            {leitnerState.stats.leitner.streakDays}
+                          </div>
+                          <div className='text-sm text-muted-foreground'>
+                            Day Streak
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Box distribution */}
+                      <div className='rounded-lg border bg-card p-4'>
+                        <h3 className='mb-3 font-medium'>Progress by Box</h3>
+                        <div className='grid grid-cols-3 gap-3 text-sm'>
+                          <div className='text-center'>
+                            <div className='text-lg font-bold text-red-600'>
+                              {leitnerState.stats.leitner.boxDistribution[1] ||
+                                0}
+                            </div>
+                            <div className='text-muted-foreground'>
+                              Box 1 (New)
+                            </div>
+                          </div>
+                          <div className='text-center'>
+                            <div className='text-lg font-bold text-yellow-600'>
+                              {leitnerState.stats.leitner.boxDistribution[2] ||
+                                0}
+                            </div>
+                            <div className='text-muted-foreground'>
+                              Box 2 (Learning)
+                            </div>
+                          </div>
+                          <div className='text-center'>
+                            <div className='text-lg font-bold text-green-600'>
+                              {leitnerState.stats.leitner.boxDistribution[3] ||
+                                0}
+                            </div>
+                            <div className='text-muted-foreground'>
+                              Box 3 (Mastered)
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Topic selector for practice mode only */}
+                  {!isLeitnerMode && (
+                    <TopicSelector
+                      topics={topics}
+                      selectedTopic={selectedTopic}
+                      onTopicChange={setSelectedTopic}
+                      questionCount={filteredQuestions.length}
+                      compact={false}
+                    />
+                  )}
                 </div>
               </motion.div>
             )}
