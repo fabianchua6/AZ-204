@@ -289,7 +289,7 @@ export function LeitnerQuizCard({
               <div className='flex items-center gap-2'>
                 {/* Question Counter */}
                 {sessionProgress && (
-                  <div className='ml-2 text-sm font-medium text-muted-foreground'>
+                  <div className='ml-2 text-sm font-medium text-muted-foreground hidden sm:block'>
                     {sessionProgress.current}/{sessionProgress.total}
                   </div>
                 )}

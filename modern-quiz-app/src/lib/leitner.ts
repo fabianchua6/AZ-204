@@ -309,6 +309,8 @@ export class LeitnerSystem {
       StorageUtils.safeRemoveItem(todayKey);
       
       // Clean up old daily attempts keys (older than 7 days)
+      // First collect all keys to avoid iteration issues during removal
+      const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('leitner-daily-attempts-')) {
@@ -319,14 +321,17 @@ export class LeitnerSystem {
             
             // Remove keys older than 7 days or invalid dates
             if (daysDiff > 7 || isNaN(daysDiff)) {
-              StorageUtils.safeRemoveItem(key);
+              keysToRemove.push(key);
             }
           } catch {
             // Remove invalid date keys
-            StorageUtils.safeRemoveItem(key);
+            keysToRemove.push(key);
           }
         }
       }
+      
+      // Now safely remove all collected keys
+      keysToRemove.forEach(key => StorageUtils.safeRemoveItem(key));
     } catch (error) {
       console.error('Failed to clear daily attempts:', error);
     }
