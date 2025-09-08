@@ -23,8 +23,11 @@ export function QuizBadges({ question, className = '' }: QuizBadgesProps) {
       )}
 
       {/* Topic Badge */}
-      <div className='flex h-8 items-center rounded-full border border-primary/30 bg-primary/20 px-3 text-sm font-medium text-primary'>
-        {question.topic}
+      <div 
+        className='flex h-8 items-center rounded-full border border-primary/30 bg-primary/20 px-3 text-sm font-medium text-primary'
+        title={question.topic.length > 10 ? question.topic : undefined}
+      >
+        {question.topic.length > 10 ? `${question.topic.substring(0, 10)}...` : question.topic}
       </div>
 
       {/* Code Example Badge */}
