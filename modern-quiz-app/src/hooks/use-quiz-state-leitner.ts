@@ -99,21 +99,37 @@ export function useQuizStateWithLeitner(
 
   // Filter and sort questions based on topic and Leitner system
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
+  const [isEndingSession, setIsEndingSession] = useState(false); // Flag to prevent regeneration during session end
 
   // 🎯 Session state tracking for end session functionality
   const isSessionComplete = useMemo(() => {
     // For Leitner sessions, ignore topic filter - session completion is based on all session questions
-    if (filteredQuestions.length === 0) return false;
+    if (filteredQuestions.length === 0) {
+      console.log('Session incomplete: No filtered questions');
+      return false;
+    }
     
     // Check if all questions in current session have been submitted
-    const submittedCount = Object.keys(submissionStates).filter(questionId => 
-      filteredQuestions.some(q => q.id === questionId) && submissionStates[questionId]?.isSubmitted
+    // Only count submission states for questions that are actually in the current session
+    const currentSessionQuestionIds = new Set(filteredQuestions.map(q => q.id));
+    const submittedInCurrentSession = Object.keys(submissionStates).filter(questionId => 
+      currentSessionQuestionIds.has(questionId) && submissionStates[questionId]?.isSubmitted
     ).length;
     
-    const isComplete = submittedCount === filteredQuestions.length && filteredQuestions.length > 0;
+    const isComplete = submittedInCurrentSession === filteredQuestions.length && filteredQuestions.length > 0;
+    
+    console.log(`Session completion check:`, {
+      submittedCount: submittedInCurrentSession,
+      totalQuestions: filteredQuestions.length,
+      isComplete,
+      totalSubmissionStates: Object.keys(submissionStates).length,
+      currentSessionQuestionIds: currentSessionQuestionIds.size,
+      filteredQuestionIds: filteredQuestions.map(q => q.id).slice(0, 5),
+      submissionStateKeys: Object.keys(submissionStates).slice(0, 10)
+    });
     
     if (isComplete) {
-      console.log(`Session complete: ${submittedCount}/${filteredQuestions.length} questions submitted`); // Debug log
+      console.log(`✅ Session complete: ${submittedInCurrentSession}/${filteredQuestions.length} questions submitted`);
     }
     
     return isComplete;
@@ -134,9 +150,9 @@ export function useQuizStateWithLeitner(
     return { correct, incorrect, total: results.length, results };
   }, [isSessionComplete, filteredQuestions, submissionStates]);
 
-  // Session progress tracking
+  // Session progress tracking - simplified for Leitner mode
   const sessionProgress = useMemo(() => {
-    if (selectedTopic !== null || filteredQuestions.length === 0) {
+    if (filteredQuestions.length === 0) {
       return { current: 0, total: 0, isActive: false };
     }
     
@@ -144,15 +160,35 @@ export function useQuizStateWithLeitner(
       filteredQuestions.some(q => q.id === questionId) && submissionStates[questionId]?.isSubmitted
     ).length;
     
-    return {
+    const progress = {
       current: currentQuestionIndex + 1, // Which question we're currently on (1-based)
       total: filteredQuestions.length,
-      isActive: filteredQuestions.length > 0 && submittedCount < filteredQuestions.length
+      isActive: !isSessionComplete && filteredQuestions.length > 0, // Active if not complete and has questions
     };
-  }, [selectedTopic, filteredQuestions, submissionStates, currentQuestionIndex]);
+    
+    console.log('📊 Session progress:', progress, {
+      currentQuestionIndex,
+      isSessionComplete,
+      submittedCount
+    });
+    
+    return progress;
+  }, [filteredQuestions, submissionStates, currentQuestionIndex, isSessionComplete]);
 
   // Update filtered questions when dependencies change
   useEffect(() => {
+    // Don't regenerate questions if we're ending a session
+    if (isEndingSession) {
+      console.log('⚠️ Skipping question regeneration - session is ending');
+      return;
+    }
+    
+    // Don't regenerate questions if session is complete - stay on results screen
+    if (isSessionComplete) {
+      console.log('⚠️ Skipping question regeneration - session is complete');
+      return;
+    }
+    
     // Only run Leitner system logic when in Leitner mode
     if (selectedTopic !== null) {
       // In Practice mode - just use regular filtering without Leitner system
@@ -236,7 +272,7 @@ export function useQuizStateWithLeitner(
     };
 
     updateQuestions();
-  }, [questions, selectedTopic, refreshTrigger]); // Add refreshTrigger to refresh after clearing progress
+  }, [questions, selectedTopic, refreshTrigger, isEndingSession, isSessionComplete]); // Add refreshTrigger to refresh after clearing progress
 
   // Initialize and update stats when questions, topic, or force refresh change
   // Note: We don't include submissionStates here to avoid excessive recalculation
@@ -488,9 +524,11 @@ export function useQuizStateWithLeitner(
 
       // 🎯 Start new session function  
       startNewSession: () => {
+        console.log('🚀 Starting new session - clearing all states');
         setCurrentQuestionIndex(0);
         setAnswers({}); // Clear all answer selections
         setSubmissionStates({}); // Clear all submission states
+        setIsEndingSession(false); // Clear ending session flag
         setRefreshTrigger(prev => prev + 1); // Force refresh of due questions
         
         // Also clear localStorage states to ensure completely fresh start
@@ -500,7 +538,18 @@ export function useQuizStateWithLeitner(
 
       // 🎯 End current session early
       endCurrentSession: () => {
-        console.log('endCurrentSession called'); // Debug log
+        console.log('🚨 endCurrentSession called');
+        
+        // Set flag to prevent question regeneration
+        setIsEndingSession(true);
+        
+        console.log('Current state:', {
+          filteredQuestionsCount: filteredQuestions.length,
+          submissionStatesCount: Object.keys(submissionStates).length,
+          answers: Object.keys(answers).length,
+          filteredQuestionIds: filteredQuestions.map(q => q.id),
+          submissionStateIds: Object.keys(submissionStates)
+        });
         
         // Clear any current answer selections immediately
         setAnswers({});
@@ -510,10 +559,13 @@ export function useQuizStateWithLeitner(
           !submissionStates[q.id]?.isSubmitted
         );
         
-        console.log(`Ending session: ${remainingQuestions.length} remaining questions`); // Debug log
+        console.log(`📝 Ending session: ${remainingQuestions.length} remaining questions out of ${filteredQuestions.length} total`);
+        console.log('Remaining question IDs:', remainingQuestions.map(q => q.id));
+        console.log('Already submitted IDs:', filteredQuestions.filter(q => submissionStates[q.id]?.isSubmitted).map(q => q.id));
         
         const endSessionStates = { ...submissionStates };
         remainingQuestions.forEach(q => {
+          console.log(`Marking question ${q.id} as session-ended`);
           endSessionStates[q.id] = {
             isSubmitted: true,
             isCorrect: false, // Mark as incorrect for stats purposes
@@ -523,13 +575,19 @@ export function useQuizStateWithLeitner(
           };
         });
         
+        console.log('Updated submission states count:', Object.keys(endSessionStates).length);
+        console.log('Questions that will be submitted after update:', Object.keys(endSessionStates).filter(id => endSessionStates[id].isSubmitted).length);
+        
         // Force update submission states to trigger session complete
         setSubmissionStates(endSessionStates);
         
-        // Force trigger a re-render after a brief delay to ensure state updates
+        // Don't trigger refresh that would regenerate questions - let the session complete naturally
+        console.log('🔄 Session ending - preventing question regeneration');
+        
+        // Reset flag after a delay to allow session completion to process
         setTimeout(() => {
-          setRefreshTrigger(prev => prev + 1);
-        }, 100);
+          setIsEndingSession(false);
+        }, 2000);
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }),
@@ -540,6 +598,7 @@ export function useQuizStateWithLeitner(
       filteredQuestions,
       questions,
       submissionStates,
+      answers,
     ]
   );
 
