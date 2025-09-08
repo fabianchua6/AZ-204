@@ -84,43 +84,6 @@ export function QuizControls({
         </div>
       </div>
 
-      {/* Collapsed Header */}
-      <div
-        className='flex cursor-pointer items-center justify-between border-t border-border p-4 transition-colors hover:bg-muted/30 dark:hover:bg-muted/20'
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className='flex items-center gap-3'>
-          <div className='flex items-center gap-2'>
-            <Filter className='h-4 w-4 text-muted-foreground' />
-            <span className='text-sm font-medium'>
-              {selectedTopic || 'All Topics'}
-            </span>
-          </div>
-          <div className='h-4 w-px bg-border' />
-          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-            <Target className='h-3 w-3' />
-            <span>
-              {stats.answeredQuestions}/{stats.totalQuestions}
-            </span>
-            <span>
-              (
-              {Math.round(
-                (stats.answeredQuestions / stats.totalQuestions) * 100
-              )}
-              %)
-            </span>
-          </div>
-        </div>
-
-        <Button variant='ghost' size='sm' className='h-8 w-8 p-0'>
-          {isExpanded ? (
-            <ChevronUp className='h-4 w-4' />
-          ) : (
-            <ChevronDown className='h-4 w-4' />
-          )}
-        </Button>
-      </div>
-
       {/* Expanded Content */}
       <AnimatePresence>
         {isExpanded && (
