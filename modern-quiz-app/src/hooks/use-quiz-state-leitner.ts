@@ -102,15 +102,22 @@ export function useQuizStateWithLeitner(
 
   // 🎯 Session state tracking for end session functionality
   const isSessionComplete = useMemo(() => {
-    if (selectedTopic !== null || filteredQuestions.length === 0) return false;
+    // For Leitner sessions, ignore topic filter - session completion is based on all session questions
+    if (filteredQuestions.length === 0) return false;
     
     // Check if all questions in current session have been submitted
     const submittedCount = Object.keys(submissionStates).filter(questionId => 
       filteredQuestions.some(q => q.id === questionId) && submissionStates[questionId]?.isSubmitted
     ).length;
     
-    return submittedCount === filteredQuestions.length && filteredQuestions.length > 0;
-  }, [selectedTopic, filteredQuestions, submissionStates]);
+    const isComplete = submittedCount === filteredQuestions.length && filteredQuestions.length > 0;
+    
+    if (isComplete) {
+      console.log(`Session complete: ${submittedCount}/${filteredQuestions.length} questions submitted`); // Debug log
+    }
+    
+    return isComplete;
+  }, [filteredQuestions, submissionStates]);
 
   // Session results for end session display
   const sessionResults = useMemo(() => {
@@ -493,6 +500,8 @@ export function useQuizStateWithLeitner(
 
       // 🎯 End current session early
       endCurrentSession: () => {
+        console.log('endCurrentSession called'); // Debug log
+        
         // Clear any current answer selections immediately
         setAnswers({});
         
@@ -500,6 +509,8 @@ export function useQuizStateWithLeitner(
         const remainingQuestions = filteredQuestions.filter(q => 
           !submissionStates[q.id]?.isSubmitted
         );
+        
+        console.log(`Ending session: ${remainingQuestions.length} remaining questions`); // Debug log
         
         const endSessionStates = { ...submissionStates };
         remainingQuestions.forEach(q => {
@@ -512,7 +523,13 @@ export function useQuizStateWithLeitner(
           };
         });
         
+        // Force update submission states to trigger session complete
         setSubmissionStates(endSessionStates);
+        
+        // Force trigger a re-render after a brief delay to ensure state updates
+        setTimeout(() => {
+          setRefreshTrigger(prev => prev + 1);
+        }, 100);
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }),

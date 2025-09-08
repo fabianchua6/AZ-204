@@ -34,7 +34,6 @@
     "test:coverage": "jest --coverage",
     "seed": "node scripts/seed.mjs",
     "build-pdf-questions": "node scripts/parse-pdf-questions.js && cp src/data/pdf-questions.json public/data/",
-    "predev": "npm run seed && npm run build-pdf-questions",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "analyze": "cross-env ANALYZE=true npm run build",
