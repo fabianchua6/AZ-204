@@ -117,7 +117,7 @@ export default function Home() {
       hasSessionResults: !!leitnerState.sessionResults,
       filteredQuestionsCount: filteredQuestions.length,
       currentQuestionIndex,
-      currentQuestionId: currentQuestion?.id
+      currentQuestionId: currentQuestion?.id,
     });
   }
 
@@ -175,10 +175,6 @@ export default function Home() {
                           <h2 className='text-xl font-bold'>
                             Session Complete!
                           </h2>
-                          <p className='text-sm text-muted-foreground'>
-                            {leitnerState.sessionResults.total} questions
-                            completed
-                          </p>
                         </div>
                       </div>
                     </CardHeader>
