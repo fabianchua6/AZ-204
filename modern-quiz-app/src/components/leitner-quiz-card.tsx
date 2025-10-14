@@ -222,23 +222,26 @@ export function LeitnerQuizCard({
   }, [onPrevious]);
 
   // Custom button states for Leitner mode - don't disable navigation during submission
-  const buttonStates = useMemo(() => ({
-    showAnswerDisabled: false,
-    nextDisabled: !canGoNext,
-    previousDisabled: !canGoPrevious,
-    submitDisabled:
-      externalSelectedAnswers.length === 0 ||
-      cardState.isSubmitting ||
+  const buttonStates = useMemo(
+    () => ({
+      showAnswerDisabled: false,
+      nextDisabled: !canGoNext,
+      previousDisabled: !canGoPrevious,
+      submitDisabled:
+        externalSelectedAnswers.length === 0 ||
+        cardState.isSubmitting ||
+        cardState.answerSubmitted,
+      showSubmitButton:
+        !cardState.answerSubmitted && externalSelectedAnswers.length > 0,
+    }),
+    [
+      canGoNext,
+      canGoPrevious,
+      externalSelectedAnswers.length,
+      cardState.isSubmitting,
       cardState.answerSubmitted,
-    showSubmitButton:
-      !cardState.answerSubmitted && externalSelectedAnswers.length > 0,
-  }), [
-    canGoNext, 
-    canGoPrevious, 
-    externalSelectedAnswers.length, 
-    cardState.isSubmitting, 
-    cardState.answerSubmitted
-  ]);
+    ]
+  );
 
   // Get box styling using CSS classes
   const currentBox = questionProgress?.currentBox || 1;
@@ -289,7 +292,7 @@ export function LeitnerQuizCard({
               <div className='flex items-center gap-2'>
                 {/* Question Counter */}
                 {sessionProgress && (
-                  <div className='ml-2 text-sm font-medium text-muted-foreground hidden sm:block'>
+                  <div className='ml-2 hidden text-sm font-medium text-muted-foreground sm:block'>
                     {sessionProgress.current}/{sessionProgress.total}
                   </div>
                 )}
@@ -312,18 +315,20 @@ export function LeitnerQuizCard({
                   <ChevronRight className='h-4 w-4' />
                 </Button>
 
-                {/* End Session Button */}
-                {sessionProgress?.isActive && onEndSession && (
-                  <Button
-                    variant='outline'
-                    size='sm'
-                    onClick={onEndSession}
-                    className='h-8 w-8 border-red-200 p-0 text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:border-red-700 dark:hover:bg-red-950/20'
-                    title='End Session'
-                  >
-                    <X className='h-4 w-4' />
-                  </Button>
-                )}
+                {/* End Session Button - Only show after all 20 questions are answered */}
+                {sessionProgress?.isActive &&
+                  onEndSession &&
+                  sessionProgress.current === sessionProgress.total && (
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={onEndSession}
+                      className='h-8 w-8 border-red-200 p-0 text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:border-red-700 dark:hover:bg-red-950/20'
+                      title='End Session'
+                    >
+                      <X className='h-4 w-4' />
+                    </Button>
+                  )}
               </div>
             </div>
           </div>
