@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { Question } from '@/types/quiz';
 import { isPdfQuestion } from '@/types/quiz';
 import { leitnerSystem, type LeitnerStats } from '@/lib/leitner';
@@ -36,6 +36,9 @@ export function useQuizStateWithLeitner(
   const [answers, setAnswers] = useState<Record<string, number[]>>({});
   const [submissionStates, setSubmissionStates] = useState<Record<string, SubmissionState>>({});
   const [refreshTrigger, setRefreshTrigger] = useState(0); // Trigger for forcing re-evaluation of due questions
+  
+  // Use ref for session ending flag to avoid race conditions with setTimeout
+  const isEndingSessionRef = useRef(false);
   
   // Initialize stats with safe defaults to prevent null reference errors
   const [stats, setStats] = useState<EnhancedQuizStats>(() => ({
@@ -177,8 +180,8 @@ export function useQuizStateWithLeitner(
 
   // Update filtered questions when dependencies change
   useEffect(() => {
-    // Don't regenerate questions if we're ending a session
-    if (isEndingSession) {
+    // Don't regenerate questions if we're ending a session (use ref for immediate check)
+    if (isEndingSession || isEndingSessionRef.current) {
       console.log('⚠️ Skipping question regeneration - session is ending');
       return;
     }
@@ -216,62 +219,85 @@ export function useQuizStateWithLeitner(
       return;
     }
 
-    const updateQuestions = async () => {
-      await leitnerSystem.ensureInitialized();
-      
-      // Use centralized filtering first
-      let baseQuestions = questionService.filterQuestions(questions);
+    // Track if component is still mounted to prevent state updates after unmount
+    let isMounted = true;
 
-      if (selectedTopic) {
-        baseQuestions = baseQuestions.filter(q => q.topic === selectedTopic);
+    const updateQuestions = async () => {
+      try {
+        await leitnerSystem.ensureInitialized();
         
-        // Sort to prioritize PDF questions first, then shuffle within each group
-        const pdfQuestions = baseQuestions.filter(q => isPdfQuestion(q));
-        const regularQuestions = baseQuestions.filter(q => !isPdfQuestion(q));
+        // Check if still mounted after async operation
+        if (!isMounted) return;
         
-        // Shuffle each group separately, then combine with PDF questions first
-        const shuffledPdf = shuffleArray(pdfQuestions);
-        const shuffledRegular = shuffleArray(regularQuestions);
-        baseQuestions = [...shuffledPdf, ...shuffledRegular];
-        
-        setFilteredQuestions(baseQuestions);
-      } else {
-        // For Leitner mode, get due questions from the Leitner system
-        const dueQuestions = await leitnerSystem.getDueQuestions(baseQuestions);
-        
-        // Sort due questions to prioritize PDF questions first
-        dueQuestions.sort((a, b) => {
-          // PDF questions come first (handle undefined safely)
-          const aIsPdf = isPdfQuestion(a);
-          const bIsPdf = isPdfQuestion(b);
+        // Use centralized filtering first
+        let baseQuestions = questionService.filterQuestions(questions);
+
+        if (selectedTopic) {
+          baseQuestions = baseQuestions.filter(q => q.topic === selectedTopic);
           
-          if (aIsPdf && !bIsPdf) return -1;
-          if (!aIsPdf && bIsPdf) return 1;
-          // Within same type (PDF or regular), maintain Leitner system order
-          return 0;
-        });
-        
-        // 🎯 SESSION-BASED: Limit to 20 most due questions per session
-        const sessionQuestions = dueQuestions.slice(0, 20);
-        
-        setFilteredQuestions(sessionQuestions);
-        
-        // Clear answer state for all due questions to ensure fresh review
-        setAnswers(prev => {
-          const cleaned = { ...prev };
-          dueQuestions.forEach(question => {
-            delete cleaned[question.id];
+          // Sort to prioritize PDF questions first, then shuffle within each group
+          const pdfQuestions = baseQuestions.filter(q => isPdfQuestion(q));
+          const regularQuestions = baseQuestions.filter(q => !isPdfQuestion(q));
+          
+          // Shuffle each group separately, then combine with PDF questions first
+          const shuffledPdf = shuffleArray(pdfQuestions);
+          const shuffledRegular = shuffleArray(regularQuestions);
+          baseQuestions = [...shuffledPdf, ...shuffledRegular];
+          
+          // Check again before setState
+          if (!isMounted) return;
+          setFilteredQuestions(baseQuestions);
+        } else {
+          // For Leitner mode, get due questions from the Leitner system
+          const dueQuestions = await leitnerSystem.getDueQuestions(baseQuestions);
+          
+          // Check if still mounted after async operation
+          if (!isMounted) return;
+          
+          // Sort due questions to prioritize PDF questions first
+          dueQuestions.sort((a, b) => {
+            // PDF questions come first (handle undefined safely)
+            const aIsPdf = isPdfQuestion(a);
+            const bIsPdf = isPdfQuestion(b);
+            
+            if (aIsPdf && !bIsPdf) return -1;
+            if (!aIsPdf && bIsPdf) return 1;
+            // Within same type (PDF or regular), maintain Leitner system order
+            return 0;
           });
-          return cleaned;
-        });
-        
-        // DO NOT clear submission states - this destroys user progress!
-        // Submission states should persist to track completion progress
-        // Only clear them explicitly when user chooses to reset progress
+          
+          // 🎯 SESSION-BASED: Limit to 20 most due questions per session
+          const sessionQuestions = dueQuestions.slice(0, 20);
+          
+          // Final mount check before setting state
+          if (!isMounted) return;
+          setFilteredQuestions(sessionQuestions);
+          
+          // Clear answer state for all due questions to ensure fresh review
+          setAnswers(prev => {
+            const cleaned = { ...prev };
+            dueQuestions.forEach(question => {
+              delete cleaned[question.id];
+            });
+            return cleaned;
+          });
+          
+          // DO NOT clear submission states - this destroys user progress!
+          // Submission states should persist to track completion progress
+          // Only clear them explicitly when user chooses to reset progress
+        }
+      } catch (error) {
+        console.error('Failed to update questions:', error);
+        // Don't update state on error to maintain current questions
       }
     };
 
     updateQuestions();
+    
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false;
+    };
   }, [questions, selectedTopic, refreshTrigger, isEndingSession, isSessionComplete]); // Add refreshTrigger to refresh after clearing progress
 
   // Initialize and update stats when questions, topic, or force refresh change
@@ -319,7 +345,7 @@ export function useQuizStateWithLeitner(
       } catch (error) {
         console.error('Failed to update stats after submission:', error);
       }
-    }, 100); // 100ms debounce to avoid excessive calculations
+    }, 300); // 300ms debounce for better performance on rapid submissions
 
     return () => clearTimeout(timeoutId);
   }, [submissionStates, questions, selectedTopic]);
@@ -348,30 +374,35 @@ export function useQuizStateWithLeitner(
     });
   }, [filteredQuestions]); // Only run when filtered questions change, not on navigation
 
-  // Clear submission states when switching topics (but preserve for 'All Topics' mode)
+  // Clean up submission states for questions not in current session
   useEffect(() => {
-    if (selectedTopic !== null) {
-      // When switching to a specific topic, clear submission states to prevent
-      // cross-contamination between Leitner mode and Practice mode
-      setSubmissionStates(prev => {
-        const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
-        const cleaned = { ...prev };
-        
-        // Only clean submission states for questions in the current filtered set
-        // This prevents Practice mode from being affected by Leitner submission states
-        Object.keys(cleaned).forEach(questionId => {
-          if (currentQuestionIds.has(questionId)) {
-            delete cleaned[questionId];
-          }
-        });
-        
+    if (filteredQuestions.length === 0) return;
+    
+    const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
+    
+    setSubmissionStates(prev => {
+      const cleaned = { ...prev };
+      let hasChanges = false;
+      
+      // Remove submission states for questions NOT in the current session
+      Object.keys(cleaned).forEach(questionId => {
+        if (!currentQuestionIds.has(questionId)) {
+          delete cleaned[questionId];
+          hasChanges = true;
+        }
+      });
+      
+      // Only update if there were actual changes
+      if (hasChanges) {
+        console.log('🧹 Cleaned up submission states for questions not in current session');
         // Update localStorage to reflect the cleaned state
         saveToLocalStorage('leitner-submission-states', cleaned);
-        
         return cleaned;
-      });
-    }
-  }, [selectedTopic, filteredQuestions]); // Run when topic or questions change
+      }
+      
+      return prev;
+    });
+  }, [filteredQuestions]); // Run when questions change (new session loaded)
 
   // Separate function for just updating selected answers (no Leitner processing)
   const updateSelectedAnswers = useCallback(
@@ -384,171 +415,162 @@ export function useQuizStateWithLeitner(
     []
   );
 
-  // Clear stale answer selections (but preserve submission history for progress tracking)
-  useEffect(() => {
-    // Only clean current answer selections, NOT submission states
-    // This prevents memory leaks while preserving user progress
-    const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
-    
-    setAnswers(prev => {
-      const cleaned = { ...prev };
-      Object.keys(cleaned).forEach(questionId => {
-        if (!currentQuestionIds.has(questionId)) {
-          delete cleaned[questionId];
-        }
-      });
-      return cleaned;
-    });
-    
-    // DO NOT clean submission states - they contain valuable progress data
-    // that should persist across topic switches and sessions
-  }, [filteredQuestions]); // Clean up when filtered questions change
+  // Actions - No memoization needed as setState functions are stable
+  // Using function form of setState to always get latest state and avoid stale closures
+  const actions = {
+    setSelectedTopic: (topic: string | null) => {
+      setSelectedTopic(topic);
+    },
 
-  // Actions - Memoized to prevent unnecessary re-renders
-  const actions = useMemo(
-    () => ({
-      setSelectedTopic: (topic: string | null) => {
-        setSelectedTopic(topic);
-      },
+    // For option selection (no Leitner processing)
+    updateAnswers: (questionId: string, answerIndexes: number[]) => {
+      updateSelectedAnswers(questionId, answerIndexes);
+    },
 
-      // For option selection (no Leitner processing)
-      updateAnswers: (questionId: string, answerIndexes: number[]) => {
-        updateSelectedAnswers(questionId, answerIndexes);
-      },
+    // For answer submission (with Leitner processing)
+    submitAnswer: async (questionId: string, answerIndexes: number[]) => {
+      if (!questions || questions.length === 0) {
+        console.error('[Leitner] No questions available');
+        return;
+      }
 
-      // For answer submission (with Leitner processing)
-      submitAnswer: async (questionId: string, answerIndexes: number[]) => {
-        if (!questions || questions.length === 0) {
-          console.error('[Leitner] No questions available');
-          return;
-        }
+      // First update the local answers state for immediate UI feedback
+      setAnswers(prev => ({
+        ...prev,
+        [questionId]: answerIndexes,
+      }));
 
-        // First update the local answers state for immediate UI feedback
-        setAnswers(prev => ({
+      // Find the question to check correctness
+      const question = questions.find(q => q.id === questionId);
+      if (!question) {
+        console.error('[Leitner] Question not found', { questionId });
+        return;
+      }
+
+      // Check if answer is correct
+      const isCorrect =
+        answerIndexes.length === question.answerIndexes.length &&
+        answerIndexes.every(answer =>
+          question.answerIndexes.includes(answer)
+        );
+
+      // Store submission state with submitted answers
+      setSubmissionStates(prev => {
+        const newState = {
           ...prev,
-          [questionId]: answerIndexes,
-        }));
-
-        // Find the question to check correctness
-        const question = questions.find(q => q.id === questionId);
-        if (!question) {
-          console.error('[Leitner] Question not found', { questionId });
-          return;
-        }
-
-        // Check if answer is correct
-        const isCorrect =
-          answerIndexes.length === question.answerIndexes.length &&
-          answerIndexes.every(answer =>
-            question.answerIndexes.includes(answer)
-          );
-
-        // Store submission state with submitted answers
-        setSubmissionStates(prev => {
-          const newState = {
-            ...prev,
-            [questionId]: {
-              isSubmitted: true,
-              isCorrect,
-              showAnswer: true,
-              submittedAt: Date.now(),
-              submittedAnswers: answerIndexes, // Store the submitted answers
-            },
-          };
-          
-          // Save to localStorage for mobile persistence
-          saveToLocalStorage('leitner-submission-states', newState);
-          
-          return newState;
-        });
-
-        try {
-          console.log(`🔍 [DEBUG] submitAnswer called: questionId=${questionId.slice(-8)}, answerIndexes=[${answerIndexes.join(',')}]`);
-          
-          // Ensure Leitner system is initialized first
-          await leitnerSystem.ensureInitialized();
-          
-          console.log(`🔍 [DEBUG] Leitner system initialized, processing answer: isCorrect=${isCorrect}`);
-          
-          // Process with Leitner system (synchronous operation)
-          const result = leitnerSystem.processAnswer(questionId, isCorrect);
-
-          console.log(`🔍 [DEBUG] Leitner processAnswer result:`, result);
-
-          // Stats are updated inline with submission state to prevent race conditions
-          // No separate updateStatsAfterSubmission call needed
-
-          // Return result for UI feedback without auto-navigation
-          return result;
-        } catch (error) {
-          console.error('🔍 [DEBUG] [Leitner] Failed to process answer:', error);
-          throw error;
-        }
-      },
-
-      // Legacy method for compatibility (now just updates answers)
-      setAnswer: (questionId: string, answerIndexes: number[]) => {
-        updateSelectedAnswers(questionId, answerIndexes);
-      },
-
-      nextQuestion: () => {
-        if (currentQuestionIndex < filteredQuestions.length - 1) {
-          setCurrentQuestionIndex(prev => prev + 1);
-        }
-      },
-
-      previousQuestion: () => {
-        if (currentQuestionIndex > 0) {
-          setCurrentQuestionIndex(prev => prev - 1);
-        }
-      },
-
-      goToQuestion: (index: number) => {
-        if (index >= 0 && index < filteredQuestions.length) {
-          setCurrentQuestionIndex(index);
-          
-          // Don't clear any states - preserve both answer selections and submission states
-          // This allows users to navigate freely while maintaining their progress
-        }
-      },
-
-      clearAllProgress: () => {
-        leitnerSystem.clearProgress();
-        setRefreshTrigger(prev => prev + 1);
-      },
-
-      // Expose submission state for a question (used by UI to highlight wrong selections)
-      getSubmissionState: (questionId: string) => {
-        return submissionStates[questionId] || null;
-      },
-
-      // 🎯 Start new session function  
-      startNewSession: () => {
-        console.log('🚀 Starting new session - clearing all states');
-        setCurrentQuestionIndex(0);
-        setAnswers({}); // Clear all answer selections
-        setSubmissionStates({}); // Clear all submission states
-        setIsEndingSession(false); // Clear ending session flag
-        setRefreshTrigger(prev => prev + 1); // Force refresh of due questions
+          [questionId]: {
+            isSubmitted: true,
+            isCorrect,
+            showAnswer: true,
+            submittedAt: Date.now(),
+            submittedAnswers: answerIndexes, // Store the submitted answers
+          },
+        };
         
-        // Also clear localStorage states to ensure completely fresh start
-        saveToLocalStorage('leitner-quiz-index', 0);
-        saveToLocalStorage('leitner-submission-states', {});
-      },
+        // Save to localStorage for mobile persistence
+        saveToLocalStorage('leitner-submission-states', newState);
+        
+        return newState;
+      });
 
-      // 🎯 End current session early
-      endCurrentSession: () => {
-        console.log('🚨 endCurrentSession called');
+      try {
+        console.log(`🔍 [DEBUG] submitAnswer called: questionId=${questionId.slice(-8)}, answerIndexes=[${answerIndexes.join(',')}]`);
         
-        // Set flag to prevent question regeneration
-        setIsEndingSession(true);
+        // Ensure Leitner system is initialized first
+        await leitnerSystem.ensureInitialized();
         
+        console.log(`🔍 [DEBUG] Leitner system initialized, processing answer: isCorrect=${isCorrect}`);
+        
+        // Process with Leitner system (synchronous operation)
+        const result = leitnerSystem.processAnswer(questionId, isCorrect);
+
+        console.log(`🔍 [DEBUG] Leitner processAnswer result:`, result);
+
+        // Stats are updated inline with submission state to prevent race conditions
+        // No separate updateStatsAfterSubmission call needed
+
+        // Return result for UI feedback without auto-navigation
+        return result;
+      } catch (error) {
+        console.error('🔍 [DEBUG] [Leitner] Failed to process answer:', error);
+        throw error;
+      }
+    },
+
+    // Legacy method for compatibility (now just updates answers)
+    setAnswer: (questionId: string, answerIndexes: number[]) => {
+      updateSelectedAnswers(questionId, answerIndexes);
+    },
+
+    nextQuestion: () => {
+      setCurrentQuestionIndex(prev => {
+        // Use function form to get latest state
+        if (prev < filteredQuestions.length - 1) {
+          return prev + 1;
+        }
+        return prev;
+      });
+    },
+
+    previousQuestion: () => {
+      setCurrentQuestionIndex(prev => {
+        // Use function form to get latest state
+        if (prev > 0) {
+          return prev - 1;
+        }
+        return prev;
+      });
+    },
+
+    goToQuestion: (index: number) => {
+      if (index >= 0 && index < filteredQuestions.length) {
+        setCurrentQuestionIndex(index);
+        
+        // Don't clear any states - preserve both answer selections and submission states
+        // This allows users to navigate freely while maintaining their progress
+      }
+    },
+
+    clearAllProgress: () => {
+      leitnerSystem.clearProgress();
+      setRefreshTrigger(prev => prev + 1);
+    },
+
+    // Expose submission state for a question (used by UI to highlight wrong selections)
+    getSubmissionState: (questionId: string) => {
+      return submissionStates[questionId] || null;
+    },
+
+    // 🎯 Start new session function  
+    startNewSession: () => {
+      console.log('🚀 Starting new session - clearing all states');
+      setCurrentQuestionIndex(0);
+      setAnswers({}); // Clear all answer selections
+      setSubmissionStates({}); // Clear all submission states
+      setIsEndingSession(false); // Clear ending session flag
+      isEndingSessionRef.current = false; // Clear ref flag
+      setRefreshTrigger(prev => prev + 1); // Force refresh of due questions
+      
+      // Also clear localStorage states to ensure completely fresh start
+      saveToLocalStorage('leitner-quiz-index', 0);
+      saveToLocalStorage('leitner-submission-states', {});
+    },
+
+    // 🎯 End current session early
+    endCurrentSession: () => {
+      console.log('🚨 endCurrentSession called');
+      
+      // Set both state and ref flag to prevent question regeneration
+      setIsEndingSession(true);
+      isEndingSessionRef.current = true;
+      
+      // Use function form to get latest state
+      setSubmissionStates(prev => {
         console.log('Current state:', {
           filteredQuestionsCount: filteredQuestions.length,
-          submissionStatesCount: Object.keys(submissionStates).length,
-          answers: Object.keys(answers).length,
+          submissionStatesCount: Object.keys(prev).length,
           filteredQuestionIds: filteredQuestions.map(q => q.id),
-          submissionStateIds: Object.keys(submissionStates)
+          submissionStateIds: Object.keys(prev)
         });
         
         // Clear any current answer selections immediately
@@ -556,14 +578,14 @@ export function useQuizStateWithLeitner(
         
         // Mark all remaining questions as "session ended" to trigger session complete
         const remainingQuestions = filteredQuestions.filter(q => 
-          !submissionStates[q.id]?.isSubmitted
+          !prev[q.id]?.isSubmitted
         );
         
         console.log(`📝 Ending session: ${remainingQuestions.length} remaining questions out of ${filteredQuestions.length} total`);
         console.log('Remaining question IDs:', remainingQuestions.map(q => q.id));
-        console.log('Already submitted IDs:', filteredQuestions.filter(q => submissionStates[q.id]?.isSubmitted).map(q => q.id));
+        console.log('Already submitted IDs:', filteredQuestions.filter(q => prev[q.id]?.isSubmitted).map(q => q.id));
         
-        const endSessionStates = { ...submissionStates };
+        const endSessionStates = { ...prev };
         remainingQuestions.forEach(q => {
           console.log(`Marking question ${q.id} as session-ended`);
           endSessionStates[q.id] = {
@@ -578,29 +600,20 @@ export function useQuizStateWithLeitner(
         console.log('Updated submission states count:', Object.keys(endSessionStates).length);
         console.log('Questions that will be submitted after update:', Object.keys(endSessionStates).filter(id => endSessionStates[id].isSubmitted).length);
         
-        // Force update submission states to trigger session complete
-        setSubmissionStates(endSessionStates);
-        
         // Don't trigger refresh that would regenerate questions - let the session complete naturally
         console.log('🔄 Session ending - preventing question regeneration');
         
-        // Reset flag after a delay to allow session completion to process
-        setTimeout(() => {
-          setIsEndingSession(false);
-        }, 2000);
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }),
-    [
-      setSelectedTopic,
-      updateSelectedAnswers,
-      currentQuestionIndex,
-      filteredQuestions,
-      questions,
-      submissionStates,
-      answers,
-    ]
-  );
+        return endSessionStates;
+      });
+      
+      // Reset flags after session completion is processed
+      // Use ref to track state immediately, then sync with state
+      setTimeout(() => {
+        isEndingSessionRef.current = false;
+        setIsEndingSession(false);
+      }, 2000);
+    },
+  };
 
   // Removed render debug log
 
