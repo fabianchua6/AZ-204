@@ -36,6 +36,7 @@ export function useQuizStateWithLeitner(
   const [answers, setAnswers] = useState<Record<string, number[]>>({});
   const [submissionStates, setSubmissionStates] = useState<Record<string, SubmissionState>>({});
   const [refreshTrigger, setRefreshTrigger] = useState(0); // Trigger for forcing re-evaluation of due questions
+  const [isLoadingSession, setIsLoadingSession] = useState(true); // Loading state for session initialization
   
   // Use ref for session ending flag to avoid race conditions with setTimeout
   const isEndingSessionRef = useRef(false);
@@ -76,12 +77,11 @@ export function useQuizStateWithLeitner(
       return;
     }
     
-    const savedIndex = loadFromLocalStorage('leitner-quiz-index', 0);
-    setCurrentQuestionIndex(savedIndex);
-    
-    // Load submission states
+    // Load submission states immediately
     const savedSubmissionStates = loadFromLocalStorage('leitner-submission-states', {});
     setSubmissionStates(savedSubmissionStates);
+    
+    // Note: currentQuestionIndex will be validated separately after questions load
   }, [selectedTopic]); // Re-run when mode changes
 
   // Save state changes (including submission states)
@@ -103,6 +103,25 @@ export function useQuizStateWithLeitner(
   // Filter and sort questions based on topic and Leitner system
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
   const [isEndingSession, setIsEndingSession] = useState(false); // Flag to prevent regeneration during session end
+  
+  // Validate and restore currentQuestionIndex after questions load
+  useEffect(() => {
+    if (selectedTopic !== null || filteredQuestions.length === 0) {
+      return;
+    }
+    
+    const savedIndex = loadFromLocalStorage('leitner-quiz-index', 0);
+    
+    // Clamp index to valid range [0, filteredQuestions.length - 1]
+    const validIndex = Math.min(savedIndex, filteredQuestions.length - 1);
+    const clampedIndex = Math.max(0, validIndex);
+    
+    if (clampedIndex !== savedIndex) {
+      console.log(`⚠️ Clamped questionIndex from ${savedIndex} to ${clampedIndex} (max: ${filteredQuestions.length - 1})`);
+    }
+    
+    setCurrentQuestionIndex(clampedIndex);
+  }, [filteredQuestions.length, selectedTopic]); // Run when questions are loaded
 
   // 🎯 Session state tracking for end session functionality
   const isSessionComplete = useMemo(() => {
@@ -224,6 +243,7 @@ export function useQuizStateWithLeitner(
 
     const updateQuestions = async () => {
       try {
+        setIsLoadingSession(true);
         await leitnerSystem.ensureInitialized();
         
         // Check if still mounted after async operation
@@ -247,8 +267,45 @@ export function useQuizStateWithLeitner(
           // Check again before setState
           if (!isMounted) return;
           setFilteredQuestions(baseQuestions);
+          setIsLoadingSession(false);
         } else {
-          // For Leitner mode, get due questions from the Leitner system
+          // 🎯 SESSION-BASED: Try to restore existing session first
+          const savedSession = loadFromLocalStorage<{
+            questionIds: string[];
+            createdAt: number;
+          } | null>('leitner-current-session', null);
+          
+          const SESSION_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+          const now = Date.now();
+          
+          // Check if we have a valid saved session that's not expired
+          if (savedSession && 
+              savedSession.questionIds && 
+              Array.isArray(savedSession.questionIds) &&
+              savedSession.questionIds.length > 0 &&
+              (now - savedSession.createdAt) < SESSION_EXPIRY) {
+            
+            console.log('🔄 Restoring saved session with', savedSession.questionIds.length, 'questions');
+            
+            // Restore the exact same questions in the exact same order
+            const restoredQuestions = savedSession.questionIds
+              .map(id => baseQuestions.find(q => q.id === id))
+              .filter((q): q is Question => q !== undefined);
+            
+            // Verify we restored most of the questions (at least 50%)
+            if (restoredQuestions.length >= savedSession.questionIds.length * 0.5) {
+              if (!isMounted) return;
+              setFilteredQuestions(restoredQuestions);
+              setIsLoadingSession(false);
+              console.log('✅ Session restored:', restoredQuestions.length, 'questions');
+              return; // Early exit - session restored successfully
+            } else {
+              console.log('⚠️ Saved session invalid - too few questions restored. Generating new session.');
+            }
+          }
+          
+          // No valid saved session - generate new one
+          console.log('🆕 Generating new session');
           const dueQuestions = await leitnerSystem.getDueQuestions(baseQuestions);
           
           // Check if still mounted after async operation
@@ -269,9 +326,18 @@ export function useQuizStateWithLeitner(
           // 🎯 SESSION-BASED: Limit to 20 most due questions per session
           const sessionQuestions = dueQuestions.slice(0, 20);
           
+          // Save the session to localStorage for restoration on refresh
+          saveToLocalStorage('leitner-current-session', {
+            questionIds: sessionQuestions.map(q => q.id),
+            createdAt: now
+          });
+          
+          console.log('💾 Saved new session:', sessionQuestions.length, 'questions');
+          
           // Final mount check before setting state
           if (!isMounted) return;
           setFilteredQuestions(sessionQuestions);
+          setIsLoadingSession(false);
           
           // Clear answer state for all due questions to ensure fresh review
           setAnswers(prev => {
@@ -288,6 +354,7 @@ export function useQuizStateWithLeitner(
         }
       } catch (error) {
         console.error('Failed to update questions:', error);
+        setIsLoadingSession(false);
         // Don't update state on error to maintain current questions
       }
     };
@@ -375,18 +442,26 @@ export function useQuizStateWithLeitner(
   }, [filteredQuestions]); // Only run when filtered questions change, not on navigation
 
   // Clean up submission states for questions not in current session
+  // BUT protect recently submitted answers (within last hour) to prevent data loss on refresh
   useEffect(() => {
     if (filteredQuestions.length === 0) return;
+    if (isSessionComplete) return; // Don't clean if session just completed
     
     const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
+    const RECENT_THRESHOLD = 60 * 60 * 1000; // 1 hour in milliseconds
+    const now = Date.now();
     
     setSubmissionStates(prev => {
       const cleaned = { ...prev };
       let hasChanges = false;
       
-      // Remove submission states for questions NOT in the current session
+      // Remove submission states for questions NOT in current session
+      // BUT keep if they were submitted recently (within last hour)
       Object.keys(cleaned).forEach(questionId => {
-        if (!currentQuestionIds.has(questionId)) {
+        const state = cleaned[questionId];
+        const isRecent = state && (now - state.submittedAt) < RECENT_THRESHOLD;
+        
+        if (!currentQuestionIds.has(questionId) && !isRecent) {
           delete cleaned[questionId];
           hasChanges = true;
         }
@@ -394,7 +469,7 @@ export function useQuizStateWithLeitner(
       
       // Only update if there were actual changes
       if (hasChanges) {
-        console.log('🧹 Cleaned up submission states for questions not in current session');
+        console.log('🧹 Cleaned up old submission states (kept recent submissions)');
         // Update localStorage to reflect the cleaned state
         saveToLocalStorage('leitner-submission-states', cleaned);
         return cleaned;
@@ -402,7 +477,7 @@ export function useQuizStateWithLeitner(
       
       return prev;
     });
-  }, [filteredQuestions]); // Run when questions change (new session loaded)
+  }, [filteredQuestions, isSessionComplete]); // Run when questions change (new session loaded)
 
   // Separate function for just updating selected answers (no Leitner processing)
   const updateSelectedAnswers = useCallback(
@@ -554,6 +629,7 @@ export function useQuizStateWithLeitner(
       // Also clear localStorage states to ensure completely fresh start
       saveToLocalStorage('leitner-quiz-index', 0);
       saveToLocalStorage('leitner-submission-states', {});
+      saveToLocalStorage('leitner-current-session', null); // Clear saved session
     },
 
     // 🎯 End current session early
@@ -638,5 +714,6 @@ export function useQuizStateWithLeitner(
     isSessionComplete,
     sessionResults,
     sessionProgress,
+    isLoadingSession, // Add loading state for UI
   };
 }

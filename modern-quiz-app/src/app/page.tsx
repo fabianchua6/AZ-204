@@ -335,6 +335,18 @@ export default function Home() {
                   </Card>
                 </div>
               </motion.div>
+            ) : leitnerState.isLoadingSession && isLeitnerMode ? (
+              // Show loading state while session is being initialized
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className='flex h-[600px] items-center justify-center'
+              >
+                <div className='text-center'>
+                  <div className='mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
+                  <p className='text-muted-foreground'>Loading session...</p>
+                </div>
+              </motion.div>
             ) : currentQuestion ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
