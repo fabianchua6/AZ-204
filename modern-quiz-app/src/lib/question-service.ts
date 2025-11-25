@@ -19,6 +19,7 @@ export interface AppStatistics {
     total: number;
     codeQuestions: number;
     noOptionsQuestions: number;
+    solutionGoalQuestions: number;
     filtered: number;
     excluded: number;
   };
@@ -44,7 +45,22 @@ export class QuestionService {
   }
 
   filterQuestions(questions: Question[]): Question[] {
-    return questions.filter(q => !q.hasCode && q.options.length > 0);
+    return questions.filter(q => {
+      // Filter out code questions
+      if (q.hasCode) return false;
+      
+      // Filter out questions with no options
+      if (q.options.length === 0) return false;
+      
+      // Filter out "Does this solution meet the goal?" questions
+      if (q.question.toLowerCase().includes('does the solution meet the goal') ||
+          q.question.toLowerCase().includes('does this solution meet') ||
+          q.question.toLowerCase().includes('solution meet the goal')) {
+        return false;
+      }
+      
+      return true;
+    });
   }
 
   getFilteringStats(questions: Question[]) {
@@ -53,11 +69,17 @@ export class QuestionService {
     const noOptionsQuestions = questions.filter(
       q => q.options.length === 0
     ).length;
+    const solutionGoalQuestions = questions.filter(q => 
+      q.question.toLowerCase().includes('does the solution meet the goal') ||
+      q.question.toLowerCase().includes('does this solution meet') ||
+      q.question.toLowerCase().includes('solution meet the goal')
+    ).length;
     const filtered = this.filterQuestions(questions).length;
     return {
       total,
       codeQuestions,
       noOptionsQuestions,
+      solutionGoalQuestions,
       filtered,
       excluded: total - filtered,
     };
