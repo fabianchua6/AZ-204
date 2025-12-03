@@ -1,7 +1,7 @@
 'use client';
 
 // React imports
-import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useCallback, useState, useEffect, useMemo, useLayoutEffect } from 'react';
 import { flushSync } from 'react-dom';
 
 // Third-party imports
@@ -116,8 +116,9 @@ export function LeitnerQuizCard({
     null
   );
 
-  // Reset local submission state when question changes
-  useEffect(() => {
+  // CRITICAL: Reset local submission state BEFORE paint when question changes
+  // This prevents the momentary flash of the answer
+  useLayoutEffect(() => {
     setJustSubmitted(false);
     setSubmissionResult(null);
   }, [question.id]);

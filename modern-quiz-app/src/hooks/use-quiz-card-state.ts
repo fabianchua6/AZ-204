@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 
 interface UseQuizCardStateProps {
   questionId: string;
@@ -10,43 +10,64 @@ interface UseQuizCardStateProps {
   };
 }
 
+// Use useLayoutEffect on client, useEffect on server (SSR safety)
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
 export function useQuizCardState({
   questionId,
   initialSubmissionState,
 }: UseQuizCardStateProps) {
+  // Track the previous question ID to detect changes synchronously
+  const prevQuestionIdRef = useRef(questionId);
+  const isFirstRender = useRef(true);
+  
+  // Determine if this is a previously submitted question
+  const wasSubmitted = initialSubmissionState?.isSubmitted ?? false;
+  
+  // Initialize state - for first render, use the initial submission state if available
   const [showAnswer, setShowAnswer] = useState(
-    initialSubmissionState?.showAnswer ?? false
+    wasSubmitted ? (initialSubmissionState?.showAnswer ?? false) : false
   );
-  const [answerSubmitted, setAnswerSubmitted] = useState(
-    initialSubmissionState?.isSubmitted ?? false
-  );
+  const [answerSubmitted, setAnswerSubmitted] = useState(wasSubmitted);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSubmissionResult, setLastSubmissionResult] = useState<
     boolean | null
-  >(initialSubmissionState?.isCorrect ?? null);
+  >(wasSubmitted ? (initialSubmissionState?.isCorrect ?? null) : null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Reset state when question changes - but preserve initial state if provided
-  useEffect(() => {
-    if (initialSubmissionState) {
-      // Restore from provided state
-      setShowAnswer(initialSubmissionState.showAnswer);
-      setAnswerSubmitted(initialSubmissionState.isSubmitted);
-      setLastSubmissionResult(initialSubmissionState.isCorrect);
-    } else {
-      // Reset to default state
-      setShowAnswer(false);
-      setAnswerSubmitted(false);
-      setLastSubmissionResult(null);
+  // CRITICAL: Synchronously reset state BEFORE paint when question changes
+  // This prevents the momentary flash of the answer
+  useIsomorphicLayoutEffect(() => {
+    // Skip the first render - initial state is already correct
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
-    setIsSubmitting(false);
+    
+    // Only reset when question actually changes
+    if (prevQuestionIdRef.current !== questionId) {
+      prevQuestionIdRef.current = questionId;
+      
+      if (initialSubmissionState?.isSubmitted) {
+        // Restore state for previously answered questions
+        setShowAnswer(initialSubmissionState.showAnswer);
+        setAnswerSubmitted(true);
+        setLastSubmissionResult(initialSubmissionState.isCorrect);
+      } else {
+        // IMPORTANT: Reset to hidden state for new questions
+        setShowAnswer(false);
+        setAnswerSubmitted(false);
+        setLastSubmissionResult(null);
+      }
+      setIsSubmitting(false);
 
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
+      // Clear any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     }
-  }, [questionId, initialSubmissionState]);
+  }, [questionId, initialSubmissionState?.isSubmitted, initialSubmissionState?.showAnswer, initialSubmissionState?.isCorrect]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
