@@ -67,13 +67,22 @@ const getRandomElement = <T>(array: T[]): T =>
 function shuffleQA(question: Question): Question {
 	if (!question.options.length) return question;
 
-	const answers = question.answerIndexes.map((i) => question.options[i]);
+	// Create an array of indices and shuffle them
+	const indices = question.options.map((_, i) => i);
+	const shuffledIndices = shuffleArray(indices);
 
-	const options = shuffleArray(question.options);
+	// Map options using shuffled indices
+	const options = shuffledIndices.map((i) => question.options[i]);
+
+	// Map answer indices to their new positions
+	const answerIndexes = question.answerIndexes.map((originalIndex) =>
+		shuffledIndices.indexOf(originalIndex)
+	);
+
 	return {
 		...question,
 		options,
-		answerIndexes: answers.map((i) => options.indexOf(i)),
+		answerIndexes,
 	};
 }
 

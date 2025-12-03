@@ -17,7 +17,12 @@ import { AnswerOptions } from '~/components/AnswerOptions';
 import { Button, LoadingButton, NextButton } from '~/components/Button';
 import { TextInput } from '~/components/Input';
 import { RichMarkdown } from '~/components/RichMarkdown';
-import { type Question, getQA, getQAById, topics } from '~/lib/qa';
+import { type Question, data as allQuestions, getQA, getQAById, topics } from '~/lib/qa';
+import {
+	clearAnsweredQuestions,
+	loadAnsweredQuestions,
+	saveAnsweredQuestions,
+} from '~/lib/storage';
 
 export const meta: MetaFunction = () => {
 	return [{ title: 'Developing Solutions for Microsoft Azure: Quiz' }];
@@ -67,15 +72,43 @@ export default function Index() {
 		searchParams.set('id', data.id);
 		currentURL.search = searchParams.toString();
 		window.history.replaceState({}, data.id, currentURL.toString());
-	});
+	}, [data.id]);
 
-	const answerSet = useRef(new Set<number>());
+	const answeredIdsRef = useRef<Set<string>>(new Set());
+	const currentTopicRef = useRef<string | null>(loaderData.topic);
+	const [initialized, setInitialized] = useState(false);
 
+	// Load persisted answered questions on mount or topic change
+	useEffect(() => {
+		if (currentTopicRef.current !== loaderData.topic) {
+			currentTopicRef.current = loaderData.topic;
+		}
+		const savedIds = loadAnsweredQuestions(loaderData.topic);
+		answeredIdsRef.current = new Set(savedIds);
+		setInitialized(true);
+	}, [loaderData.topic]);
+
+	// Convert question IDs to indices for the answered hidden field
 	const answered = useMemo(() => {
-		answerSet.current.delete(data.index);
-		answerSet.current.add(data.index);
-		return Array.from(answerSet.current).join(',');
-	}, [data.index]);
+		// Add current question to answered set
+		answeredIdsRef.current.add(data.id);
+
+		// Persist to localStorage
+		if (initialized) {
+			saveAnsweredQuestions(
+				loaderData.topic,
+				Array.from(answeredIdsRef.current),
+			);
+		}
+
+		// Convert IDs back to indices for the form (backend expects indices)
+		const indices: number[] = [];
+		for (const id of answeredIdsRef.current) {
+			const idx = allQuestions.findIndex((q) => q.id === id);
+			if (idx >= 0) indices.push(idx);
+		}
+		return indices.join(',');
+	}, [data.id, loaderData.topic, initialized]);
 
 	return (
 		<QuestionForm
