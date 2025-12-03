@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import {
 	type ButtonHTMLAttributes,
 	type FC,
+	memo,
 	useEffect,
 	useRef,
 	useState,
@@ -27,10 +28,14 @@ const getColor = (color: ButtonProps['bgColor']) => {
 	}
 };
 
-export const Button: FC<ButtonProps> = ({ bgColor, className, ...props }) => {
+export const Button: FC<ButtonProps> = memo(function Button({
+	bgColor,
+	className,
+	...props
+}) {
 	const style = clsx(btnStyle, getColor(bgColor), 'rounded-lg', className);
 	return <button className={style} {...props} />;
-};
+});
 
 type LoadingButtonProps = Omit<
 	ButtonHTMLAttributes<HTMLButtonElement>,

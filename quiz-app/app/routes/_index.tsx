@@ -18,11 +18,10 @@ import { Button, LoadingButton, NextButton } from '~/components/Button';
 import { TextInput } from '~/components/Input';
 import { RichMarkdown } from '~/components/RichMarkdown';
 import { type Question, data as allQuestions, getQA, getQAById, topics } from '~/lib/qa';
-import {
-	clearAnsweredQuestions,
-	loadAnsweredQuestions,
-	saveAnsweredQuestions,
-} from '~/lib/storage';
+import { loadAnsweredQuestions, saveAnsweredQuestions } from '~/lib/storage';
+
+// Pre-compute ID to index map for O(1) lookups
+const questionIdToIndex = new Map(allQuestions.map((q, i) => [q.id, i]));
 
 export const meta: MetaFunction = () => {
 	return [{ title: 'Developing Solutions for Microsoft Azure: Quiz' }];
@@ -104,8 +103,8 @@ export default function Index() {
 		// Convert IDs back to indices for the form (backend expects indices)
 		const indices: number[] = [];
 		for (const id of answeredIdsRef.current) {
-			const idx = allQuestions.findIndex((q) => q.id === id);
-			if (idx >= 0) indices.push(idx);
+			const idx = questionIdToIndex.get(id);
+			if (idx !== undefined) indices.push(idx);
 		}
 		return indices.join(',');
 	}, [data.id, loaderData.topic, initialized]);
@@ -140,11 +139,16 @@ function QuestionForm({
 	};
 
 	const isLoading = navigation.state === 'submitting';
-	const isCorrectlyAnswered =
-		data.answerIndexes &&
-		data.answerIndexes.length > 0 &&
-		data.answerIndexes.length === checkedValues.length &&
-		data.answerIndexes.every((value) => checkedValues.includes(value));
+
+	// Memoize correct answer check - uses Set for O(1) lookups
+	const isCorrectlyAnswered = useMemo(() => {
+		const { answerIndexes } = data;
+		if (!answerIndexes?.length || answerIndexes.length !== checkedValues.length) {
+			return false;
+		}
+		const checkedSet = new Set(checkedValues);
+		return answerIndexes.every((value) => checkedSet.has(value));
+	}, [data.answerIndexes, checkedValues]);
 
 	const buttonColor = showAnswer || isCorrectlyAnswered ? 'green' : 'blue';
 
@@ -233,7 +237,7 @@ function QuestionForm({
 				<div className="font-bold">Answer: </div>
 				<RichMarkdown>{data.answer}</RichMarkdown>
 			</div>
-			<div className="tems-center mt-12 grid grid-cols-1 gap-y-4 sm:grid-cols-3">
+			<div className="items-center mt-12 grid grid-cols-1 gap-y-4 sm:grid-cols-3">
 				<Button
 					type="button"
 					className="sm:justify-self-start"

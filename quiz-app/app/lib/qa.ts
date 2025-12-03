@@ -6,12 +6,22 @@ export { data };
 
 export type Question = QAPair & { index: number };
 
+// Pre-compute lookup maps for O(1) access
+const dataByIdMap = new Map(data.map((q, i) => [q.id, { question: q, index: i }]));
+const dataByTopicMap = new Map<string, QAPair[]>();
+for (const q of data) {
+	const existing = dataByTopicMap.get(q.topic) || [];
+	existing.push(q);
+	dataByTopicMap.set(q.topic, existing);
+}
+
 export const getQA = (
 	topic?: string | null | undefined,
 	answeredIndexes?: Set<number> | null | undefined,
 ): Question | null => {
+	// Use pre-computed map for O(1) topic lookup
 	let questions: QAPair[] = topic
-		? data.filter((item) => topic === item.topic)
+		? (dataByTopicMap.get(topic) || [])
 		: data;
 
 	if (questions.length === 0) return null;
@@ -47,17 +57,15 @@ export const getQA = (
 	return shuffleQA({ ...question, index });
 };
 
-export const getQAById = (id: string) => {
-	const index = data.findIndex((item) => item.id === id);
-	if (index < 0 || !data[index]) return null;
-	return shuffleQA({ ...data[index], index });
+export const getQAById = (id: string): Question | null => {
+	const entry = dataByIdMap.get(id);
+	if (!entry) return null;
+	return shuffleQA({ ...entry.question, index: entry.index });
 };
 
 export const getQuestionsByTopic = (topic: string): QAPair[] => {
-	const questions: QAPair[] = data.filter((item) => topic === item.topic);
-
-	if (questions.length === 0) return [];
-
+	const questions = dataByTopicMap.get(topic);
+	if (!questions?.length) return [];
 	return shuffleArray(questions);
 };
 

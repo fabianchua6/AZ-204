@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { type FormEventHandler, useEffect, useState } from 'react';
+import { type FormEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
 import { Form, Link, useLoaderData, useParams } from 'react-router';
 
@@ -81,33 +81,38 @@ export default function Topic() {
 
 	const question = index < questions.length ? questions[index] : null;
 
-	const isCorrectlyAnswered =
-		question?.answerIndexes &&
-		question.answerIndexes.length > 0 &&
-		question.answerIndexes.length === checkedValues.length &&
-		question.answerIndexes.every((value) => checkedValues.includes(value));
+	// Memoize correct answer check - uses Set for O(1) lookups
+	const isCorrectlyAnswered = useMemo(() => {
+		const answerIndexes = question?.answerIndexes;
+		if (!answerIndexes?.length || answerIndexes.length !== checkedValues.length) {
+			return false;
+		}
+		const checkedSet = new Set(checkedValues);
+		return answerIndexes.every((value) => checkedSet.has(value));
+	}, [question?.answerIndexes, checkedValues]);
 
 	const buttonColor = showAnswer || isCorrectlyAnswered ? 'green' : 'blue';
 
-	const handleSubmit: FormEventHandler<HTMLFormElement | HTMLButtonElement> = (
-		e,
-	) => {
-		e.preventDefault();
-		setCheckedValues([]);
-		setShowAnswer(false);
-		setIndex((index) => index + 1);
-		window.scrollTo({ top: 0, behavior: 'smooth' });
-		return false;
-	};
+	const handleSubmit: FormEventHandler<HTMLFormElement | HTMLButtonElement> = useCallback(
+		(e) => {
+			e.preventDefault();
+			setCheckedValues([]);
+			setShowAnswer(false);
+			setIndex((idx) => idx + 1);
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+			return false;
+		},
+		[],
+	);
 
-	const handleRestart = () => {
+	const handleRestart = useCallback(() => {
 		clearTopicProgress(topicName);
 		setIndex(0);
 		setQuestions(loaderQuestions); // Use fresh shuffled order from loader
 		setCheckedValues([]);
 		setShowAnswer(false);
 		window.scrollTo({ top: 0, behavior: 'smooth' });
-	};
+	}, [topicName, loaderQuestions]);
 
 	return (
 		<Form method="post" onSubmit={handleSubmit}>
