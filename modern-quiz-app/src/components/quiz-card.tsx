@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { QuizOption } from '@/components/quiz/quiz-option';
 import { QuizNavigation } from '@/components/quiz/quiz-navigation';
@@ -150,3 +151,6 @@ export function QuizCard({
     </div>
   );
 }
+
+// Memoize to prevent unnecessary re-renders when parent state changes
+export const QuizCardMemo = memo(QuizCard);

@@ -1,7 +1,7 @@
 'use client';
 
 // React imports
-import { useCallback, useState, useEffect, useMemo, useLayoutEffect } from 'react';
+import { useCallback, useState, useMemo, useLayoutEffect, memo } from 'react';
 import { flushSync } from 'react-dom';
 
 // Third-party imports
@@ -402,3 +402,6 @@ export function LeitnerQuizCard({
     </div>
   );
 }
+
+// Memoize to prevent unnecessary re-renders when parent state changes
+export const LeitnerQuizCardMemo = memo(LeitnerQuizCard);
