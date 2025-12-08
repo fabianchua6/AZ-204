@@ -110,17 +110,6 @@ export default function Home() {
 
   const currentQuestion = filteredQuestions[currentQuestionIndex];
 
-  // Debug session completion state
-  if (isLeitnerMode) {
-    console.log('🎯 Page render - Session state:', {
-      isSessionComplete: leitnerState.isSessionComplete,
-      hasSessionResults: !!leitnerState.sessionResults,
-      filteredQuestionsCount: filteredQuestions.length,
-      currentQuestionIndex,
-      currentQuestionId: currentQuestion?.id,
-    });
-  }
-
   return (
     <div className='via-background-secondary to-background-tertiary min-h-screen bg-gradient-to-br from-background'>
       <Header />
