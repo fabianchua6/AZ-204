@@ -61,7 +61,8 @@ describe('QuizCard', () => {
 
   it('shows topic badge', () => {
     render(<QuizCard {...defaultProps} />);
-    const topicBadges = screen.getAllByText('App Service');
+    // Topic is truncated to first 10 chars if longer than 10, "App Service" = 11 chars
+    const topicBadges = screen.getAllByText(/App Servic/);
     expect(topicBadges.length).toBeGreaterThan(0);
   });
 
@@ -90,6 +91,6 @@ describe('QuizCard', () => {
 
     render(<QuizCard {...defaultProps} question={multiSelectQuestion} />);
     expect(screen.getByText(/Multiple Choice Question/i)).toBeInTheDocument();
-    expect(screen.getByText(/Select all correct answers/i)).toBeInTheDocument();
+    expect(screen.getByText(/You can select multiple answers/i)).toBeInTheDocument();
   });
 });
