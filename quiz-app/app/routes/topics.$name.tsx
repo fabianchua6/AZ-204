@@ -77,7 +77,7 @@ export default function Topic() {
 	useEffect(() => {
 		setCheckedValues([]);
 		setShowAnswer(false);
-	}, [index]);
+	}, []);
 
 	const question = index < questions.length ? questions[index] : null;
 

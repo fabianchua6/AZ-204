@@ -148,7 +148,7 @@ function QuestionForm({
 		}
 		const checkedSet = new Set(checkedValues);
 		return answerIndexes.every((value) => checkedSet.has(value));
-	}, [data.answerIndexes, checkedValues]);
+	}, [data.answerIndexes, checkedValues, data]);
 
 	const buttonColor = showAnswer || isCorrectlyAnswered ? 'green' : 'blue';
 
@@ -237,7 +237,7 @@ function QuestionForm({
 				<div className="font-bold">Answer: </div>
 				<RichMarkdown>{data.answer}</RichMarkdown>
 			</div>
-			<div className="items-center mt-12 grid grid-cols-1 gap-y-4 sm:grid-cols-3">
+			<div className="mt-12 grid grid-cols-1 items-center gap-y-4 sm:grid-cols-3">
 				<Button
 					type="button"
 					className="sm:justify-self-start"

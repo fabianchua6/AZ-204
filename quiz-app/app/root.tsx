@@ -51,7 +51,7 @@ export default function App() {
 								<Link
 									to="/settings"
 									title="Settings"
-									className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-gray-400 transition-colors hover:text-gray-600"
+									className="-translate-y-1/2 absolute top-1/2 right-0 p-2 text-gray-400 transition-colors hover:text-gray-600"
 								>
 									<svg
 										className="h-6 w-6"
