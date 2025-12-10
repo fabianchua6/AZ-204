@@ -44,6 +44,37 @@ export function saveTopicProgress(
 }
 
 /**
+ * Type guard to validate QuizProgress data
+ */
+function isQuizProgress(obj: unknown): obj is QuizProgress {
+	return (
+		typeof obj === 'object' &&
+		obj !== null &&
+		'index' in obj &&
+		'questionIds' in obj &&
+		'timestamp' in obj &&
+		typeof obj.index === 'number' &&
+		Array.isArray(obj.questionIds) &&
+		obj.questionIds.every((id) => typeof id === 'string') &&
+		typeof obj.timestamp === 'number'
+	);
+}
+
+/**
+ * Type guard to validate AnsweredQuestions data
+ */
+function isAnsweredQuestions(obj: unknown): obj is AnsweredQuestions {
+	if (typeof obj !== 'object' || obj === null) return false;
+
+	for (const value of Object.values(obj)) {
+		if (!Array.isArray(value)) return false;
+		if (!value.every((id) => typeof id === 'string')) return false;
+	}
+
+	return true;
+}
+
+/**
  * Load progress for topic-based quiz
  */
 export function loadTopicProgress(topic: string): QuizProgress | null {
@@ -53,17 +84,29 @@ export function loadTopicProgress(topic: string): QuizProgress | null {
 		const data = localStorage.getItem(`${STORAGE_KEY_PREFIX}${topic}`);
 		if (!data) return null;
 
-		const progress = JSON.parse(data) as QuizProgress;
+		const parsed = JSON.parse(data);
 
-		// Expire progress after 24 hours
-		const ONE_DAY = 24 * 60 * 60 * 1000;
-		if (Date.now() - progress.timestamp > ONE_DAY) {
+		// Validate the data structure
+		if (!isQuizProgress(parsed)) {
+			console.warn('Invalid quiz progress data, clearing...');
 			localStorage.removeItem(`${STORAGE_KEY_PREFIX}${topic}`);
 			return null;
 		}
 
-		return progress;
-	} catch {
+		// Expire progress after 24 hours
+		const ONE_DAY = 24 * 60 * 60 * 1000;
+		if (Date.now() - parsed.timestamp > ONE_DAY) {
+			localStorage.removeItem(`${STORAGE_KEY_PREFIX}${topic}`);
+			return null;
+		}
+
+		return parsed;
+	} catch (error) {
+		console.error('Error loading topic progress:', error);
+		// Clear potentially corrupted data
+		try {
+			localStorage.removeItem(`${STORAGE_KEY_PREFIX}${topic}`);
+		} catch {}
 		return null;
 	}
 }
@@ -93,15 +136,23 @@ export function saveAnsweredQuestions(
 	try {
 		const key = topic || '_all';
 		const existingData = localStorage.getItem(GLOBAL_ANSWERED_KEY);
-		const answered: AnsweredQuestions = existingData
-			? (JSON.parse(existingData) as AnsweredQuestions)
-			: {};
+		let answered: AnsweredQuestions = {};
+
+		if (existingData) {
+			const parsed = JSON.parse(existingData);
+			// Validate existing data before using it
+			if (isAnsweredQuestions(parsed)) {
+				answered = parsed;
+			} else {
+				console.warn('Invalid answered questions data, resetting...');
+			}
+		}
 
 		answered[key] = questionIds;
 
 		localStorage.setItem(GLOBAL_ANSWERED_KEY, JSON.stringify(answered));
-	} catch {
-		console.warn('Failed to save answered questions');
+	} catch (error) {
+		console.warn('Failed to save answered questions:', error);
 	}
 }
 
@@ -115,11 +166,23 @@ export function loadAnsweredQuestions(topic: string | null): string[] {
 		const data = localStorage.getItem(GLOBAL_ANSWERED_KEY);
 		if (!data) return [];
 
-		const answered = JSON.parse(data) as AnsweredQuestions;
-		const key = topic || '_all';
+		const parsed = JSON.parse(data);
 
-		return answered[key] || [];
-	} catch {
+		// Validate the data structure
+		if (!isAnsweredQuestions(parsed)) {
+			console.warn('Invalid answered questions data, clearing...');
+			localStorage.removeItem(GLOBAL_ANSWERED_KEY);
+			return [];
+		}
+
+		const key = topic || '_all';
+		return parsed[key] || [];
+	} catch (error) {
+		console.error('Error loading answered questions:', error);
+		// Clear potentially corrupted data
+		try {
+			localStorage.removeItem(GLOBAL_ANSWERED_KEY);
+		} catch {}
 		return [];
 	}
 }
@@ -138,13 +201,21 @@ export function clearAnsweredQuestions(topic?: string | null): void {
 			const data = localStorage.getItem(GLOBAL_ANSWERED_KEY);
 			if (!data) return;
 
-			const answered = JSON.parse(data) as AnsweredQuestions;
-			const key = topic || '_all';
-			delete answered[key];
+			const parsed = JSON.parse(data);
 
-			localStorage.setItem(GLOBAL_ANSWERED_KEY, JSON.stringify(answered));
+			// Validate data before modifying
+			if (!isAnsweredQuestions(parsed)) {
+				console.warn('Invalid data, clearing all answered questions');
+				localStorage.removeItem(GLOBAL_ANSWERED_KEY);
+				return;
+			}
+
+			const key = topic || '_all';
+			delete parsed[key];
+
+			localStorage.setItem(GLOBAL_ANSWERED_KEY, JSON.stringify(parsed));
 		}
-	} catch {
-		// Ignore errors
+	} catch (error) {
+		console.warn('Error clearing answered questions:', error);
 	}
 }
