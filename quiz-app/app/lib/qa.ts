@@ -7,7 +7,9 @@ export { data };
 export type Question = QAPair & { index: number };
 
 // Pre-compute lookup maps for O(1) access
-const dataByIdMap = new Map(data.map((q, i) => [q.id, { question: q, index: i }]));
+const dataByIdMap = new Map(
+	data.map((q, i) => [q.id, { question: q, index: i }]),
+);
 const dataByTopicMap = new Map<string, QAPair[]>();
 for (const q of data) {
 	const existing = dataByTopicMap.get(q.topic) || [];
@@ -20,9 +22,7 @@ export const getQA = (
 	answeredIndexes?: Set<number> | null | undefined,
 ): Question | null => {
 	// Use pre-computed map for O(1) topic lookup
-	let questions: QAPair[] = topic
-		? (dataByTopicMap.get(topic) || [])
-		: data;
+	let questions: QAPair[] = topic ? dataByTopicMap.get(topic) || [] : data;
 
 	if (questions.length === 0) return null;
 
@@ -84,7 +84,7 @@ function shuffleQA(question: Question): Question {
 
 	// Map answer indices to their new positions
 	const answerIndexes = question.answerIndexes.map((originalIndex) =>
-		shuffledIndices.indexOf(originalIndex)
+		shuffledIndices.indexOf(originalIndex),
 	);
 
 	return {

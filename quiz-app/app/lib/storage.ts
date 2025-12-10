@@ -53,7 +53,7 @@ export function loadTopicProgress(topic: string): QuizProgress | null {
 		const data = localStorage.getItem(`${STORAGE_KEY_PREFIX}${topic}`);
 		if (!data) return null;
 
-		const progress: QuizProgress = JSON.parse(data);
+		const progress = JSON.parse(data) as QuizProgress;
 
 		// Expire progress after 24 hours
 		const ONE_DAY = 24 * 60 * 60 * 1000;
@@ -94,7 +94,7 @@ export function saveAnsweredQuestions(
 		const key = topic || '_all';
 		const existingData = localStorage.getItem(GLOBAL_ANSWERED_KEY);
 		const answered: AnsweredQuestions = existingData
-			? JSON.parse(existingData)
+			? (JSON.parse(existingData) as AnsweredQuestions)
 			: {};
 
 		answered[key] = questionIds;
@@ -115,7 +115,7 @@ export function loadAnsweredQuestions(topic: string | null): string[] {
 		const data = localStorage.getItem(GLOBAL_ANSWERED_KEY);
 		if (!data) return [];
 
-		const answered: AnsweredQuestions = JSON.parse(data);
+		const answered = JSON.parse(data) as AnsweredQuestions;
 		const key = topic || '_all';
 
 		return answered[key] || [];
@@ -138,7 +138,7 @@ export function clearAnsweredQuestions(topic?: string | null): void {
 			const data = localStorage.getItem(GLOBAL_ANSWERED_KEY);
 			if (!data) return;
 
-			const answered: AnsweredQuestions = JSON.parse(data);
+			const answered = JSON.parse(data) as AnsweredQuestions;
 			const key = topic || '_all';
 			delete answered[key];
 

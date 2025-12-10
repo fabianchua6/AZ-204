@@ -17,7 +17,13 @@ import { AnswerOptions } from '~/components/AnswerOptions';
 import { Button, LoadingButton, NextButton } from '~/components/Button';
 import { TextInput } from '~/components/Input';
 import { RichMarkdown } from '~/components/RichMarkdown';
-import { type Question, data as allQuestions, getQA, getQAById, topics } from '~/lib/qa';
+import {
+	data as allQuestions,
+	getQA,
+	getQAById,
+	type Question,
+	topics,
+} from '~/lib/qa';
 import { loadAnsweredQuestions, saveAnsweredQuestions } from '~/lib/storage';
 
 // Pre-compute ID to index map for O(1) lookups
@@ -143,7 +149,10 @@ function QuestionForm({
 	// Memoize correct answer check - uses Set for O(1) lookups
 	const isCorrectlyAnswered = useMemo(() => {
 		const { answerIndexes } = data;
-		if (!answerIndexes?.length || answerIndexes.length !== checkedValues.length) {
+		if (
+			!answerIndexes?.length ||
+			answerIndexes.length !== checkedValues.length
+		) {
 			return false;
 		}
 		const checkedSet = new Set(checkedValues);

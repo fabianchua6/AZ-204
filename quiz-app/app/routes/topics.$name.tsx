@@ -1,5 +1,11 @@
 import clsx from 'clsx';
-import { type FormEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+	type FormEventHandler,
+	useCallback,
+	useEffect,
+	useMemo,
+	useState,
+} from 'react';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
 import { Form, Link, useLoaderData, useParams } from 'react-router';
 
@@ -84,7 +90,10 @@ export default function Topic() {
 	// Memoize correct answer check - uses Set for O(1) lookups
 	const isCorrectlyAnswered = useMemo(() => {
 		const answerIndexes = question?.answerIndexes;
-		if (!answerIndexes?.length || answerIndexes.length !== checkedValues.length) {
+		if (
+			!answerIndexes?.length ||
+			answerIndexes.length !== checkedValues.length
+		) {
 			return false;
 		}
 		const checkedSet = new Set(checkedValues);
@@ -93,17 +102,15 @@ export default function Topic() {
 
 	const buttonColor = showAnswer || isCorrectlyAnswered ? 'green' : 'blue';
 
-	const handleSubmit: FormEventHandler<HTMLFormElement | HTMLButtonElement> = useCallback(
-		(e) => {
+	const handleSubmit: FormEventHandler<HTMLFormElement | HTMLButtonElement> =
+		useCallback((e) => {
 			e.preventDefault();
 			setCheckedValues([]);
 			setShowAnswer(false);
 			setIndex((idx) => idx + 1);
 			window.scrollTo({ top: 0, behavior: 'smooth' });
 			return false;
-		},
-		[],
-	);
+		}, []);
 
 	const handleRestart = useCallback(() => {
 		clearTopicProgress(topicName);
