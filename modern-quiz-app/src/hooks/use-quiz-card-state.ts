@@ -69,6 +69,19 @@ export function useQuizCardState({
     }
   }, [questionId, initialSubmissionState?.isSubmitted, initialSubmissionState?.showAnswer, initialSubmissionState?.isCorrect]);
 
+  // Handle when submission state is cleared for the SAME question (e.g., new session)
+  // This is separate from question changes to handle session resets
+  useIsomorphicLayoutEffect(() => {
+    // If the external state says "not submitted" but our internal state says "submitted",
+    // we need to reset (this happens when starting a new session)
+    if (!initialSubmissionState?.isSubmitted && answerSubmitted) {
+      setShowAnswer(false);
+      setAnswerSubmitted(false);
+      setLastSubmissionResult(null);
+      setIsSubmitting(false);
+    }
+  }, [initialSubmissionState?.isSubmitted, answerSubmitted]);
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
