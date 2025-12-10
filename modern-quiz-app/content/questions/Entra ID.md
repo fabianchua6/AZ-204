@@ -411,41 +411,40 @@ Answer: Emtra ID B2C supports authentication through a variety of social media p
 
 ---
 
-Question: Click on the following steps in the correct order to integrate authentication and authorization working with the Microsoft identity platform for Web API:
+Question: What is the correct order to integrate authentication and authorization working with the Microsoft identity platform for Web API?
 
-- [x] Store token cache
-- [x] Register app
-- [x] Control access to web API (authorization)
-- [x] Configure app with code sample
-- [x] Configure permission & call API of choice
-- [x] Validate access token
-- [x] Configure secrets & certificates
-
-Answer:
-
-1. Register app
-1. Configure app with code sample
-1. Validate access token
-1. Configure secrets & certificates
-1. Configure permission & call API of choice
-1. Control access to web API (authorization)
+Steps to order:
 1. Store token cache
+2. Register app
+3. Control access to web API (authorization)
+4. Configure app with code sample
+5. Configure permission & call API of choice
+6. Validate access token
+7. Configure secrets & certificates
+
+- [ ] 1, 2, 3, 4, 5, 6, 7
+- [ ] 2, 4, 7, 6, 5, 3, 1
+- [x] 2, 4, 6, 7, 5, 3, 1
+- [ ] 2, 7, 4, 6, 5, 1, 3
+
+Answer: The correct sequence is: **Register app → Configure app with code sample → Validate access token → Configure secrets & certificates → Configure permission & call API of choice → Control access to web API (authorization) → Store token cache** (2, 4, 6, 7, 5, 3, 1)
 
 ---
 
-Question: Click on the following steps in the correct order to protect an API in Azure API Management with Microsoft Entra ID:
+Question: What is the correct order to protect an API in Azure API Management with Microsoft Entra ID?
 
-- [x] Register the backend API application in Microsoft Entra ID.
-- [x] Register the web App (website containing summarized results) in Microsoft Entra ID so that it can call the backend API.
-- [x] Allow permissions between the website app to call the backend API app. Add the configurations in Microsoft Entra ID.
-- [x] Enable OAuth 2.0 user authorization and add the validate-jwt policy to validate the OAuth token for API calls.
-
-Answer:
-
+Steps to order:
 1. Register the backend API application in Microsoft Entra ID.
-1. Register the web App (website containing summarized results) in Microsoft Entra ID so that it can call the backend API.
-1. Allow permissions between the website app to call the backend API app. Add the configurations in Microsoft Entra ID.
-1. Enable OAuth 2.0 user authorization and add the validate-jwt policy to validate the OAuth token for API calls.
+2. Register the web App (website containing summarized results) in Microsoft Entra ID so that it can call the backend API.
+3. Allow permissions between the website app to call the backend API app. Add the configurations in Microsoft Entra ID.
+4. Enable OAuth 2.0 user authorization and add the validate-jwt policy to validate the OAuth token for API calls.
+
+- [x] 1, 2, 3, 4
+- [ ] 2, 1, 3, 4
+- [ ] 1, 3, 2, 4
+- [ ] 4, 1, 2, 3
+
+Answer: The correct sequence is: **Register backend API → Register web app → Allow permissions → Enable OAuth 2.0 and validate-jwt policy** (1, 2, 3, 4)
 
 ---
 
