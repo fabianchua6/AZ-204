@@ -503,7 +503,10 @@ export class LeitnerSystem {
           timesIncorrect: progress.timesIncorrect,
         });
       }
-    );
+    });
+
+    // Combine new questions and questions with progress
+    const questionsWithPriority = [...newQuestions, ...questionsWithProgress];
 
     // Filter to only questions that are due or new, plus some review questions
     const dueAndNewQuestions = questionsWithPriority.filter(q => {
