@@ -24,9 +24,9 @@ export const LEITNER_CONFIG = {
     MIN_DAILY_TARGET: 1,
     MAX_DAILY_TARGET: 500,
     CLEANUP_THRESHOLD_DAYS: 30,
-    MIN_DUE_QUESTIONS: 50, // Reduced from 100 for better performance
-    MAX_NEW_QUESTIONS_PER_SESSION: 20, // NEW: Limit new questions per session
-    REVIEW_PROBABILITY: 0.5, // Increased to 50% for more review questions
+    MIN_DUE_QUESTIONS: 20,
+    MAX_NEW_QUESTIONS_PER_SESSION: 20,
+    REVIEW_PROBABILITY: 0.25, // 25% chance to include box 3 questions for review
   } as const,
 
   // Performance settings

@@ -528,7 +528,20 @@ export default function DebugPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                  <Button
+                    onClick={() => {
+                      leitnerSystem.refreshQuestionOrder();
+                      setClearResult('✅ Question order refreshed! You should see different questions now.');
+                    }}
+                    variant="outline"
+                    className="h-auto py-3"
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-lg">🎲</span>
+                      <span className="text-xs">Shuffle Questions</span>
+                    </div>
+                  </Button>
                   <Button
                     onClick={forceHardRefresh}
                     variant="outline"

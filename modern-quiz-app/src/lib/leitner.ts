@@ -33,6 +33,7 @@ export class LeitnerSystem {
   private initializationPromise: Promise<void> | null = null;
   private saveTimeout: NodeJS.Timeout | null = null;
   private questionSeed: number = Date.now(); // Stable seed for sorting
+  private lastSeedRotation: number = Date.now(); // Track when seed was last rotated
   private settings: LeitnerSettings = { ...LEITNER_CONFIG.DEFAULT_SETTINGS };
 
   constructor() {
@@ -255,6 +256,20 @@ export class LeitnerSystem {
   // Timezone-aware date comparison helper
   private isDateDue(reviewDateStr: string, currentDate: Date): boolean {
     return DateUtils.isDateDue(reviewDateStr, currentDate);
+  }
+
+  // Stable pseudo-random function for consistent sorting
+  private stableRandom(questionId: string): number {
+    // Rotate seed every 5 minutes to provide fresh randomization
+    const now = Date.now();
+    const SEED_ROTATION_INTERVAL = 5 * 60 * 1000; // 5 minutes
+    
+    if (now - this.lastSeedRotation > SEED_ROTATION_INTERVAL) {
+      this.questionSeed = now;
+      this.lastSeedRotation = now;
+    }
+    
+    return AlgorithmUtils.stableRandom(questionId, this.questionSeed);
   }
 
   private moveQuestion(currentBox: number, wasCorrect: boolean): number {
@@ -488,54 +503,43 @@ export class LeitnerSystem {
           timesIncorrect: progress.timesIncorrect,
         });
       }
-    });
-
-    console.log('🔍 [DEBUG] Progress stats:', progressStats);
-    console.log(`🔍 [DEBUG] New questions available: ${newQuestions.length}`);
-    console.log(`🔍 [DEBUG] Questions with progress: ${questionsWithProgress.length}`);
-
-    // Start with due questions from existing progress
-    const dueProgressQuestions = questionsWithProgress.filter(q => q.isDue);
-    
-    // Add some non-due questions for review (higher probability now)
-    const reviewQuestions = questionsWithProgress
-      .filter(q => !q.isDue && q.currentBox === LEITNER_CONFIG.LIMITS.MAX_BOX && Math.random() < LEITNER_CONFIG.LIMITS.REVIEW_PROBABILITY);
-
-    // Limit new questions per session to prevent overwhelming
-    const limitedNewQuestions = newQuestions
-      .sort(() => Math.random() - 0.5) // Shuffle new questions
-      .slice(0, LEITNER_CONFIG.LIMITS.MAX_NEW_QUESTIONS_PER_SESSION);
-
-    console.log(`🔍 [DEBUG] Due progress questions: ${dueProgressQuestions.length}`);
-    console.log(`🔍 [DEBUG] Review questions added: ${reviewQuestions.length}`);
-    console.log(`🔍 [DEBUG] New questions (limited): ${limitedNewQuestions.length}/${newQuestions.length}`);
-
-    // Combine all question types
-    const dueAndNewQuestions = [
-      ...dueProgressQuestions,
-      ...reviewQuestions,
-      ...limitedNewQuestions
-    ];
-
-    console.log(`🔍 [DEBUG] Initial question selection: ${dueAndNewQuestions.length}`);
-    console.log(`🔍 [DEBUG] Box distribution in selected questions:`, 
-      dueAndNewQuestions.reduce((acc, q) => {
-        acc[`box${q.currentBox}`] = (acc[`box${q.currentBox}`] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>)
     );
 
-    // If we still need more questions, add some non-due questions
+    // Filter to only questions that are due or new, plus some review questions
+    const dueAndNewQuestions = questionsWithPriority.filter(q => {
+      // Include all due questions and new questions
+      if (q.isDue) return true;
+
+      // Include some questions from box 3 for review (25% chance - increased from 10%)
+      if (q.currentBox === LEITNER_CONFIG.LIMITS.MAX_BOX && Math.random() < LEITNER_CONFIG.LIMITS.REVIEW_PROBABILITY) return true;
+
+      // Also include some questions from box 2 for extra variety (15% chance)
+      if (q.currentBox === 2 && Math.random() < 0.15) return true;
+
+      return false;
+    });
+
+    // If we have too few due questions, add more from all boxes with preference for lower boxes
     if (dueAndNewQuestions.length < LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS) {
-      console.log(`🔍 [DEBUG] Need more questions: ${dueAndNewQuestions.length} < ${LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS}`);
+      const additionalNeeded = LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS - dueAndNewQuestions.length;
       
-      const additionalQuestions = questionsWithProgress
-        .filter(q => !q.isDue) // Get non-due questions
-        .sort(() => Math.random() - 0.5) // Shuffle for randomness
-        .slice(0, LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS - dueAndNewQuestions.length);
-      
-      console.log(`🔍 [DEBUG] Adding ${additionalQuestions.length} additional questions`);
-      dueAndNewQuestions.push(...additionalQuestions);
+      // Get questions not already included, prioritizing lower boxes
+      const availableQuestions = questionsWithPriority
+        .filter(q => !q.isDue && !dueAndNewQuestions.some(dup => dup.id === q.id))
+        .sort((a, b) => {
+          // Prioritize lower boxes for additional questions
+          if (a.currentBox !== b.currentBox) return a.currentBox - b.currentBox;
+          
+          // Then by failure count
+          const failureDiff = (b.timesIncorrect || 0) - (a.timesIncorrect || 0);
+          if (failureDiff !== 0) return failureDiff;
+          
+          // Finally by stable random for variety
+          return this.stableRandom(a.id) - this.stableRandom(b.id);
+        })
+        .slice(0, additionalNeeded);
+        
+      dueAndNewQuestions.push(...availableQuestions);
     }
 
     console.log(`🔍 [DEBUG] Final question count before sorting: ${dueAndNewQuestions.length}`);
@@ -752,12 +756,17 @@ export class LeitnerSystem {
     
     // Clear all daily attempts data to prevent stale counts
     this.clearAllDailyAttempts();
+    
+    // Reset seed for new randomization
+    this.questionSeed = Date.now();
+    this.lastSeedRotation = Date.now();
   }
 
-  // Force refresh question randomization (useful for getting different question order)
-  refreshQuestionPool(): void {
-    // Simply trigger a re-randomization by calling getDueQuestions again
-    console.log('Question pool refreshed - next session will have different order');
+  // Force refresh of question randomization (for users experiencing repetition)
+  refreshQuestionOrder(): void {
+    this.questionSeed = Date.now();
+    this.lastSeedRotation = Date.now();
+    console.log('Question randomization refreshed - questions will appear in a new order');
   }
 
   // Clear only navigation/submission states (preserves Leitner progress)
