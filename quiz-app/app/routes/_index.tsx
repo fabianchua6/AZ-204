@@ -17,7 +17,13 @@ import { AnswerOptions } from '~/components/AnswerOptions';
 import { Button, LoadingButton, NextButton } from '~/components/Button';
 import { TextInput } from '~/components/Input';
 import { RichMarkdown } from '~/components/RichMarkdown';
-import { type Question, data as allQuestions, getQA, getQAById, topics } from '~/lib/qa';
+import {
+	data as allQuestions,
+	getQA,
+	getQAById,
+	type Question,
+	topics,
+} from '~/lib/qa';
 import { loadAnsweredQuestions, saveAnsweredQuestions } from '~/lib/storage';
 
 // Pre-compute ID to index map for O(1) lookups
@@ -143,12 +149,15 @@ function QuestionForm({
 	// Memoize correct answer check - uses Set for O(1) lookups
 	const isCorrectlyAnswered = useMemo(() => {
 		const { answerIndexes } = data;
-		if (!answerIndexes?.length || answerIndexes.length !== checkedValues.length) {
+		if (
+			!answerIndexes?.length ||
+			answerIndexes.length !== checkedValues.length
+		) {
 			return false;
 		}
 		const checkedSet = new Set(checkedValues);
 		return answerIndexes.every((value) => checkedSet.has(value));
-	}, [data.answerIndexes, checkedValues]);
+	}, [data.answerIndexes, checkedValues, data]);
 
 	const buttonColor = showAnswer || isCorrectlyAnswered ? 'green' : 'blue';
 
@@ -237,7 +246,7 @@ function QuestionForm({
 				<div className="font-bold">Answer: </div>
 				<RichMarkdown>{data.answer}</RichMarkdown>
 			</div>
-			<div className="items-center mt-12 grid grid-cols-1 gap-y-4 sm:grid-cols-3">
+			<div className="mt-12 grid grid-cols-1 items-center gap-y-4 sm:grid-cols-3">
 				<Button
 					type="button"
 					className="sm:justify-self-start"
