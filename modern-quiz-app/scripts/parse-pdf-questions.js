@@ -7,8 +7,10 @@ const { TOPIC_MAPPING } = require('./topic-mapping');
 
 // Function to generate a unique ID for a question
 // Includes question text, options, and answer to handle question variants
+// Uses JSON serialization for safe, collision-free hashing
 function generateQuestionId(questionText, options, answer) {
-  const combinedText = questionText + '||' + options.join('||') + '||' + answer;
+  const data = { q: questionText, o: options, a: answer };
+  const combinedText = JSON.stringify(data);
   return crypto.createHash('sha256').update(combinedText).digest('hex');
 }
 
