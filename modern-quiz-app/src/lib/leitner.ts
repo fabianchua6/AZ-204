@@ -171,24 +171,19 @@ export class LeitnerSystem {
   private performSave(): void {
     try {
       const data = Object.fromEntries(this.progress);
-      console.log(`🔍 [DEBUG] Saving ${this.progress.size} progress entries to localStorage`);
       StorageUtils.safeSetItem(LEITNER_CONFIG.STORAGE.PROGRESS, JSON.stringify(data));
-      console.log(`🔍 [DEBUG] Successfully saved progress to localStorage`);
     } catch (error) {
-      console.error(`🔍 [DEBUG] ERROR saving to localStorage:`, error);
       if (error instanceof DOMException && error.code === 22) {
         // Storage quota exceeded - cleanup old data
-        console.log(`🔍 [DEBUG] Storage quota exceeded, cleaning up old data`);
         this.cleanupOldData();
         try {
           const data = Object.fromEntries(this.progress);
           StorageUtils.safeSetItem(LEITNER_CONFIG.STORAGE.PROGRESS, JSON.stringify(data));
-          console.log(`🔍 [DEBUG] Successfully saved after cleanup`);
         } catch (retryError) {
-          console.error('🔍 [DEBUG] Failed to save even after cleanup:', retryError);
+          console.error('Failed to save even after cleanup:', retryError);
         }
       } else {
-        console.error('🔍 [DEBUG] Failed to save Leitner progress:', error);
+        console.error('Failed to save Leitner progress:', error);
       }
     }
   }
@@ -382,39 +377,25 @@ export class LeitnerSystem {
     questionId: string,
     wasCorrect: boolean
   ): LeitnerAnswerResult {
-    console.log(`🔍 [DEBUG] processAnswer called: questionId=${questionId.slice(-8)}, wasCorrect=${wasCorrect}`);
-    
-    // Remove async since this is synchronous
     if (!this.initialized) {
-      console.error('🔍 [DEBUG] ERROR: Leitner system not initialized!');
       throw new Error('Leitner system not initialized. Call ensureInitialized() first.');
     }
 
     if (!questionId || typeof wasCorrect !== 'boolean') {
-      console.error('🔍 [DEBUG] ERROR: Invalid parameters for processAnswer');
       throw new Error('Invalid parameters for processAnswer');
     }
 
     let progress = this.progress.get(questionId);
-    console.log(`🔍 [DEBUG] Existing progress for question:`, progress ? {
-      currentBox: progress.currentBox,
-      timesCorrect: progress.timesCorrect,
-      timesIncorrect: progress.timesIncorrect,
-      lastReviewed: progress.lastReviewed
-    } : 'NEW QUESTION');
 
     // Initialize if question hasn't been seen before
     if (!progress) {
       progress = this.initializeQuestion(questionId);
-      console.log(`🔍 [DEBUG] Initialized new question in box ${progress.currentBox}`);
     }
 
     const currentBox = progress.currentBox;
     const newBox = this.moveQuestion(currentBox, wasCorrect);
     const now = new Date();
     const nextReview = this.calculateNextReviewDate(newBox, now);
-
-    console.log(`🔍 [DEBUG] Question movement: Box ${currentBox} → Box ${newBox}, Next review: ${nextReview.toISOString()}`);
 
     // Update progress with optimized object creation
     const updatedProgress: LeitnerProgress = {
@@ -428,13 +409,11 @@ export class LeitnerSystem {
     };
 
     this.progress.set(questionId, updatedProgress);
-    console.log(`🔍 [DEBUG] Updated progress stored. Total progress entries: ${this.progress.size}`);
     
     // Track daily attempts for daily target calculation
     this.incrementDailyAttempts();
     
     this.saveToStorage();
-    console.log(`🔍 [DEBUG] Progress saved to localStorage`);
 
     return {
       correct: wasCorrect,
@@ -451,16 +430,12 @@ export class LeitnerSystem {
     await this.ensureInitialized();
 
     if (!Array.isArray(allQuestions) || allQuestions.length === 0) {
-      console.log('🔍 [DEBUG] No questions provided to getDueQuestions');
       return [];
     }
-
-    console.log(`🔍 [DEBUG] Starting getDueQuestions with ${allQuestions.length} total questions`);
 
     // Note: Questions are already filtered upstream by QuestionService.filterQuestions()
     // Don't double-filter - use all provided questions to maximize variety
     const currentDate = new Date();
-    console.log(`🔍 [DEBUG] Current date: ${currentDate.toISOString()}`);
 
     // Analyze current progress state
     const progressStats = {
@@ -545,10 +520,6 @@ export class LeitnerSystem {
       dueAndNewQuestions.push(...availableQuestions);
     }
 
-    console.log(`🔍 [DEBUG] Final question count before sorting: ${dueAndNewQuestions.length}`);
-
-    console.log(`🔍 [DEBUG] Final question count before sorting: ${dueAndNewQuestions.length}`);
-
     // Optimized sorting with early returns
     const sortedQuestions = dueAndNewQuestions.sort((a, b) => {
       // Due questions first
@@ -568,27 +539,8 @@ export class LeitnerSystem {
       return randomA - randomB;
     });
 
-    // Log sample of questions for debugging
-    console.log(`🔍 [DEBUG] Sample of sorted questions (first 10):`, 
-      sortedQuestions.slice(0, 10).map(q => ({
-        id: q.id.slice(-8),
-        topic: q.topic,
-        box: q.currentBox,
-        isDue: q.isDue,
-        timesIncorrect: q.timesIncorrect || 0
-      }))
-    );
-
     // Apply optimized interleaving by topic for better learning
     const interleaved = this.optimizedInterleaveByTopic(sortedQuestions);
-    
-    console.log(`🔍 [DEBUG] Final interleaved questions: ${interleaved.length}`);
-    console.log(`🔍 [DEBUG] Topic distribution:`, 
-      interleaved.reduce((acc, q) => {
-        acc[q.topic] = (acc[q.topic] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>)
-    );
 
     return interleaved;
   }

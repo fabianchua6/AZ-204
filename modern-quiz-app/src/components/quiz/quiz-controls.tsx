@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, Target, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { TopicSelector } from '@/components/topic-selector';
 import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/lib/constants';
 import type { QuizStats } from '@/types/quiz';
