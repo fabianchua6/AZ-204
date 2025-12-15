@@ -1,9 +1,6 @@
-import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 import type { Metadata } from 'next';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'AZ-204 Quiz App',
@@ -27,7 +24,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en' suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className='font-sans'>
         <ThemeProvider
           attribute='class'
           defaultTheme='system'

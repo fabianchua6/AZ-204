@@ -6,8 +6,12 @@ const crypto = require('crypto');
 const { TOPIC_MAPPING } = require('./topic-mapping');
 
 // Function to generate a unique ID for a question
-function generateQuestionId(questionText) {
-  return crypto.createHash('sha256').update(questionText).digest('hex');
+// Includes question text, options, and answer to handle question variants
+// Uses JSON serialization for safe, collision-free hashing
+function generateQuestionId(questionText, options, answer) {
+  const data = { q: questionText, o: options, a: answer };
+  const combinedText = JSON.stringify(data);
+  return crypto.createHash('sha256').update(combinedText).digest('hex');
 }
 
 // Function to map PDF topics to existing categories
@@ -75,7 +79,6 @@ function parseQuestions(markdownContent) {
       // Found options, save question and start collecting options
       if (line.startsWith('A.') && currentState === 'question') {
         question.question = currentText.trim();
-        question.id = generateQuestionId(question.question);
         currentState = 'options';
 
         // Add the first option
@@ -182,6 +185,8 @@ function parseQuestions(markdownContent) {
 
     // Only add if we have a valid question
     if (question.question && question.topic && question.options.length > 0) {
+      // Generate ID after all data is collected, including answer for uniqueness
+      question.id = generateQuestionId(question.question, question.options, question.answer);
       questions.push(question);
     }
   }
