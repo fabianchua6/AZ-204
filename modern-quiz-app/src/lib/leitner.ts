@@ -537,8 +537,8 @@ export class LeitnerSystem {
           const failureDiff = (b.timesIncorrect || 0) - (a.timesIncorrect || 0);
           if (failureDiff !== 0) return failureDiff;
           
-          // Finally by stable random for variety
-          return this.stableRandom(a.id) - this.stableRandom(b.id);
+          // Finally by true random for better variety each session
+          return Math.random() - 0.5;
         })
         .slice(0, additionalNeeded);
         

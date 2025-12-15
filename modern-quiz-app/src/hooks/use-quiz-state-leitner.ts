@@ -276,7 +276,7 @@ export function useQuizStateWithLeitner(
             createdAt: number;
           } | null>('leitner-current-session', null);
           
-          const SESSION_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+          const SESSION_EXPIRY = 6 * 60 * 60 * 1000; // 6 hours (reduced from 24 to provide fresher question sets)
           const now = Date.now();
           
           // Check if we have a valid saved session that's not expired
