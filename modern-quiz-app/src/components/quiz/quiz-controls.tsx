@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
-import { TopicSelector } from '@/components/topic-selector';
+import { motion } from 'framer-motion';
+import { Target } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/lib/constants';
 import type { QuizStats } from '@/types/quiz';
 
@@ -20,15 +19,17 @@ interface QuizControlsProps {
 }
 
 export function QuizControls({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   topics,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   selectedTopic,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onTopicChange,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   totalQuestions,
   stats,
   leitnerStats,
 }: QuizControlsProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   const progressPercentage =
     (stats.answeredQuestions / stats.totalQuestions) * 100;
 
@@ -81,68 +82,6 @@ export function QuizControls({
           </div>
         </div>
       </div>
-
-      {/* Expanded Content */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className='overflow-hidden'
-          >
-            <CardContent className='p-4 pt-0'>
-              <div className='space-y-4'>
-                <div>
-                  <label className='mb-2 block text-sm font-medium'>
-                    Topic Filter
-                  </label>
-                  <TopicSelector
-                    topics={topics}
-                    selectedTopic={selectedTopic}
-                    onTopicChange={onTopicChange}
-                    questionCount={totalQuestions}
-                    compact={true}
-                  />
-                </div>
-
-                <div className='space-y-3'>
-                  <div className='flex items-center justify-between text-sm'>
-                    <span className='text-muted-foreground'>Progress</span>
-                    <span className='font-medium text-foreground'>
-                      {stats.answeredQuestions} / {stats.totalQuestions}
-                    </span>
-                  </div>
-                  <div className='h-2 w-full rounded-full border border-border/50 bg-muted'>
-                    <div
-                      className='h-2 rounded-full bg-primary transition-all duration-300 ease-out'
-                      style={{
-                        width: `${Math.round(
-                          (stats.answeredQuestions / stats.totalQuestions) * 100
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                  <div className='flex items-center justify-between text-xs text-muted-foreground'>
-                    <span>Correct: {stats.correctAnswers}</span>
-                    <span>
-                      Accuracy:{' '}
-                      {stats.answeredQuestions > 0
-                        ? Math.round(
-                            (stats.correctAnswers / stats.answeredQuestions) *
-                              100
-                          )
-                        : 0}
-                      %
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </Card>
   );
 }
