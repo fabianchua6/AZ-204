@@ -274,17 +274,23 @@ export function useQuizStateWithLeitner(
           const savedSession = loadFromLocalStorage<{
             questionIds: string[];
             createdAt: number;
+            totalQuestions?: number; // Track question count for invalidation
           } | null>('leitner-current-session', null);
           
           const SESSION_EXPIRY = 4 * 60 * 60 * 1000; // 4 hours - shorter to ensure fresh questions each session
           const now = Date.now();
+          
+          // Invalidate session if question pool changed significantly (>10% difference)
+          const questionCountChanged = savedSession?.totalQuestions && 
+            Math.abs(savedSession.totalQuestions - baseQuestions.length) > baseQuestions.length * 0.1;
           
           // Check if we have a valid saved session that's not expired
           if (savedSession && 
               savedSession.questionIds && 
               Array.isArray(savedSession.questionIds) &&
               savedSession.questionIds.length > 0 &&
-              (now - savedSession.createdAt) < SESSION_EXPIRY) {
+              (now - savedSession.createdAt) < SESSION_EXPIRY &&
+              !questionCountChanged) {
             
             debug('🔄 Restoring saved session with', savedSession.questionIds.length, 'questions');
             
@@ -334,7 +340,8 @@ export function useQuizStateWithLeitner(
           // Save the session to localStorage for restoration on refresh
           saveToLocalStorage('leitner-current-session', {
             questionIds: sessionQuestions.map(q => q.id),
-            createdAt: now
+            createdAt: now,
+            totalQuestions: baseQuestions.length // Track for invalidation when questions change
           });
           
           debug('💾 Saved new session:', sessionQuestions.length, 'questions');
