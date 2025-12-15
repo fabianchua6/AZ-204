@@ -276,7 +276,7 @@ export function useQuizStateWithLeitner(
             createdAt: number;
           } | null>('leitner-current-session', null);
           
-          const SESSION_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+          const SESSION_EXPIRY = 4 * 60 * 60 * 1000; // 4 hours - shorter to ensure fresh questions each session
           const now = Date.now();
           
           // Check if we have a valid saved session that's not expired
@@ -312,20 +312,24 @@ export function useQuizStateWithLeitner(
           // Check if still mounted after async operation
           if (!isMounted) return;
           
-          // Sort due questions to prioritize PDF questions first
-          dueQuestions.sort((a, b) => {
+          // Shuffle the due questions to ensure variety each session
+          // This prevents the same order appearing every time
+          const shuffledDueQuestions = shuffleArray(dueQuestions);
+          
+          // Sort shuffled questions to prioritize PDF questions first (stable sort)
+          shuffledDueQuestions.sort((a, b) => {
             // PDF questions come first (handle undefined safely)
             const aIsPdf = isPdfQuestion(a);
             const bIsPdf = isPdfQuestion(b);
             
             if (aIsPdf && !bIsPdf) return -1;
             if (!aIsPdf && bIsPdf) return 1;
-            // Within same type (PDF or regular), maintain Leitner system order
+            // Within same type (PDF or regular), maintain shuffled order
             return 0;
           });
           
           // 🎯 SESSION-BASED: Limit to 20 most due questions per session
-          const sessionQuestions = dueQuestions.slice(0, 20);
+          const sessionQuestions = shuffledDueQuestions.slice(0, 20);
           
           // Save the session to localStorage for restoration on refresh
           saveToLocalStorage('leitner-current-session', {
