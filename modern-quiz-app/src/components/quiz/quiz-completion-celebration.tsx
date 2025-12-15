@@ -11,6 +11,9 @@ import { Trophy, CheckCircle, Target, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
+// Utility imports
+import { triggerHaptic } from '@/lib/haptics';
+
 interface QuizCompletionCelebrationProps {
   isVisible: boolean;
   stats: {
@@ -32,6 +35,8 @@ export function QuizCompletionCelebration({
 
   useEffect(() => {
     if (isVisible) {
+      // Trigger celebration haptic when modal appears
+      triggerHaptic('success');
       const timer = setTimeout(() => setShowConfetti(true), 500);
       return () => clearTimeout(timer);
     }

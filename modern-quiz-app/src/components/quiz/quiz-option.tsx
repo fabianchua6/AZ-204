@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
+import { triggerHaptic } from '@/lib/haptics';
 
 interface QuizOptionProps {
   option: string;
@@ -66,6 +67,7 @@ export function QuizOption({
 
   const handleClick = useCallback(() => {
     if (!disabled && !showAnswer) {
+      triggerHaptic('selection');
       onSelect(index);
     }
   }, [disabled, showAnswer, onSelect, index]);
@@ -74,6 +76,7 @@ export function QuizOption({
     (e: React.KeyboardEvent) => {
       if ((e.key === 'Enter' || e.key === ' ') && !disabled && !showAnswer) {
         e.preventDefault();
+        triggerHaptic('selection');
         onSelect(index);
       }
     },

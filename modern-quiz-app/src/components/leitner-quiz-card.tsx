@@ -22,6 +22,9 @@ import { QuizQuestionContent } from '@/components/quiz/quiz-question-content';
 // Hook imports
 import { useQuizCardState } from '@/hooks/use-quiz-card-state';
 
+// Utility imports
+import { triggerHaptic } from '@/lib/haptics';
+
 // Type imports
 import type { Question } from '@/types/quiz';
 
@@ -181,12 +184,16 @@ export function LeitnerQuizCard({
       return;
     }
 
+    triggerHaptic('medium');
     cardState.startSubmitting();
 
     try {
       const result = await onAnswerSubmit(question.id, externalSelectedAnswers);
 
       if (result) {
+        // Trigger haptic feedback based on result
+        triggerHaptic(result.correct ? 'success' : 'error');
+        
         // Set local state immediately for instant feedback
         setJustSubmitted(true);
         setSubmissionResult(result.correct);
@@ -212,12 +219,14 @@ export function LeitnerQuizCard({
   // Navigation handlers - keep navigation simple and independent of submission
   const handleNext = useCallback(() => {
     if (onNext) {
+      triggerHaptic('light');
       onNext();
     }
   }, [onNext]);
 
   const handlePrevious = useCallback(() => {
     if (onPrevious) {
+      triggerHaptic('light');
       onPrevious();
     }
   }, [onPrevious]);
