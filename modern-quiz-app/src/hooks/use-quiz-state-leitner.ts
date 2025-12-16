@@ -285,6 +285,7 @@ export function useQuizStateWithLeitner(
             Math.abs(savedSession.totalQuestions - baseQuestions.length) > baseQuestions.length * 0.1;
           
           // Check if we have a valid saved session that's not expired
+          // Also check if all questions have been answered - if so, start fresh
           if (savedSession && 
               savedSession.questionIds && 
               Array.isArray(savedSession.questionIds) &&
@@ -299,8 +300,18 @@ export function useQuizStateWithLeitner(
               .map(id => baseQuestions.find(q => q.id === id))
               .filter((q): q is Question => q !== undefined);
             
-            // Verify we restored most of the questions (at least 50%)
-            if (restoredQuestions.length >= savedSession.questionIds.length * 0.5) {
+            // Check if all questions were answered (session complete)
+            const savedSubmissions = loadFromLocalStorage<Record<string, { isSubmitted: boolean }>>('leitner-submission-states', {});
+            const allAnswered = restoredQuestions.length > 0 && 
+              restoredQuestions.every(q => savedSubmissions[q.id]?.isSubmitted);
+            
+            if (allAnswered) {
+              debug('⚠️ All questions answered - generating fresh session');
+              // Clear old session and fall through to generate new one
+              saveToLocalStorage('leitner-current-session', null);
+              saveToLocalStorage('leitner-submission-states', {});
+              // Don't return - fall through to generate new session
+            } else if (restoredQuestions.length >= savedSession.questionIds.length * 0.5) {
               if (!isMounted) return;
               setFilteredQuestions(restoredQuestions);
               setIsLoadingSession(false);
@@ -308,6 +319,7 @@ export function useQuizStateWithLeitner(
               return; // Early exit - session restored successfully
             } else {
               debug('⚠️ Saved session invalid - too few questions restored. Generating new session.');
+              // Fall through to generate new session
             }
           }
           

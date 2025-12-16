@@ -1,6 +1,8 @@
 [
   {
+    "id": "c07ad512a9630514edf3b648c9248082302d3ed504fa8156c8f43249c9b8bcce",
     "question": "You have two Hyper-V hosts named Host1 and Host2. Host1 has an Azure virtual machine named VM1 that was deployed by using a custom Azure Resource Manager template. You need to move VM1 to Host2. What should you do?",
+    "answer": "When you redeploy a VM, it moves the VM to a new node within the Azure infrastructure and then powers it back on, retaining all your configuration options and associated resources.",
     "options": [
       "From the Update management blade, click Enable.",
       "From the Overview blade, move VM1 to a different subscription.",
@@ -10,15 +12,14 @@
     "answerIndexes": [
       2
     ],
-    "answer": "When you redeploy a VM, it moves the VM to a new node within the Azure infrastructure and then powers it back on, retaining all your configuration options and associated resources.  ",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 1,
-    "id": "10dee3bb7959d82743ed1c70a10dd93d737c54ee62120ee5d520f7b1fc4b53fd"
+    "topic": "Compute Solutions",
+    "isPdf": true
   },
   {
-    "question": "Your company has an Azure Kubernetes Service (AKS) cluster that you manage from an Azure AD-joined device. The cluster is located in a resource group. Developers have created an application named MyApp. MyApp was packaged into a container image. You need to deploy the YAML manifest file for the application. Solution: You install the Azure CLI on the device and run the kubectl apply `\"f myapp.yaml command. Does this meet the goal?",
+    "id": "5ab0b2ba60309dbad58791fcbc8f95bffc8f75191faefa5009d1fda2bbea7d94",
+    "question": "Your company has an Azure Kubernetes Service (AKS) cluster that you manage from an Azure AD-joined device. The cluster is located in a resource group. Developers have created an application named MyApp. MyApp was packaged into a container image. You need to deploy the YAML manifest file for the application. Does this meet the goal?",
+    "answer": "`kubectl apply -f myapp.yaml` applies a configuration change to a resource from a file or stdin. This is the correct approach for deploying YAML manifest files to AKS clusters.",
     "options": [
       "Yes",
       "No"
@@ -26,15 +27,29 @@
     "answerIndexes": [
       0
     ],
-    "answer": "kubectl apply -f myapp.yaml applies a configuration change to a resource from a file or stdin.   Nokaido",
-    "topic": "Azure",
     "hasCode": true,
-    "isPdf": true,
-    "pdfQuestionNumber": 3,
-    "id": "ea3551941bbe89987af1b4570d92a344bfc1147eebe16afa94bda6c6ffb91ea4"
+    "topic": "Containers",
+    "isPdf": true
   },
   {
+    "id": "3e7b97d121bb0b9ced197b25774adfa3fc19cc352235e8d26bdc8de250e953e8",
+    "question": "Your company has an Azure Kubernetes Service (AKS) cluster that you manage from an Azure AD-joined device. The cluster is located in a resource group. Developers have created an application named MyApp. MyApp was packaged into a container image. You need to deploy the YAML manifest file for the application. Does this meet the goal?",
+    "answer": "Running a Docker container with Azure CLI does not directly deploy a YAML manifest to AKS. You need to use `kubectl apply` command with the proper authentication to the AKS cluster.",
+    "options": [
+      "Yes",
+      "No"
+    ],
+    "answerIndexes": [
+      1
+    ],
+    "hasCode": true,
+    "topic": "Containers",
+    "isPdf": true
+  },
+  {
+    "id": "a1055a34d1d55ef28ea50243afc029610f2c77c53b2dea976e26691bb1bfc59b",
     "question": "Your company has a web app named WebApp1. You use the WebJobs SDK to design a triggered App Service background task that automatically invokes a function in the code every time new data is received in a queue. You are preparing to configure the service processes a queue data item. Which of the following is the service you should use?",
+    "answer": "WebJobs is the correct service for creating background tasks in Azure App Service that can be triggered by queue messages. WebJobs SDK provides the framework for building these triggered applications.",
     "options": [
       "Logic Apps",
       "WebJobs",
@@ -44,15 +59,14 @@
     "answerIndexes": [
       1
     ],
-    "answer": "  DefaultName2",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 5,
-    "id": "e70d072ee7a92b7f9bdc3ef36aac70ed9ece2e333386c878cae32a27f8198cb3"
+    "hasCode": true,
+    "topic": "App Service",
+    "isPdf": true
   },
   {
+    "id": "ee475bac7fad6da01a25bac7a71ff5f32e90bd6e5b94f6861308f22bb2012065",
     "question": "Your company has an Azure subscription. You need to deploy a number of Azure virtual machines to the subscription by using Azure Resource Manager (ARM) templates. The virtual machines will be included in a single availability set. You need to ensure that the ARM template allows for as many virtual machines as possible to remain accessible in the event of fabric failure or maintenance. Which of the following is the value that you should configure for the platformFaultDomainCount property?",
+    "answer": "The number of fault domains for managed availability sets varies by region - either two or three per region. Setting this to the maximum value ensures the highest availability.",
     "options": [
       "10",
       "30",
@@ -62,51 +76,31 @@
     "answerIndexes": [
       3
     ],
-    "answer": "The number of fault domains for managed availability sets varies by region - either two or three per region.   jay158",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 6,
-    "id": "9d6086652ad3029a85428e01c37f109a137ef74cde8c9a4dbec2a77f2b8c1090"
+    "hasCode": true,
+    "topic": "Compute Solutions",
+    "isPdf": true
   },
   {
-    "question": "This question requires that you evaluate the underlined text to determine if it is correct. You company has an on-premises deployment of MongoDB, and an Azure Cosmos DB account that makes use of the MongoDB API. You need to devise a strategy to migrate MongoDB to the Azure Cosmos DB account. You include the Data Management Gateway tool in your migration strategy. Instructions: Review the underlined text. If it makes the statement correct, select `No change required.` If the statement is incorrect, select the",
+    "id": "736a2bbb33dadeaf9d2fc897ffe60976fef1b5d5b15ab2a7f8b6b4dab04ff07c",
+    "question": "Your company has an Azure subscription. You need to deploy a number of Azure virtual machines to the subscription by using Azure Resource Manager (ARM) templates. The virtual machines will be included in a single availability set. You need to ensure that the ARM template allows for as many virtual machines as possible to remain accessible in the event of fabric failure or maintenance. Which of the following is the value that you should configure for the platformUpdateDomainCount property?",
+    "answer": "Each virtual machine in your availability set is assigned an update domain and a fault domain by the underlying Azure platform. For a given availability set, five non-user-configurable update domains are assigned by default (Resource Manager deployments can then be increased to provide up to 20 update domains).",
     "options": [
-      "No change required",
-      "mongorestore",
-      "Azure Storage Explorer",
-      "AzCopy"
+      "10",
+      "20",
+      "30",
+      "40"
     ],
     "answerIndexes": [
       1
     ],
-    "answer": "  jay158",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 9,
-    "id": "f680e379bf5c0d9870e313fc9e946d4543e3952a3fd7e3ba6227c3797e9b2cef"
+    "hasCode": true,
+    "topic": "Compute Solutions",
+    "isPdf": true
   },
   {
-    "question": "You are developing an e-Commerce Web App. You want to use Azure Key Vault to ensure that sign-ins to the e-Commerce Web App are secured by using Azure App Service authentication and Azure Active Directory (AAD). What should you do on the e-Commerce Web App?",
-    "options": [
-      "Run the az keyvault secret command.",
-      "Enable Azure AD Connect.",
-      "Enable Managed Service Identity (MSI).",
-      "Create an Azure AD service principal."
-    ],
-    "answerIndexes": [
-      2
-    ],
-    "answer": "A managed identity from Azure Active Directory allows your app to easily access other AAD-protected resources such as Azure Key Vault. samples/app-service-msi-keyvault-dotnet/keyvault-msi-appservice-sample/   ZodiaC",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 10,
-    "id": "9b813175f84bb2844e170f2999dd7735645608a8e858d73ca973c61b6626a7e2"
-  },
-  {
-    "question": "This question requires that you evaluate the underlined text to determine if it is correct. Your Azure Active Directory Azure (Azure AD) tenant has an Azure subscription linked to it. Your developer has created a mobile application that obtains Azure AD access tokens using the OAuth 2 implicit grant type. The mobile application must be registered in Azure AD. You require a redirect URI from the developer for registration purposes. Instructions: Review the underlined text. If it makes the statement correct, select `No change is needed.` If the statement is incorrect, select the",
+    "id": "ef0a8501357f0729d392a3d7c2c13182aa46979618a484c2b24ab8b664559eba",
+    "question": "Your Azure Active Directory (Azure AD) tenant has an Azure subscription linked to it. Your developer has created a mobile application that obtains Azure AD access tokens using the OAuth 2 implicit grant type. The mobile application must be registered in Azure AD. You require a redirect URI from the developer for registration purposes.",
+    "answer": "For Native Applications you need to provide a Redirect URI, which Azure AD will use to return token responses.",
     "options": [
       "No change required.",
       "a secret",
@@ -116,15 +110,32 @@
     "answerIndexes": [
       0
     ],
-    "answer": "For Native Applications you need to provide a Redirect URI, which Azure AD will use to return token responses.   jvyas",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 11,
-    "id": "71a777e2e4fb6d6531cbf16378b37ce0eb904ceed0d5975eca2c071a3a5f91bd"
+    "hasCode": true,
+    "topic": "Entra ID",
+    "isPdf": true
   },
   {
+    "id": "b5a1f9adcb5e70821728b562c3d97251f6fcfe709eb8dd09458b7e85b58203b7",
+    "question": "You are creating an Azure key vault using PowerShell. Objects deleted from the key vault must be kept for a set period of 90 days. Which two of the following parameters must be used in conjunction to meet the requirement? (Choose two.)",
+    "answer": "Both EnableSoftDelete and EnablePurgeProtection must be configured together. Soft delete allows recovery of deleted objects within the retention period, while purge protection prevents permanent deletion during the retention period.",
+    "options": [
+      "EnabledForDeployment",
+      "EnablePurgeProtection",
+      "EnabledForTemplateDeployment",
+      "EnableSoftDelete"
+    ],
+    "answerIndexes": [
+      1,
+      3
+    ],
+    "hasCode": true,
+    "topic": "Key Vault",
+    "isPdf": true
+  },
+  {
+    "id": "ee13d04862540f3429690542e2d1725c249011f1e05c6cceb9840ec35ea663ea",
     "question": "You manage an Azure SQL database that allows for Azure AD authentication. You need to make sure that database developers can connect to the SQL database via Microsoft SQL Server Management Studio (SSMS). You also need to make sure the developers use their on-premises Active Directory account for authentication. Your strategy should allow for authentication prompts to be kept to a minimum. Which of the following should you implement?",
+    "answer": "Active Directory integrated authentication allows users to connect using their existing Windows credentials without additional prompts. This method works when logged in to Windows using Azure Active Directory credentials from a federated domain.",
     "options": [
       "Azure AD token.",
       "Azure Multi-Factor authentication.",
@@ -134,67 +145,65 @@
     "answerIndexes": [
       2
     ],
-    "answer": "Azure AD can be the initial Azure AD managed domain. Azure AD can also be an on-premises Active Directory Domain Services that is federated with the Azure AD. Using an Azure AD identity to connect using SSMS or SSDT The following procedures show you how to connect to a SQL database with an Azure AD identity using SQL Server Management Studio or SQL Server Database Tools. Active Directory integrated authentication Use this method if you are logged in to Windows using your Azure Active Directory credentials from a federated domain. 1. Start Management Studio or Data Tools and in the Connect to Server (or Connect to Database Engine) dialog box, in the Authentication box, select Active Directory - Integrated. No password is needed or can be entered because your existing credentials will be presented for the connection. 2. Select the Options button, and on the Connection Properties page, in the Connect to database box, type the name of the user database you want to connect to. (The AD domain name or tenant IDג€ option is only supported for Universal with MFA connection options, otherwise it is greyed out.)   MrXBasit",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 14,
-    "id": "4b7f4feac21704a1f77d771f39fa239c3dfbfa79809ffa467e7ddf1ce88b7fe8"
+    "hasCode": true,
+    "topic": "Entra ID",
+    "isPdf": true
   },
   {
+    "id": "e547b43b4fbe916f17dd1152304d89aebaec7680084ddd693b8d8ecd4d60fc63",
     "question": "You are developing an application to transfer data between on-premises file servers and Azure Blob storage. The application stores keys, secrets, and certificates in Azure Key Vault and makes use of the Azure Key Vault APIs. You want to configure the application to allow recovery of an accidental deletion of the key vault or key vault objects for 90 days after deletion. What should you do?",
+    "answer": "When soft-delete is enabled, resources marked as deleted resources are retained for a specified period (90 days by default). Purge protection ensures that a vault or an object in the deleted state cannot be purged until the retention period has passed.",
     "options": [
       "Run the Add-AzKeyVaultKey cmdlet.",
-      "Run the az keyvault update --enable-soft-delete true --enable-purge-protection true CLI.",
+      "Run the `az keyvault update --enable-soft-delete true --enable-purge-protection true` CLI.",
       "Implement virtual network service endpoints for Azure Key Vault.",
-      "Run the az keyvault update --enable-soft-delete false CLI."
+      "Run the `az keyvault update --enable-soft-delete false` CLI."
     ],
     "answerIndexes": [
       1
     ],
-    "answer": "When soft-delete is enabled, resources marked as deleted resources are retained for a specified period (90 days by default). The service further provides a mechanism for recovering the deleted object, essentially undoing the deletion. Purge protection is an optional Key Vault behavior and is not enabled by default. Purge protection can only be enabled once soft-delete is enabled. When purge protection is on, a vault or an object in the deleted state cannot be purged until the retention period has passed. Soft-deleted vaults and objects can still be recovered, ensuring that the retention policy will be followed. The default retention period is 90 days, but it is possible to set the retention policy interval to a value from 7 to 90 days through the Azure portal. Once the retention policy interval is set and saved it cannot be changed for that vault.   anu_ezio",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 15,
-    "id": "82ead21a5bbf1eac3bf688bd8efe41a95120031adb3ee5ed45688a27352c6e54"
+    "topic": "Key Vault",
+    "isPdf": true
   },
   {
-    "question": "Note: The question is included in a number of questions that depicts the identical set-up. However, every question has a distinctive result. Establish if the solution satisfies the requirements. You are configuring a web app that delivers streaming video to users. The application makes use of continuous integration and deployment. You need to ensure that the application is highly available and that the users' streaming experience is constant. You also want to configure the application to store data in a geographic location that is nearest to the user. Solution: You include the use of Azure Redis Cache in your design. Does the solution meet the goal?",
+    "id": "36fbc6f63f3622738a9aae644a04a78dad7b7fc1690c69525aa395ef82046bcd",
+    "question": "You are developing an e-Commerce Web App. You want to use Azure Key Vault to ensure that sign-ins to the e-Commerce Web App are secured by using Azure App Service authentication and Azure Active Directory (AAD). What should you do on the e-Commerce Web App?",
+    "answer": "A managed identity from Azure Active Directory allows your app to easily access other AAD-protected resources such as Azure Key Vault without managing credentials in code.",
     "options": [
-      "Yes",
-      "No"
-    ],
-    "answerIndexes": [
-      1
-    ],
-    "answer": "  NStanhope",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 17,
-    "id": "b5c99de61275f78fb98c578c5c814f51f48586aaf0544c5a3293b8fd16943bf9"
-  },
-  {
-    "question": "You develop a Web App on a tier D1 app service plan. You notice that page load times increase during periods of peak trafic. You want to implement automatic scaling when CPU load is above 80 percent. Your solution must minimize costs. What should you do first?",
-    "options": [
-      "Enable autoscaling on the Web App.",
-      "Switch to the Premium App Service tier plan.",
-      "Switch to the Standard App Service tier plan.",
-      "Switch to the Azure App Services consumption plan."
+      "Run the az keyvault secret command.",
+      "Enable Azure AD Connect.",
+      "Enable Managed Service Identity (MSI).",
+      "Create an Azure AD service principal."
     ],
     "answerIndexes": [
       2
     ],
-    "answer": "Configure the web app to the Standard App Service Tier. The Standard tier supports auto-scaling, and we should minimize the cost. We can then enable autoscaling on the web app, add a scale rule and add a Scale condition. us/pricing/details/app-service/plans/   examTaker455",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 20,
-    "id": "d94c779da2834ed9b11edeea67ba3be0399d6f2319939092d41fb084556cb366"
+    "hasCode": true,
+    "topic": "App Service",
+    "isPdf": true
   },
   {
+    "id": "887271a2a8cc09a1de016a033c9630eb08b876690aebc95bf629901ca7ed9121",
+    "question": "You company has an on-premises deployment of MongoDB, and an Azure Cosmos DB account that makes use of the MongoDB API. You need to devise a strategy to migrate MongoDB to the Azure Cosmos DB account. You include the Data Management Gateway tool in your migration strategy.",
+    "answer": "mongorestore is the correct tool for migrating MongoDB data to Azure Cosmos DB with MongoDB API. It can restore MongoDB data from backup files to the target database.",
+    "options": [
+      "No change required",
+      "mongorestore",
+      "Azure Storage Explorer",
+      "AzCopy"
+    ],
+    "answerIndexes": [
+      1
+    ],
+    "hasCode": false,
+    "topic": "Cosmos DB",
+    "isPdf": true
+  },
+  {
+    "id": "5bf65ee55dbbccec9d4fc7f90fc6d8527cb57dc1e076b9721f03ec300a916a3c",
     "question": "Your company's Azure subscription includes an Azure Log Analytics workspace. Your company has a hundred on-premises servers that run either Windows Server 2012 R2 or Windows Server 2016, and is linked to the Azure Log Analytics workspace. The Azure Log Analytics workspace is set up to gather performance counters associated with security from these linked servers. You must configure alerts based on the information gathered by the Azure Log Analytics workspace. You have to make sure that alert rules allow for dimensions, and that alert creation time should be kept to a minimum. Furthermore, a single alert notification must be created when the alert is created and when the alert is resolved. You need to make use of the necessary signal type when creating the alert rules. Which of the following is the option you should use?",
+    "answer": "Metric alerts in Azure Monitor provide a way to get notified when one of your metrics cross a threshold. Metric alerts work on a range of multi-dimensional platform metrics, custom metrics, Application Insights standard and custom metrics.",
     "options": [
       "The Activity log signal type.",
       "The Application Log signal type.",
@@ -204,15 +213,14 @@
     "answerIndexes": [
       2
     ],
-    "answer": "Metric alerts in Azure Monitor provide a way to get notified when one of your metrics cross a threshold. Metric alerts work on a range of multi- dimensional platform metrics, custom metrics, Application Insights standard and custom metrics. Note: Signals are emitted by the target resource and can be of several types. Metric, Activity log, Application Insights, and Log.   MiraA",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 21,
-    "id": "ff20d9670752ecde2d391650ece4e07cef6a7385ef5740fef98146add3abab5e"
+    "hasCode": true,
+    "topic": "Monitor",
+    "isPdf": true
   },
   {
+    "id": "16202c58305040ded1874aa19fcdd756717e2f9130a879176afa05ea3177ee56",
     "question": "You are developing a .NET Core MVC application that allows customers to research independent holiday accommodation providers. You want to implement Azure Search to allow the application to search the index by using various criteria to locate documents related to accommodation. You want the application to allow customers to search the index by using regular expressions. What should you do?",
+    "answer": "The SearchParameters.QueryType Property specifies the syntax of the search query. Use 'full' if your query uses the Lucene query syntax, which supports regular expressions, wildcard, fuzzy search, and proximity search.",
     "options": [
       "Configure the SearchMode property of the SearchParameters class.",
       "Configure the QueryType property of the SearchParameters class.",
@@ -222,15 +230,14 @@
     "answerIndexes": [
       1
     ],
-    "answer": "The SearchParameters.QueryType Property gets or sets a value that specifies the syntax of the search query. The default is 'simple'. Use 'full' if your query uses the Lucene query syntax. You can write queries against Azure Search based on the rich Lucene Query Parser syntax for specialized query forms: wildcard, fuzzy search, proximity search, regular expressions are a few examples. us/dotnet/api/microsoft.azure.search.models.searchparameters.querytype   7ack",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 22,
-    "id": "d4a6bb843617d0acf031d2e100ff29c7ba4f27a2be1e9e571070ea0e48abac97"
+    "topic": "Azure",
+    "isPdf": true
   },
   {
+    "id": "4b2e0a9e3a1fc3065a6a8f1702df9ae7632cf6d8df88d7d7278f36310274aae6",
     "question": "You are a developer at your company. You need to update the definitions for an existing Logic App. What should you use?",
+    "answer": "The Logic App Code View allows you to edit the JSON definition of your logic app directly. This is the appropriate tool for updating logic app definitions programmatically.",
     "options": [
       "the Enterprise Integration Pack (EIP)",
       "the Logic App Code View",
@@ -240,15 +247,46 @@
     "answerIndexes": [
       1
     ],
-    "answer": "Edit JSON - Azure portal - 1. Sign in to the Azure portal. 2. From the left menu, choose All services. In the search box, find \"logic apps\", and then from the results, select your logic app. 3. On your logic app's menu, under Development Tools, select Logic App Code View. 4. The Code View editor opens and shows your logic app definition in JSON format. apps/logic-apps-author-definitions   abdou1987",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 23,
-    "id": "3b9c713633b8098f12c5914cad85fdea0b2520ab132cfc05168afb9cff272a16"
+    "hasCode": true,
+    "topic": "Functions",
+    "isPdf": true
   },
   {
-    "question": "You are a developer at your company. You need to edit the workfiows for an existing Logic App. What should you use?",
+    "id": "34e40a3d24108e972b79716bdc57635e07b486d3f2f3d8c343627a29de78451a",
+    "question": "You are developing a solution for a public facing API. The API back end is hosted in an Azure App Service instance. You have implemented a RESTful service for the API back end. You must configure back-end authentication for the API Management service instance. Does the solution meet the goal?",
+    "answer": "API Management allows securing access to the back-end service of an API using client certificates. Since the API back end is hosted in an Azure App Service instance (Azure resource), client certificate gateway credentials for the Azure resource is the correct approach.",
+    "options": [
+      "Yes",
+      "No"
+    ],
+    "answerIndexes": [
+      0
+    ],
+    "hasCode": true,
+    "topic": "API Management",
+    "isPdf": true
+  },
+  {
+    "id": "00f1d25f364ee5e2a4f4ef1f32ee09808b185f5cc694bcadaab7207e00547765",
+    "question": "You are developing a .NET Core MVC application that allows customers to research independent holiday accommodation providers. You want to implement Azure Search to allow the application to search the index by using various criteria to locate documents related to accommodation venues. You want the application to list holiday accommodation venues that fall within a specific price range and are within a specified distance to an airport. What should you do?",
+    "answer": "The Filter property gets or sets the OData $filter expression to apply to the search query. Filters are ideal for range queries (price range) and geographic distance calculations.",
+    "options": [
+      "Configure the SearchMode property of the SearchParameters class.",
+      "Configure the QueryType property of the SearchParameters class.",
+      "Configure the Facets property of the SearchParameters class.",
+      "Configure the Filter property of the SearchParameters class."
+    ],
+    "answerIndexes": [
+      3
+    ],
+    "hasCode": false,
+    "topic": "Azure",
+    "isPdf": true
+  },
+  {
+    "id": "89d7484c5fc1171492ac5755e7f74f0bef7e437ed5383a3d525fa985a1791eff",
+    "question": "You are a developer at your company. You need to edit the workflows for an existing Logic App. What should you use?",
+    "answer": "The Logic Apps Designer provides a visual interface for editing workflows. While the Enterprise Integration Pack (EIP) is used for B2B solutions and enterprise integration workflows, the Designer is the primary tool for editing Logic App workflows.",
     "options": [
       "the Enterprise Integration Pack (EIP)",
       "the Logic App Code View",
@@ -256,17 +294,48 @@
       "the Logic Apps Designer"
     ],
     "answerIndexes": [
-      0
+      3
     ],
-    "answer": "For business-to-business (B2B) solutions and seamless communication between organizations, you can build automated scalable enterprise integration workfiows by using the Enterprise Integration Pack (EIP) with Azure Logic Apps. apps/logic-apps-author-definitions   Nokaido",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 29,
-    "id": "614b507f0cbd3204eafeb912c1720618de3183d790aff8e9adf381c790704105"
+    "topic": "Functions",
+    "isPdf": true
   },
   {
-    "question": "You are developing an application that applies a set of governance policies for internal and external services, as well as for applications. You develop a stateful ASP.NET Core 2.1 web application named PolicyApp and deploy it to an Azure App Service Web App. The PolicyApp reacts to events from Azure Event Grid and performs policy actions based on those events. You have the following requirements: ✑ Authentication events must be used to monitor users when they sign in and sign out. ✑ All authentication events must be processed by PolicyApp. ✑ Sign outs must be processed as fast as possible. What should you do?",
+    "id": "1298d9c4d08c5392f352bcee5777c2da72a311afb9bb0659d3f356442296ba43",
+    "question": "You are configuring a web app that delivers streaming video to users. The application makes use of continuous integration and deployment. You need to ensure that the application is highly available and that the users' streaming experience is constant. You also want to configure the application to store data in a geographic location that is nearest to the user. Does the solution meet the goal?",
+    "answer": "Azure CDN provides a global solution for rapidly delivering high-bandwidth content by caching content at strategically placed physical nodes across the world, ensuring content is delivered from locations nearest to users.",
+    "options": [
+      "Yes",
+      "No"
+    ],
+    "answerIndexes": [
+      0
+    ],
+    "hasCode": false,
+    "topic": "Azure",
+    "isPdf": true
+  },
+  {
+    "id": "79da1dc0e3590d84cfcd9c11c20feef2951613b90e0c9cfec538c04dfd8a5920",
+    "question": "You develop a Web App on a tier D1 app service plan. You notice that page load times increase during periods of peak traffic. You want to implement automatic scaling when CPU load is above 80 percent. Your solution must minimize costs. What should you do first?",
+    "answer": "Configure the web app to the Standard App Service Tier. The Standard tier supports auto-scaling, and we should minimize the cost. The D1 tier does not support auto-scaling.",
+    "options": [
+      "Enable autoscaling on the Web App.",
+      "Switch to the Premium App Service tier plan.",
+      "Switch to the Standard App Service tier plan.",
+      "Switch to the Azure App Services consumption plan."
+    ],
+    "answerIndexes": [
+      2
+    ],
+    "hasCode": false,
+    "topic": "App Service",
+    "isPdf": true
+  },
+  {
+    "id": "ffcd70ff83b75770573ae61d4c1ca0a4df6f3709ca5b998d710940960949279e",
+    "question": "You are developing an application that applies a set of governance policies for internal and external services, as well as for applications. You develop a stateful ASP.NET Core 2.1 web application named PolicyApp and deploy it to an Azure App Service Web App. The PolicyApp reacts to events from Azure Event Grid and performs policy actions based on those events. You have the following requirements: • Authentication events must be used to monitor users when they sign in and sign out. • All authentication events must be processed by PolicyApp. • Sign outs must be processed as fast as possible. What should you do?",
+    "answer": "Using subject prefix filtering with subjectBeginsWith allows you to prioritize and process specific event types (sign-out events) faster while still processing all authentication events through the same infrastructure.",
     "options": [
       "Create a new Azure Event Grid subscription for all authentication events. Use the subscription to process sign-out events.",
       "Create a separate Azure Event Grid handler for sign-in and sign-out events.",
@@ -276,15 +345,29 @@
     "answerIndexes": [
       3
     ],
-    "answer": "  ning",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 31,
-    "id": "9932d1901651fca3d646902ea97619394e09950e234139f69e4bf6f9f5923535"
+    "topic": "Event Grid",
+    "isPdf": true
   },
   {
-    "question": "Note: This question is part of a series of questions that present the same scenario. Each question in the series contains a unique solution that might meet the stated goals. Some question sets might have more than one correct solution, while others might not have a correct solution. After you answer a question in this section, you will NOT be able to return to it. As a result, these questions will not appear in the review screen. You develop a software as a service (SaaS) offering to manage photographs. Users upload photos to a web service which then stores the photos in Azure Storage Blob storage. The storage account type is General-purpose V2. When photos are uploaded, they must be processed to produce and save a mobile-friendly version of the image. The process to produce a mobile- friendly version of the image must start in less than one minute. You need to design the process that starts the photo processing. Solution: Trigger the photo processing from Blob storage events. Does the solution meet the goal?",
+    "id": "ca4b8f656f6ab4b4c70e27e4c5e1c59d3f9cafbc428c9e76aec3abde88c29f81",
+    "question": "You develop and deploy an Azure App Service API app to a Windows-hosted deployment slot named Development. You create additional deployment slots named Testing and Production. You enable auto swap on the Production deployment slot. You need to ensure that scripts run and resources are available before a swap operation occurs. Does the solution meet the goal?",
+    "answer": "The applicationInitialization configuration element in web.config allows you to specify custom initialization actions. The swap operation waits for this custom warm-up to finish before swapping with the target slot.",
+    "options": [
+      "Yes",
+      "No"
+    ],
+    "answerIndexes": [
+      0
+    ],
+    "hasCode": true,
+    "topic": "App Service",
+    "isPdf": true
+  },
+  {
+    "id": "2c047ccee09dd684062d7e9b249639bad921ebdde8d26d10b19162b67073586c",
+    "question": "You develop a software as a service (SaaS) offering to manage photographs. Users upload photos to a web service which then stores the photos in Azure Storage Blob storage. The storage account type is General-purpose V2. When photos are uploaded, they must be processed to produce and save a mobile-friendly version of the image. The process to produce a mobile-friendly version of the image must start in less than one minute. You need to design the process that starts the photo processing. Does the solution meet the goal?",
+    "answer": "While Blob storage events can trigger processing, you need to catch the triggered event and move the photo processing to an Azure Function triggered from the blob upload. The processing must start in less than one minute, and only StorageV2 (general purpose v2) and BlobStorage support event integration.",
     "options": [
       "Yes",
       "No"
@@ -292,51 +375,29 @@
     "answerIndexes": [
       1
     ],
-    "answer": "You need to catch the triggered event, so move the photo processing to an Azure Function triggered from the blob upload. Note: Azure Storage events allow applications to react to events. Common Blob storage event scenarios include image or video processing, search indexing, or any file-oriented workfiow. Events are pushed using Azure Event Grid to subscribers such as Azure Functions, Azure Logic Apps, or even to your own http listener. However, the processing must start in less than one minute. Note: Only storage accounts of kind StorageV2 (general purpose v2) and BlobStorage support event integration. Storage (general purpose v1) does not support integration with Event Grid.   YahyaSonmez",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 4,
-    "id": "8805c4d0a635f890a2e7343bcb4ac0e7b9462406be168078050ec9b360e5f51e"
+    "topic": "Blob Storage",
+    "isPdf": true
   },
   {
-    "question": "You develop a website. You plan to host the website in Azure. You expect the website to experience high trafic volumes after it is published. You must ensure that the website remains available and responsive while minimizing cost. You need to deploy the website. What should you do?",
+    "id": "a628428ead0e5b00e1e0bd1e60ea89b0ecb5aff214b25d671910d601cfa1504d",
+    "question": "You develop a software as a service (SaaS) offering to manage photographs. Users upload photos to a web service which then stores the photos in Azure Storage Blob storage. The storage account type is General-purpose V2. When photos are uploaded, they must be processed to produce and save a mobile-friendly version of the image. The process to produce a mobile-friendly version of the image must start in less than one minute. Does the solution meet the goal?",
+    "answer": "Azure Storage events allow applications to react to blob upload events. Azure Functions can be triggered by these events and will start processing within the required timeframe. This is the correct approach for event-driven photo processing.",
     "options": [
-      "Deploy the website to a virtual machine. Configure the virtual machine to automatically scale when the CPU load is high.",
-      "Deploy the website to an App Service that uses the Shared service tier. Configure the App Service plan to automatically scale when the CPU load is high.",
-      "Deploy the website to a virtual machine. Configure a Scale Set to increase the virtual machine instance count when the CPU load is high.",
-      "Deploy the website to an App Service that uses the Standard service tier. Configure the App Service plan to automatically scale when the CPU load is high."
+      "Yes",
+      "No"
     ],
     "answerIndexes": [
-      3
+      0
     ],
-    "answer": "Windows Azure Web Sites (WAWS) offers 3 modes: Standard, Free, and Shared. Standard mode carries an enterprise-grade SLA (Service Level Agreement) of 99.9% monthly, even for sites with just one instance. Standard mode runs on dedicated instances, making it different from the other ways to buy Windows Azure Web Sites. Incorrect Answers: B: Shared and Free modes do not offer the scaling fiexibility of Standard, and they have some important limits. Shared mode, just as the name states, also uses shared Compute resources, and also has a CPU limit. So, while neither Free nor Shared is likely to be the best choice for your production environment due to these limits.   profesorklaus",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 13,
-    "id": "2842d364589877ac3e7d16568b1f1db100d6395866cb64b0cce56828977e387f"
+    "topic": "Functions",
+    "isPdf": true
   },
   {
-    "question": "You are developing an application that uses Azure Blob storage. The application must read the transaction logs of all the changes that occur to the blobs and the blob metadata in the storage account for auditing purposes. The changes must be in the order in which they occurred, include only create, update, delete, and copy operations and be retained for compliance reasons. You need to process the transaction logs asynchronously. What should you do?",
-    "options": [
-      "Process all Azure Blob storage events by using Azure Event Grid with a subscriber Azure Function app.",
-      "Enable the change feed on the storage account and process all changes for available events.",
-      "Process all Azure Storage Analytics logs for successful blob events.",
-      "Use the Azure Monitor HTTP Data Collector API and scan the request body for successful blob events."
-    ],
-    "answerIndexes": [
-      1
-    ],
-    "answer": "Change feed support in Azure Blob Storage The purpose of the change feed is to provide transaction logs of all the changes that occur to the blobs and the blob metadata in your storage account. The change feed provides ordered, guaranteed, durable, immutable, read-only log of these changes. Client applications can read these logs at any time, either in streaming or in batch mode. The change feed enables you to build eficient and scalable solutions that process change events that occur in your Blob Storage account at a low cost.   Ummara",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 20,
-    "id": "a103d7d5761d00cb06ad14cc688a6c194b4788eaee5949f021eb9fe0e9fd8654"
-  },
-  {
+    "id": "88d8ba38e318d0e54d05e832befecf43d8dee571c47cc42312cca90717b9c5db",
     "question": "You are developing an Azure Function App that processes images that are uploaded to an Azure Blob container. Images must be processed as quickly as possible after they are uploaded, and the solution must minimize latency. You create code to process images when the Function App is triggered. You need to configure the Function App. What should you do?",
+    "answer": "The Blob storage trigger starts a function when a new or updated blob is detected. The Consumption plan provides automatic scaling and cost efficiency for event-driven scenarios. This combination minimizes latency and costs.",
     "options": [
       "Use an App Service plan. Configure the Function App to use an Azure Blob Storage input trigger.",
       "Use a Consumption plan. Configure the Function App to use an Azure Blob Storage trigger.",
@@ -347,89 +408,79 @@
     "answerIndexes": [
       1
     ],
-    "answer": "The Blob storage trigger starts a function when a new or updated blob is detected. The blob contents are provided as input to the function. The Consumption plan limits a function app on one virtual machine (VM) to 1.5 GB of memory.   Kitkit",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 22,
-    "id": "63b1d3a6a67d01115cae093c8d6aae4a41cb453df3b053af3855778c99ce8a8d"
+    "hasCode": true,
+    "topic": "Functions",
+    "isPdf": true
   },
   {
-    "question": "You are developing a web application that runs as an Azure Web App. The web application stores data in Azure SQL Database and stores files in an Azure Storage account. The web application makes HTTP requests to external services as part of normal operations. The web application is instrumented with Application Insights. The external services are OpenTelemetry compliant. You need to ensure that the customer ID of the signed in user is associated with all operations throughout the overall system. What should you do?",
+    "id": "0743835c111266f22a2d11a5eab574301c866e595ef9f5b94a54556678cf9e07",
+    "question": "You develop an HTTP triggered Azure Function app to process Azure Storage blob data. The app is triggered using an output binding on the blob. The app continues to time out after four minutes. The app must process the blob data. You need to ensure the app does not time out and processes the blob data. Does the solution meet the goal?",
+    "answer": "This is a best practice for long-running functions. By passing the payload to a queue for asynchronous processing, you can return an immediate response and avoid timeout issues while still ensuring the work gets done.",
     "options": [
-      "Add the customer ID for the signed in user to the CorrelationContext in the web application",
-      "On the current SpanContext, set the TraceId to the customer ID for the signed in user",
-      "Set the header Ocp-Apim-Trace to the customer ID for the signed in user",
-      "Create a new SpanContext with the TraceFlags value set to the customer ID for the signed in user"
+      "Yes",
+      "No"
     ],
     "answerIndexes": [
       0
     ],
-    "answer": "  willchenxa",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 39,
-    "id": "fae94fc31b09d2e5a135af2ef6fb1c99868ae92f459d50fe22aadba3ca041b8c"
+    "topic": "Functions",
+    "isPdf": true
   },
   {
-    "question": "You develop Azure Durable Functions to manage vehicle loans. The loan process includes multiple actions that must be run in a specified order. One of the actions includes a customer credit check process, which may require multiple days to process. You need to implement Azure Durable Functions for the loan process. Which Azure Durable Functions type should you use?",
+    "id": "26cd8d07e178806119006cb177384e63e449e29de6a717ab56d29425da0a14dd",
+    "question": "You are developing an application that uses Azure Blob storage. The application must read the transaction logs of all the changes that occur to the blobs and the blob metadata in the storage account for auditing purposes. The changes must be in the order in which they occurred, include only create, update, delete, and copy operations and be retained for compliance reasons. You need to process the transaction logs asynchronously. What should you do?",
+    "answer": "Change feed support in Azure Blob Storage provides transaction logs of all changes to blobs and blob metadata. The change feed provides ordered, guaranteed, durable, immutable, read-only logs of these changes, which is perfect for auditing and compliance.",
     "options": [
-      "orchestrator",
-      "client",
-      "entity",
-      "activity"
+      "Process all Azure Blob storage events by using Azure Event Grid with a subscriber Azure Function app.",
+      "Enable the change feed on the storage account and process all changes for available events.",
+      "Process all Azure Storage Analytics logs for successful blob events.",
+      "Use the Azure Monitor HTTP Data Collector API and scan the request body for successful blob events."
+    ],
+    "answerIndexes": [
+      1
+    ],
+    "hasCode": false,
+    "topic": "Blob Storage",
+    "isPdf": true
+  },
+  {
+    "id": "dd76e702326a23d23a909c5139e15e8a6892de361e17a5f54f70a66bfe4efbe6",
+    "question": "You are developing an Azure Durable Function to manage an online ordering process. The process must call an external API to gather product discount information. You need to implement the Azure Durable Function. Which Azure Durable Function types should you use? Each correct answer presents part of the solution.",
+    "answer": "- **Orchestrator functions** coordinate the execution of multiple functions and manage the workflow - **Activity functions** perform the actual work, such as calling external APIs - The orchestrator calls activity functions to gather product discount information from external APIs",
+    "options": [
+      "Orchestrator",
+      "Entity",
+      "Client",
+      "Activity"
+    ],
+    "answerIndexes": [
+      0,
+      3
+    ],
+    "hasCode": false,
+    "topic": "Functions",
+    "isPdf": true
+  },
+  {
+    "id": "82045493a301e2b306ce7556982e21d131f2956df29142ad9570723c3d871b65",
+    "question": "You deploy an Azure Container Apps app and disable ingress on the container app. Users report that they are unable to access the container app. You investigate and observe that the app has scaled to 0 instances. You need to resolve the issue with the container app. Does the solution meet the goal?",
+    "answer": "Enabling ingress allows external access to the container app. Creating an HTTP scale rule ensures the app scales based on incoming HTTP requests, preventing it from scaling to 0 when there are requests to process.",
+    "options": [
+      "Yes",
+      "No"
     ],
     "answerIndexes": [
       0
     ],
-    "answer": "  imanonion",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 46,
-    "id": "fdecd58dd563792c13816042684716ea18737c1290d50cdde7183251f3267b47"
+    "topic": "Containers",
+    "isPdf": true
   },
   {
-    "question": "You are developing several microservices to run on Azure Container Apps. External HTTP ingress trafic has been enabled for the microservices. The microservices must be deployed to the same virtual network and write logs to the same Log Analytics workspace. You need to deploy the microservices. What should you do?",
-    "options": [
-      "Enable single revision mode.",
-      "Use a separate environment for each container.",
-      "Use a private container registry image and single image for all containers.",
-      "Use a single environment for all containers.",
-      "Enable multiple revision mode."
-    ],
-    "answerIndexes": [
-      0
-    ],
-    "answer": "  MikeM27",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 52,
-    "id": "5458359d5976d593045f8b22893360e96831accfc87cc1cc1288aa00c3ae786a"
-  },
-  {
-    "question": "You are developing a microservice to run on Azure Container Apps for a company. External HTTP ingress trafic has been enabled. The company requires that updates to the microservice must not cause downtime. You need to deploy an update to the microservices. What should you do?",
-    "options": [
-      "Enable single revision mode.",
-      "Use multiple environments for each container.",
-      "Use a private container registry and single image for all containers.",
-      "Use a single environment for all containers.",
-      "Enable multiple revision mode."
-    ],
-    "answerIndexes": [
-      0
-    ],
-    "answer": "  AzDeveloper",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 58,
-    "id": "ee4dd2a1cc430b7af4b26fdc204ab1b4efe71ee6b76fe1c4a6998e5c5ca148aa"
-  },
-  {
+    "id": "536be7f06d18685266952d72c3b09d695b396628ae1477ffffa03d95d2bb26b6",
     "question": "You are building a website that uses Azure Blob storage for data storage. You configure Azure Blob storage lifecycle to move all blobs to the archive tier after 30 days. Customers have requested a service-level agreement (SLA) for viewing data older than 30 days. You need to document the minimum SLA for data recovery. Which SLA should you use?",
+    "answer": "The archive access tier has the lowest storage cost. But it has higher data retrieval costs compared to the hot and cool tiers. Data in the archive tier can take several hours to retrieve depending on the priority of the rehydration. For small objects, a high priority rehydrate may retrieve the object from archive in under 1 hour.",
     "options": [
       "at least two days",
       "between one and 15 hours",
@@ -439,15 +490,14 @@
     "answerIndexes": [
       1
     ],
-    "answer": "The archive access tier has the lowest storage cost. But it has higher data retrieval costs compared to the hot and cool tiers. Data in the archive tier can take several hours to retrieve depending on the priority of the rehydration. For small objects, a high priority rehydrate may retrieve the object from archive in under 1 hour.   homimi6115",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 2,
-    "id": "2ae1306a467ce587dca1d401ba47c0a4efaffd2f5ba64bb37c2a4875105a83b5"
+    "topic": "Blob Storage",
+    "isPdf": true
   },
   {
+    "id": "827968f00d705ff54d596eb9817b409a750f0c3e96fbb5cc6ead55b295441b47",
     "question": "You develop Azure solutions. A .NET application needs to receive a message each time an Azure virtual machine finishes processing data. The messages must NOT persist after being processed by the receiving application. You need to implement the .NET object that will receive the messages. Which object should you use?",
+    "answer": "A queue allows processing of a message by a single consumer. Need a CloudQueueClient to access the Azure VM. In contrast to queues, topics and subscriptions provide a one-to-many form of communication in a publish and subscribe pattern. It's useful for scaling to large numbers of recipients.",
     "options": [
       "QueueClient",
       "SubscriptionClient",
@@ -457,15 +507,14 @@
     "answerIndexes": [
       3
     ],
-    "answer": "A queue allows processing of a message by a single consumer. Need a CloudQueueClient to access the Azure VM. Incorrect Answers: B, C: In contrast to queues, topics and subscriptions provide a one-to-many form of communication in a publish and subscribe pattern. It's useful for scaling to large numbers of recipients.   mlantonis",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 8,
-    "id": "3310838ffd983bbacc6d4aa3010e1c78eb1edbc9c82dce04bffd241ee8584e75"
+    "hasCode": true,
+    "topic": "Message Queues",
+    "isPdf": true
   },
   {
+    "id": "f0f583b900f0e1df539160589d0948657c1fee6e7e789bdd03cab9b91932def1",
     "question": "You develop Azure solutions. You must connect to a No-SQL globally-distributed database by using the .NET API. You need to create an object to configure and execute requests in the database. Which code segment should you use?",
+    "answer": "Example: ```csharp // Create a new instance of the Cosmos Client this.cosmosClient = new CosmosClient(EndpointUri, PrimaryKey) //ADD THIS PART TO YOUR CODE await this.CreateDatabaseAsync(); ```",
     "options": [
       "new Container(EndpointUri, PrimaryKey);",
       "new Database(EndpointUri, PrimaryKey);",
@@ -474,15 +523,14 @@
     "answerIndexes": [
       2
     ],
-    "answer": "Example: // Create a new instance of the Cosmos Client this.cosmosClient = new CosmosClient(EndpointUri, PrimaryKey) //ADD THIS PART TO YOUR CODE await this.CreateDatabaseAsync();   Mr2302682",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 10,
-    "id": "5a76eba7fa779ec702aa8dd26ae335b5e2c11d17a747de5a338511ff12871304"
+    "hasCode": true,
+    "topic": "Cosmos DB",
+    "isPdf": true
   },
   {
-    "question": "You have an existing Azure storage account that stores large volumes of data across multiple containers. You need to copy all data from the existing storage account to a new storage account. The copy process must meet the following requirements: ✑ Automate data movement. ✑ Minimize user input required to perform the operation. ✑ Ensure that the data movement process is recoverable. What should you use?",
+    "id": "e4dac80d28b0d4f049f29b38febf4e0ad357f5fdbae617d88f498e8ab60bba42",
+    "question": "You have an existing Azure storage account that stores large volumes of data across multiple containers. You need to copy all data from the existing storage account to a new storage account. The copy process must meet the following requirements: - Automate data movement - Minimize user input required to perform the operation - Ensure that the data movement process is recoverable What should you use?",
+    "answer": "You can copy blobs, directories, and containers between storage accounts by using the AzCopy v10 command-line utility. The copy operation is synchronous so when the command returns, that indicates that all files have been copied.",
     "options": [
       "AzCopy",
       "Azure Storage Explorer",
@@ -492,108 +540,33 @@
     "answerIndexes": [
       0
     ],
-    "answer": "You can copy blobs, directories, and containers between storage accounts by using the AzCopy v10 command-line utility. The copy operation is synchronous so when the command returns, that indicates that all files have been copied.   kondapaturi",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 11,
-    "id": "3842d4dc6bccec28f4b45e2df716bab7022c5cee7f2f0ee20f8eee0e62c23cf9"
+    "topic": "Blob Storage",
+    "isPdf": true
   },
   {
-    "question": "You develop and deploy a web application to Azure App Service. The application accesses data stored in an Azure Storage account. The account contains several containers with several blobs with large amounts of data. You deploy all Azure resources to a single region. You need to move the Azure Storage account to the new region. You must copy all data to the new region. What should you do first?",
+    "id": "d03ef0171ea2f90c9cf057a99e5192bbf868d86325e5adb86a23991a0accb0f6",
+    "question": "You are developing an Azure Cosmos DB solution by using the Azure Cosmos DB SQL API. The data includes millions of documents. Each document may contain hundreds of properties. The properties of the documents do not contain distinct values for partitioning. Azure Cosmos DB must scale individual containers in the database to meet the performance needs of the application by spreading the workload evenly across all partitions over time. You need to select a partition key. Which two partition keys can you use? Each correct answer presents a complete solution.",
+    "answer": "You can form a partition key by concatenating multiple property values into a single artificial partitionKey property. These keys are referred to as synthetic keys. Another possible strategy to distribute the workload more evenly is to append a random number at the end of the partition key value. When you distribute items in this way, you can perform parallel write operations across partitions.",
     "options": [
-      "Export the Azure Storage account Azure Resource Manager template",
-      "Initiate a storage account failover",
-      "Configure object replication for all blobs",
-      "Use the AzCopy command line tool",
-      "Create a new Azure Storage account in the current region F. Create a new subscription in the current region"
+      "a single property value that does not appear frequently in the documents",
+      "a value containing the collection name",
+      "a single property value that appears frequently in the documents",
+      "a concatenation of multiple property values with a random suffix appended",
+      "a hash suffix appended to a property value"
     ],
     "answerIndexes": [
-      0
+      3,
+      4
     ],
-    "answer": "To move a storage account, create a copy of your storage account in another region. Then, move your data to that account by using AzCopy, or another tool of your choice and finally, delete the resources in the source region. To get started, export, and then modify a Resource Manager template.   BhavikaSNN",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 23,
-    "id": "d2abd1dfa0765fb7f76d918bafa7fca9609573b1c7769417d41dce2580b9d89c"
+    "hasCode": true,
+    "topic": "Cosmos DB",
+    "isPdf": true
   },
   {
-    "question": "An organization deploys Azure Cosmos DB. You need to ensure that the index is updated as items are created, updated, or deleted. What should you do?",
-    "options": [
-      "Set the indexing mode to Lazy.",
-      "Set the value of the automatic property of the indexing policy to False.",
-      "Set the value of the EnableScanInQuery option to True.",
-      "Set the indexing mode to Consistent."
-    ],
-    "answerIndexes": [
-      3
-    ],
-    "answer": "Azure Cosmos DB supports two indexing modes: Consistent: The index is updated synchronously as you create, update or delete items. This means that the consistency of your read queries will be the consistency configured for the account. None: Indexing is disabled on the container.   finnishr",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 27,
-    "id": "0b97931d8e50a39f70880ac1d6b5950cfc00eae3d2673b4056ecc40d8255511d"
-  },
-  {
-    "question": "You create and publish a new Azure App Service web app. User authentication and authorization must use Azure Active Directory (Azure AD). You need to configure authentication and authorization. What should you do first?",
-    "options": [
-      "Add an identity provider.",
-      "Map an existing custom DNS name.",
-      "Create and configure a new app setting.",
-      "Add a private certificate.",
-      "Create and configure a managed identity."
-    ],
-    "answerIndexes": [
-      0
-    ],
-    "answer": "  Firo",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 47,
-    "id": "39ab79ee10d89cd124c46ceb2f684a930f053ef5d0585995cb96abe80641a86a"
-  },
-  {
-    "question": "You have a Linux container-based console application that uploads image files from customer sites all over the world. A back-end system that runs on Azure virtual machines processes the images by using the Azure Blobs API. You are not permitted to make changes to the application. Some customer sites only have phone-based internet connections. You need to configure the console application to access the images. What should you use?",
-    "options": [
-      "Azure BlobFuse",
-      "Azure Disks",
-      "Azure Storage Network File System (NFS) 3.0 support",
-      "Azure Files"
-    ],
-    "answerIndexes": [
-      2
-    ],
-    "answer": "  130nk3r5",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 49,
-    "id": "efcd855020162e32d9755a19d06400e9181a128bff9bf1f474a799c6f3d5d3df"
-  },
-  {
-    "question": "You create an Azure Cosmos DB for NoSQL database. You plan to use the Azure Cosmos DB .NET SDK v3 API for NoSQL to upload the following files: You receive the following error message when uploading the files: “413 Entity too large”. You need to determine which files you can upload to the Azure Cosmos DB for NoSQL database. Which files can you upload?",
-    "options": [
-      "File1, File2, File3, File4, and File5",
-      "File1 and File2 only",
-      "File1, File2, and File3 only",
-      "File1, File2, File3, and File4 only",
-      "File1 only"
-    ],
-    "answerIndexes": [
-      1
-    ],
-    "answer": "  Jedi",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 53,
-    "id": "1522af97717f259201b28b81b7b8a95679101e7678bc37d67e716f576a695f18"
-  },
-  {
+    "id": "19705175bc6a51429d63ecbb76eeefe09d254ded893d727485643b961ba13bb2",
     "question": "You are developing a Java application that uses Cassandra to store key and value data. You plan to use a new Azure Cosmos DB resource and the Cassandra API in the application. You create an Azure Active Directory (Azure AD) group named Cosmos DB Creators to enable provisioning of Azure Cosmos accounts, databases, and containers. The Azure AD group must not be able to access the keys that are required to access the data. You need to restrict access to the Azure AD group. Which role-based access control should you use?",
+    "answer": "Azure Cosmos DB now provides a new RBAC role, Cosmos DB Operator. This new role lets you provision Azure Cosmos accounts, databases, and containers, but can't access the keys that are required to access the data. This role is intended for use in scenarios where the ability to grant access to Azure Active Directory service principals to manage deployment operations for Cosmos DB is needed, including the account, database, and containers.",
     "options": [
       "DocumentDB Accounts Contributor",
       "Cosmos Backup Operator",
@@ -603,15 +576,32 @@
     "answerIndexes": [
       2
     ],
-    "answer": "Azure Cosmos DB now provides a new RBAC role, Cosmos DB Operator. This new role lets you provision Azure Cosmos accounts, databases, and containers, but can't access the keys that are required to access the data. This role is intended for use in scenarios where the ability to grant access to Azure Active Directory service principals to manage deployment operations for Cosmos DB is needed, including the account, database, and containers.   mlantonis",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 1,
-    "id": "86b798ea96ecae8d544387f74b4e12e9983f9a23d079b3da1417ca10823da102"
+    "topic": "Cosmos DB",
+    "isPdf": true
   },
   {
+    "id": "1facc830b10eb9adb548e2028f31b45da5c2872e98a11ffad438fb481e061710",
+    "question": "You provide an Azure API Management managed web service to clients. The back-end web service implements HTTP Strict Transport Security (HSTS). Every request to the backend service must include a valid HTTP authorization header. You need to configure the Azure API Management instance with an authentication policy. Which two policies can you use? Each correct answer presents a complete solution.",
+    "answer": "Certificate Authentication and OAuth Client Credential Grant are both valid authentication mechanisms that can provide the required HTTP authorization headers for API Management to communicate with backend services that require authentication.",
+    "options": [
+      "Basic Authentication",
+      "Digest Authentication",
+      "Certificate Authentication",
+      "OAuth Client Credential Grant"
+    ],
+    "answerIndexes": [
+      2,
+      3
+    ],
+    "hasCode": true,
+    "topic": "API Management",
+    "isPdf": true
+  },
+  {
+    "id": "37689a1b47b03ec595338a4a52ca79eebcb14d626dc40154e6d33819c005e791",
     "question": "You have an application that includes an Azure Web app and several Azure Function apps. Application secrets including connection strings and certificates are stored in Azure Key Vault. Secrets must not be stored in the application or application runtime environment. Changes to Azure Active Directory (Azure AD) must be minimized. You need to design the approach to loading application secrets. What should you do?",
+    "answer": "Use Key Vault references for App Service and Azure Functions. Key Vault references currently only support system-assigned managed identities. User-assigned identities cannot be used.",
     "options": [
       "Create a single user-assigned Managed Identity with permission to access Key Vault and configure each App Service to use that Managed Identity.",
       "Create a single Azure AD Service Principal with permission to access Key Vault and use a client secret from within the App Services to access Key Vault.",
@@ -621,15 +611,14 @@
     "answerIndexes": [
       2
     ],
-    "answer": "Use Key Vault references for App Service and Azure Functions. Key Vault references currently only support system-assigned managed identities. User-assigned identities cannot be used.   AssilAbdulrahim",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 9,
-    "id": "57be620b35befbb014711d02c9b9068d4b7fb513dc3e776a902c49abc2bbe457"
+    "topic": "Key Vault",
+    "isPdf": true
   },
   {
-    "question": "Your company is developing an Azure API hosted in Azure. You need to implement authentication for the Azure API to access other Azure resources. You have the following requirements: ✑ All API calls must be authenticated. ✑ Callers to the API must not send credentials to the API. Which authentication mechanism should you use?",
+    "id": "bef65500ca95dbacba35d2f1ae30935018b7c6fc3ca78bcb05b0bff33159c81e",
+    "question": "Your company is developing an Azure API hosted in Azure. You need to implement authentication for the Azure API to access other Azure resources. You have the following requirements: - All API calls must be authenticated - Callers to the API must not send credentials to the API Which authentication mechanism should you use?",
+    "answer": "Azure Active Directory Managed Service Identity (MSI) gives your code an automatically managed identity for authenticating to Azure services, so that you can keep credentials out of your code. Use the authentication-managed-identity policy to authenticate with a backend service using the managed identity.",
     "options": [
       "Basic",
       "Anonymous",
@@ -639,123 +628,53 @@
     "answerIndexes": [
       2
     ],
-    "answer": "Azure Active Directory Managed Service Identity (MSI) gives your code an automatically managed identity for authenticating to Azure services, so that you can keep credentials out of your code. Note: Use the authentication-managed-identity policy to authenticate with a backend service using the managed identity. This policy essentially uses the managed identity to obtain an access token from Azure Active Directory for accessing the specified resource. After successfully obtaining the token, the policy will set the value of the token in the Authorization header using the Bearer scheme. Incorrect Answers: A: Use the authentication-basic policy to authenticate with a backend service using Basic authentication. This policy effectively sets the HTTP Authorization header to the value corresponding to the credentials provided in the policy. B: Anonymous is no authentication at all. D: Your code needs credentials to authenticate to cloud services, but you want to limit the visibility of those credentials as much as possible. Ideally, they never appear on a developer's workstation or get checked-in to source control. Azure Key Vault can store credentials securely so they aren't in your code, but to retrieve them you need to authenticate to Azure Key Vault. To authenticate to Key Vault, you need a credential! A classic bootstrap problem.   clarionprogrammer",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 14,
-    "id": "74dd29422ce631f3baf736974cf0914c4e98868bdd18368529a40ffdb658fef0"
+    "hasCode": true,
+    "topic": "API Management",
+    "isPdf": true
   },
   {
-    "question": "You develop an app that allows users to upload photos and videos to Azure storage. The app uses a storage REST API call to upload the media to a blob storage account named Account1. You have blob storage containers named Container1 and Container2. Uploading of videos occurs on an irregular basis. You need to copy specific blobs from Container1 to Container2 when a new video is uploaded. What should you do?",
+    "id": "91b8da47207e86330a21417bc7da941b5842700d5236a652753b02e9d0f0224c",
+    "question": "You develop a web application. You need to register the application with an active Azure Active Directory (Azure AD) tenant. Which three actions should you perform in sequence?",
+    "answer": "1. Sign in to the Azure portal using either a work or school account or a personal Microsoft account. 2. If your account gives you access to more than one tenant, select your account in the upper right corner. Set your portal session to the Azure AD tenant that you want. 3. Search for and select Azure Active Directory. Under Manage, select App registrations. 4. Select New registration. (Step 1) 5. In Register an application, enter a meaningful application name to display to users. 6. Specify who can use the application. Select the Azure AD instance. (Step 2) 7. Under Redirect URI (optional), select the type of app you're building: Web or Public client (mobile & desktop). Then enter the redirect URI, or reply URL, for your application. (Step 3) 8. When finished, select Register.",
     "options": [
-      "Copy blobs to Container2 by using the Put Blob operation of the Blob Service REST API",
-      "Create an Event Grid topic that uses the Start-AzureStorageBlobCopy cmdlet",
-      "Use AzCopy with the Snapshot switch to copy blobs to Container2",
-      "Download the blob to a virtual machine and then upload the blob to Container2"
+      "Select New registration",
+      "Specify who can use the application",
+      "Under Redirect URI, select the type of app you're building and enter the redirect URI",
+      "Search for and select Azure Active Directory",
+      "Create a new Azure AD tenant"
     ],
     "answerIndexes": [
-      1
-    ],
-    "answer": "The Start-AzureStorageBlobCopy cmdlet starts to copy a blob. Example 1: Copy a named blob - C:\\PS>Start-AzureStorageBlobCopy -SrcBlob \"ContosoPlanning2015\" -DestContainer \"ContosoArchives\" -SrcContainer \"ContosoUploads\" This command starts the copy operation of the blob named ContosoPlanning2015 from the container named ContosoUploads to the container named ContosoArchives.   AnonymousJhb",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 22,
-    "id": "101dc65355ff41694e662bea97cbef72b456dee6ab0cc258d31f0b7b2a97df0c"
-  },
-  {
-    "question": "You are developing an ASP.NET Core website that uses Azure FrontDoor. The website is used to build custom weather data sets for researchers. Data sets are downloaded by users as Comma Separated Value (CSV) files. The data is refreshed every 10 hours. Specific files must be purged from the FrontDoor cache based upon Response Header values. You need to purge individual assets from the Front Door cache. Which type of cache purge should you use?",
-    "options": [
-      "single path",
-      "wildcard",
-      "root domain"
-    ],
-    "answerIndexes": [
-      0
-    ],
-    "answer": "These formats are supported in the lists of paths to purge: ✑ Single path purge: Purge individual assets by specifying the full path of the asset (without the protocol and domain), with the file extension, for example, / [1] ✑ Wildcard purge: Asterisk (*) may be used as a wildcard. Purge all folders, subfolders, and files under an endpoint with /* in the path or purge all subfolders and files under a specific folder by specifying the folder followed by /*, for example, /pictures/*. ✑ Root domain purge: Purge the root of the endpoint with \"/\" in the path.   mlantonis",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 23,
-    "id": "0bcc5fa126073d4b8e9fe6ec0e7313bcda932d8d39027c074abc8bc5c58233ab"
-  },
-  {
-    "question": "Your company is developing an Azure API. You need to implement authentication for the Azure API. You have the following requirements: All API calls must be secure. ✑ Callers to the API must not send credentials to the API. Which authentication mechanism should you use?",
-    "options": [
-      "Basic",
-      "Anonymous",
-      "Managed identity",
-      "Client certificate"
-    ],
-    "answerIndexes": [
+      0,
+      1,
       2
     ],
-    "answer": "Use the authentication-managed-identity policy to authenticate with a backend service using the managed identity of the API Management service. This policy essentially uses the managed identity to obtain an access token from Azure Active Directory for accessing the specified resource. After successfully obtaining the token, the policy will set the value of the token in the Authorization header using the Bearer scheme.   MasDen",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 24,
-    "id": "004d392d62e790fbd445b200e6dc194fd0bf211eea5ed55fcbfafbc2f90066c9"
+    "hasCode": true,
+    "topic": "Entra ID",
+    "isPdf": true
   },
   {
-    "question": "You are a developer for a SaaS company that offers many web services. All web services for the company must meet the following requirements: ✑ Use API Management to access the services ✑ Use OpenID Connect for authentication ✑ Prevent anonymous usage A recent security audit found that several web services can be called without any authentication. Which API Management policy should you implement?",
+    "id": "d205101ef2b233a979a3d98e86e7ab106ad05fb76c2391c2f60008411eb58071",
+    "question": "You have a new Azure subscription. You are developing an internal website for employees to view sensitive data. The website uses Azure Active Directory (Azure AD) for authentication. You need to implement multifactor authentication for the website. Which two actions should you perform? Each correct answer presents part of the solution.",
+    "answer": "C: Multi-Factor Authentication comes as part of the following offerings: - Azure Active Directory Premium licenses - Full featured use of Azure Multi-Factor Authentication Service (Cloud) or Azure Multi-Factor Authentication Server (On-premises). - Multi-Factor Authentication for Office 365 - Azure Active Directory Global Administrators",
     "options": [
-      "jsonp",
-      "authentication-certificate",
-      "check-header",
-      "validate-jwt"
+      "Configure the website to use Azure AD B2C.",
+      "In Azure AD, create a new conditional access policy.",
+      "Upgrade to Azure AD Premium.",
+      "In Azure AD, enable application proxy.",
+      "In Azure AD conditional access, enable the baseline policy."
     ],
     "answerIndexes": [
-      3
+      1,
+      2
     ],
-    "answer": "Add the validate-jwt policy to validate the OAuth token for every incoming request. Incorrect Answers: A: The jsonp policy adds JSON with padding (JSONP) support to an operation or an API to allow cross-domain calls from JavaScript browser- based clients. JSONP is a method used in JavaScript programs to request data from a server in a different domain. JSONP bypasses the limitation enforced by most web browsers where access to web pages must be in the same domain. JSONP - Adds JSON with padding (JSONP) support to an operation or an API to allow cross-domain calls from JavaScript browser-based clients.   Cornholioz",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 25,
-    "id": "bdaa93814205e1126e3536422f98608cebc444d16880e7bd10497f6c86f5ac58"
+    "hasCode": true,
+    "topic": "Entra ID",
+    "isPdf": true
   },
   {
-    "question": "You develop and deploy an Azure Logic app that calls an Azure Function app. The Azure Function app includes an OpenAPI (Swagger) definition and uses an Azure Blob storage account. All resources are secured by using Azure Active Directory (Azure AD). The Azure Logic app must securely access the Azure Blob storage account. Azure AD resources must remain if the Azure Logic app is deleted. You need to secure the Azure Logic app. What should you do?",
-    "options": [
-      "Create a user-assigned managed identity and assign role-based access controls.",
-      "Create an Azure AD custom role and assign the role to the Azure Blob storage account.",
-      "Create an Azure Key Vault and issue a client certificate.",
-      "Create a system-assigned managed identity and issue a client certificate.",
-      "Create an Azure AD custom role and assign role-based access controls."
-    ],
-    "answerIndexes": [
-      0
-    ],
-    "answer": "To give a managed identity access to an Azure resource, you need to add a role to the target resource for that identity. Note: To easily authenticate access to other resources that are protected by Azure Active Directory (Azure AD) without having to sign in and provide credentials or secrets, your logic app can use a managed identity (formerly known as Managed Service Identity or MSI). Azure manages this identity for you and helps secure your credentials because you don't have to provide or rotate secrets. If you set up your logic app to use the system-assigned identity or a manually created, user-assigned identity, the function in your logic app can also use that same identity for authentication. management/api-management-howto-mutual-certificates-for-clients   aradice",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 31,
-    "id": "57abaef30a6418a358423333db3ade411f0332622a487e4ec33f14750ca4f3c8"
-  },
-  {
-    "question": "You deploy an Azure App Service web app. You create an app registration for the app in Azure Active Directory (Azure AD) and Twitter. The app must authenticate users and must use SSL for all communications. The app must use Twitter as the identity provider. You need to validate the Azure AD request in the app code. What should you validate?",
-    "options": [
-      "ID token header",
-      "ID token signature",
-      "HTTP response code",
-      "Tenant ID"
-    ],
-    "answerIndexes": [
-      0
-    ],
-    "answer": "  RaghavMGupta",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 37,
-    "id": "ec8dc0d76bb5fefd74c6427529ec2668aaea38d05341f83115545e8f134ba24e"
-  },
-  {
+    "id": "c1e4c93785203184c8c362d2affa1cc87f87d7b42428e908cb2a2c0225db8962",
     "question": "A development team is creating a new REST API. The API will store data in Azure Blob storage. You plan to deploy the API to Azure App Service. Developers must access the Azure Blob storage account to develop the API for the next two months. The Azure Blob storage account must not be accessible by the developers after the two-month time period. You need to grant developers access to the Azure Blob storage account. What should you do?",
+    "answer": "",
     "options": [
       "Generate a shared access signature (SAS) for the Azure Blob storage account and provide the SAS to all developers.",
       "Create and apply a new lifecycle management policy to include a last accessed date value. Apply the policy to the Azure Blob storage account.",
@@ -765,15 +684,14 @@
     "answerIndexes": [
       0
     ],
-    "answer": "  alexein74",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 38,
-    "id": "79c07e216bea4daf06aebcce4e3e20e8889db1509fe6115b83bff46739dd7d48"
+    "topic": "Shared Access Signatures",
+    "isPdf": true
   },
   {
-    "question": "You manage a data processing application that receives requests from an Azure Storage queue. You need to manage access to the queue. You have the following requirements: ✑ Provide other applications access to the Azure queue. ✑ Ensure that you can revoke access to the queue without having to regenerate the storage account keys. ✑ Specify access at the queue level and not at the storage account level. Which type of shared access signature (SAS) should you use?",
+    "id": "bf3340160bdd592b17e24c2240e3655f55ea67926b1d41edcc9bc43661ed6878",
+    "question": "You manage a data processing application that receives requests from an Azure Storage queue. You need to manage access to the queue. You have the following requirements: - Provide other applications access to the Azure queue. - Ensure that you can revoke access to the queue without having to regenerate the storage account keys. - Specify access at the queue level and not at the storage account level. Which type of shared access signature (SAS) should you use?",
+    "answer": "Stored access policies give you the option to revoke permissions for a service SAS without having to regenerate the storage account keys.",
     "options": [
       "Service SAS with a stored access policy",
       "Account SAS",
@@ -783,69 +701,50 @@
     "answerIndexes": [
       0
     ],
-    "answer": "A service SAS is secured with the storage account key. A service SAS delegates access to a resource in only one of the Azure Storage services: Blob storage, Queue storage, Table storage, or Azure Files. Stored access policies give you the option to revoke permissions for a service SAS without having to regenerate the storage account keys. Incorrect Answers: Account SAS: Account SAS is specified at the account level. It is secured with the storage account key. User Delegation SAS: A user delegation SAS applies to Blob storage only.  ",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 44,
-    "id": "86708fdd0f930287b86cc487a12e852c6661609544cdd84e586815636f4ccc94"
+    "topic": "Service Bus",
+    "isPdf": true
   },
   {
-    "question": "You are building a web application that uses the Microsoft identity platform for user authentication. You are implementing user identification for the web application. You need to retrieve a claim to uniquely identify a user. Which claim type should you use?",
-    "options": [
-      "aud",
-      "nonce",
-      "oid",
-      "idp"
-    ],
-    "answerIndexes": [
-      2
-    ],
-    "answer": "oid -The object identifier for the user in Azure AD. This value is the immutable and non-reusable identifier of the user. Use this value, not email, as a unique identifier for users; email addresses can change. If you use the Azure AD Graph API in your app, object ID is that value used to query profile information. Incorrect: Not A: aud - Who the token was issued for. This will be the application's client ID.   serpevi",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 46,
-    "id": "e7e124b1c40d5dbd425129542cc7ca061195205ddf350d1297eea5116dac084a"
-  },
-  {
+    "id": "b71d6c6583bec7eb65fd62712d71e554ed74de658f5d9ff93d0fc0b95bb1ba01",
     "question": "You are developing an Azure Function that calls external APIs by providing an access token for the API. The access token is stored in a secret named token in an Azure Key Vault named mykeyvault. You need to ensure the Azure Function can access to the token. Which value should you store in the Azure Function App configuration?",
+    "answer": "Syntax: @Microsoft.KeyVault(SecretUri={copied identifier for the username secret})",
     "options": [
       "KeyVault:mykeyvault;Secret:token",
       "App:Settings:Secret:mykeyvault:token",
-      "AZUREKVCONNSTR_",
-      "@Microsoft.KeyVault(SecretUri="
+      "AZUREKVCONNSTR\\_https://mykeyveult.vault.ezure.net/secrets/token/",
+      "@Microsoft.KeyVault(SecretUri=https://mykeyvault.vault.azure.net/secrets/token/)"
     ],
     "answerIndexes": [
       3
     ],
-    "answer": "Add Key Vault secrets reference in the Function App configuration. Syntax: @Microsoft.KeyVault(SecretUri={copied identifier for the username secret})   lorenaizzo",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 47,
-    "id": "801cca0b90ffa9bf08200d27c17f24c661ade37ac0d106875ff37802daa757d6"
+    "topic": "Key Vault",
+    "isPdf": true
   },
   {
-    "question": "A company maintains multiple web and mobile applications. Each application uses custom in-house identity providers as well as social identity providers. You need to implement single sign-on (SSO) for all the applications. What should you do?",
+    "id": "d6ad900e901f15d8fdff854704282d4ad005509fbe109b5dcc10e729c0360647",
+    "question": "You develop a Python application for image rendering that uses GPU resources to optimize rendering processes. You deploy the application to an Azure Container Instances (ACI) Linux container. The application requires a secret value to be passed when the container is started. The value must only be accessed from within the container. You need to pass the secret value. What are two possible ways to achieve this goal? Each correct answer presents a complete solution.",
+    "answer": "E: Use a secret volume to supply sensitive information to the containers in a container group. The secret volume stores your secrets in files within the volume, accessible by the containers in the container group. By storing secrets in a secret volume, you can avoid adding sensitive data like SSH keys or database credentials to your application code.",
     "options": [
-      "Use Azure Active Directory B2C (Azure AD B2C) with custom policies.",
-      "Use Azure Active Directory B2B (Azure AD B2B) and enable external collaboration.",
-      "Use Azure Active Directory B2C (Azure AD B2C) with user fiows.",
-      "Use Azure Active Directory B2B (Azure AD B2B)."
+      "Create an environment variable Set the secureValue property to the secret value.",
+      "Add the secret value to the container image. Use a managed identity.",
+      "Add the secret value to the application code Set the container startup command.",
+      "Add the secret value to an Azure Blob storage account. Generate a SAS token.",
+      "Mount a secret volume containing the secret value in a secrets file."
     ],
     "answerIndexes": [
-      1
+      0,
+      4
     ],
-    "answer": "You can add Google as an identity provider for B2B guest users. Federation with SAML/WS-Fed identity providers for guest users. Make sure your organization's external collaboration settings are configured such that you're allowed to invite guests. Note 1: As a user who is assigned any of the limited administrator directory roles, you can use the Azure portal to invite B2B collaboration users. You can invite guest users to the directory, to a group, or to an application. After you invite a user through any of these methods, the invited user's account is added to Azure Active Directory (Azure AD), with a user type of Guest. Note 2: Direct federation in Azure Active Directory is now referred to as SAML/WS-Fed identity provider (IdP) federation. directory/external-identities/add-users-administrator   tcybu",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 48,
-    "id": "ac9e4d73629412e8534d73897722e02087f02edbf5ca0cabaa529b39e8bd7427"
+    "hasCode": true,
+    "topic": "Containers",
+    "isPdf": true
   },
   {
+    "id": "0d34fc30b79f50c54d62a579a81104c7964c0331b0193ce3ecd3c821a93527cc",
     "question": "You are developing a user portal for a company. You need to create a report for the portal that lists information about employees who are subject matter experts for a specific topic. You must ensure that administrators have full control and consent over the data. Which technology should you use?",
+    "answer": "Microsoft Graph Data Connect augments Microsoft Graph's transactional model with an intelligent way to access rich data at scale. The data covers how workers communicate, collaborate, and manage their time across all the applications and services in Microsoft 365.",
     "options": [
       "Microsoft Graph data connect",
       "Microsoft Graph API",
@@ -854,52 +753,14 @@
     "answerIndexes": [
       0
     ],
-    "answer": "Data Connect grants a more granular control and consent model: you can manage data, see who is accessing it, and request specific properties of an entity. This enhances the Microsoft Graph model, which grants or denies applications access to entire entities. Microsoft Graph Data Connect augments Microsoft Graph's transactional model with an intelligent way to access rich data at scale. The data covers how workers communicate, collaborate, and manage their time across all the applications and services in Microsoft 365. Incorrect: Not B: The Microsoft Graph API is a RESTful web API that enables you to access Microsoft Cloud service resources. After you register your app and get authentication tokens for a user or service, you can make requests to the Microsoft Graph API. A simplistic definition of a Graph API is an API that models the data in terms of nodes and edges (objects and relationships) and allows the client to interact with multiple nodes in a single request. Not C: Microsoft Graph connectors, your organization can index third-party data so that it appears in Microsoft Search results. With Microsoft Graph connectors, your organization can index third-party data so that it appears in Microsoft Search results.   nvtienanh",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 50,
-    "id": "07995e4d1ef2452ca05edf78c38631abcfbe0b97c9cbf2ddf6b5a30a8d3b966d"
+    "topic": "Graph",
+    "isPdf": true
   },
   {
-    "question": "You are developing a web application that uses the Microsoft identity platform for user and resource authentication. The web application calls several REST APIs. A REST API call must read the user’s calendar. The web application requires permission to send an email as the user. You need to authorize the web application and the API. Which parameter should you use?",
-    "options": [
-      "tenant",
-      "code_challenge",
-      "state",
-      "client_id",
-      "scope"
-    ],
-    "answerIndexes": [
-      4
-    ],
-    "answer": "  alexein74",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 55,
-    "id": "8d6b3d93355561d4032c2ed19882b685239a2033028db8f30ecface8668d9065"
-  },
-  {
-    "question": "You develop and deploy an Azure App Service web app named App1. You create a new Azure Key Vault named Vault1. You import several API keys, passwords, certificates, and cryptographic keys into Vault1. You need to grant App1 access to Vault1 and automatically rotate credentials. Credentials must not be stored in code. What should you do?",
-    "options": [
-      "Enable App Service authentication for Appl. Assign a custom RBAC role to Vault1.",
-      "Add a TLS/SSL binding to App1.",
-      "Upload a self-signed client certificate to Vault1. Update App1 to use the client certificate.",
-      "Assign a managed identity to App1."
-    ],
-    "answerIndexes": [
-      3
-    ],
-    "answer": "  alexein74",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 58,
-    "id": "22ccb52eb58a041f8f02fe7d0a37dc01e6402ab2462358b3e62cb407be44833a"
-  },
-  {
+    "id": "01cea3b26ad1b216b4b1832b341469034245f545eceb19a0c26c81197e0c97ed",
     "question": "You are developing a Java application to be deployed in Azure. The application stores sensitive data in Azure Cosmos DB. You need to configure Always Encrypted to encrypt the sensitive data inside the application. What should you do first?",
+    "answer": "",
     "options": [
       "Create a new container to include an encryption policy with the JSON properties to be encrypted.",
       "Create a customer-managed key (CMK) and store the key in a new Azure Key Vault instance.",
@@ -909,15 +770,31 @@
     "answerIndexes": [
       1
     ],
-    "answer": "  alexein74",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 59,
-    "id": "7a6299a668d36f59d316e3833344780eb8412ae299738a3726de443375ade959"
+    "topic": "Cosmos DB",
+    "isPdf": true
   },
   {
+    "id": "bc2a9dd462c9eba64a4c31187ca3eb0ad92646f6a64b3cefc2e382e54a13a04e",
+    "question": "You develop and deploy an Azure App Service web app named App1. You create a new Azure Key Vault named Vault1. You import several API keys, passwords, certificates, and cryptographic keys into Vault1. You need to grant App1 access to Vault1 and automatically rotate credentials. Credentials must not be stored in code. What should you do?",
+    "answer": "",
+    "options": [
+      "Enable App Service authentication for App1. Assign a custom RBAC role to Vault1.",
+      "Add a TLS/SSL binding to App1.",
+      "Upload a self-signed client certificate to Vault1. Update App1 to use the client certificate.",
+      "Assign a managed identity to App1."
+    ],
+    "answerIndexes": [
+      3
+    ],
+    "hasCode": true,
+    "topic": "Managed Identities",
+    "isPdf": true
+  },
+  {
+    "id": "68351d3860a02abbe95ffff0d55525ba35df4b939c48a7c99c48717c702e6203",
     "question": "You are developing several Azure API Management (APIM) hosted APIs. You must transform the APIs to hide private backend information and obscure the technology stack used to implement the backend processing. You need to protect all APIs. What should you do?",
+    "answer": "``` ```",
     "options": [
       "Configure and apply a new inbound policy scoped to a product.",
       "Configure and apply a new outbound policy scoped to the operation.",
@@ -925,409 +802,10 @@
       "Configure and apply a new backend policy scoped to global."
     ],
     "answerIndexes": [
-      1
-    ],
-    "answer": "  Ciupaz 3 months, 3 weeks ago",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 66,
-    "id": "09affa0e0ec946f8ff2403d400f8b5d2bc9742eb8cd5d7e392c5c963f6a0d4ad"
-  },
-  {
-    "question": "Case study - This is a case study. Case studies are not timed separately. You can use as much exam time as you would like to complete each case. However, there may be additional case studies and sections on this exam. You must manage your time to ensure that you are able to complete all questions included on this exam in the time provided. To answer the questions included in a case study, you will need to reference information that is provided in the case study. Case studies might contain exhibits and other resources that provide more information about the scenario that is described in the case study. Each question is independent of the other questions in this case study. At the end of this case study, a review screen will appear. This screen allows you to review your answers and to make changes before you move to the next section of the exam. After you begin a new section, you cannot return to this section. To start the case study - To display the first question in this case study, click the Next button. Use the buttons in the left pane to explore the content of the case study before you answer the questions. Clicking these buttons displays information such as business requirements, existing environment, and problem statements. When you are ready to answer a question, click the Question button to return to the question. Background - Munson’s Pickles and Preserves Farm is an agricultural cooperative corporation based in Washington, US, with farms located across the United States. The company supports agricultural production resources by distributing seeds fertilizers, chemicals, fuel, and farm machinery to the farms. Current Environment - The company is migrating all applications from an on-premises datacenter to Microsoft Azure. Applications support distributors, farmers, and internal company staff. Corporate website - • The company hosts a public website located at The site supports farmers and distributors who request agricultural production resources. Farms - • The company created a new customer tenant in the Microsoft Entra admin center to support authentication and authorization for applications. Distributors - • Distributors integrate their applications with data that is accessible by using APIs hosted at to receive and update resource data. Requirements - The application components must meet the following requirements: Corporate website - • The site must be migrated to Azure App Service. • Costs must be minimized when hosting in Azure. • Applications must automatically scale independent of the compute resources. • All code changes must be validated by internal staff before release to production. • File transfer speeds must improve, and webpage-load performance must increase. • All site settings must be centrally stored, secured without using secrets, and encrypted at rest and in transit. • A queue-based load leveling pattern must be implemented by using Azure Service Bus queues to support high volumes of website agricultural production resource requests. Farms - • Farmers must authenticate to applications by using Microsoft Entra ID. Distributors - • The company must track a custom telemetry value with each API call and monitor performance of all APIs. • API telemetry values must be charted to evaluate variations and trends for resource data. Internal staff - • App and API updates must be validated before release to production. • Staff must be able to select a link to direct them back to the production app when validating an app or API update. • Staff profile photos and email must be displayed on the website once they authenticate to applications by using their Microsoft Entra ID. Security - • All web communications must be secured by using TLS/HTTPS. • Web content must be restricted by country/region to support corporate compliance standards. • The principle of least privilege must be applied when providing any user rights or process access rights. • Managed identities for Azure resources must be used to authenticate services that support Microsoft Entra ID authentication. Issues - Corporate website - • Farmers report HTTP 503 errors at the same time as internal staff report that CPU and memory usage are high. • Distributors report HTTP 502 errors at the same time as internal staff report that average response times and networking trafic are high. • Internal staff report webpage load sizes are large and take a long time to load. • Developers receive authentication errors to Service Bus when they debug locally. Distributors - • Many API telemetry values are sent in a short period of time. Telemetry trafic, data costs, and storage costs must be reduced while preserving a statistically correct analysis of the data points sent by the APIs. You need to secure the corporate website to meet the security requirements. What should you do?",
-    "options": [
-      "Create an Azure Cache for Redis instance. Update the code to support the cache.",
-      "Create an Azure Content Delivery Network profile and endpoint. Configure the endpoint. С. Create an App Service instance with a standard plan. Configure the custom domain with a TLS/SSL certificate.",
-      "Create an Azure Application Gateway with a Web Application Firewall (WAF). Configure end-to-end TLS encryption and the WAF."
-    ],
-    "answerIndexes": [
       2
     ],
-    "answer": "",
-    "topic": "Azure",
     "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 70,
-    "id": "7106bacff00ab53196f405adfca1e8991f10c588cb7951280f02b05028466559"
-  },
-  {
-    "question": "Note: This question is part of a series of questions that present the same scenario. Each question in the series contains a unique solution. Determine whether the solution meets the stated goals. You are developing and deploying several ASP.NET web applications to Azure App Service. You plan to save session state information and HTML output. You must use a storage mechanism with the following requirements: ✑ Share session state across all ASP.NET web applications. ✑ Support controlled, concurrent access to the same session state data for multiple readers and a single writer. ✑ Save full HTTP responses for concurrent requests. You need to store the information. Proposed Solution: Enable Application Request Routing (ARR). Does the solution meet the goal?",
-    "options": [
-      "Yes",
-      "No"
-    ],
-    "answerIndexes": [
-      1
-    ],
-    "answer": "Instead deploy and configure Azure Cache for Redis. Update the web applications.   gematsaljoa",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 2,
-    "id": "758f984bb03dbb203aa75a9b6b94ad6a4953ed9059720733684c5a1193887d3f"
-  },
-  {
-    "question": "You develop a gateway solution for a public facing news API. The news API back end is implemented as a RESTful service and uses an OpenAPI specification. You need to ensure that you can access the news API by using an Azure API Management service instance. Which Azure PowerShell command should you run?",
-    "options": [
-      "Import-AzureRmApiManagementApi -Context $ApiMgmtContext -SpecificationFormat \"Swagger\" -SpecificationPath $SwaggerPath -Path $Path",
-      "New-AzureRmApiManagementBackend -Context $ApiMgmtContext -Url $Url -Protocol http",
-      "New-AzureRmApiManagement -ResourceGroupName $ResourceGroup -Name $Name ג€\"Location $Location -Organization $Org - AdminEmail $AdminEmail",
-      "New-AzureRmApiManagementBackendProxy -Url $ApiUrl"
-    ],
-    "answerIndexes": [
-      3
-    ],
-    "answer": "New-AzureRmApiManagementBackendProxy creates a new Backend Proxy Object which can be piped when creating a new Backend entity. Example: Create a Backend Proxy In-Memory Object PS C:\\>$secpassword = ConvertTo-SecureString \"PlainTextPassword\" -AsPlainText -Force PS C:\\>$proxyCreds = New-Object System.Management.Automation.PSCredential (\"foo\", $secpassword) PS C:\\>$credential = New-AzureRmApiManagementBackendProxy -Url \" -ProxyCredential $proxyCreds PS C:\\>$apimContext = New-AzureRmApiManagementContext -ResourceGroupName \"Api-Default-WestUS\" -ServiceName \"contoso\" PS C:\\>$backend = New-AzureRmApiManagementBackend -Context $apimContext -BackendId 123 -Url ' - Protocol http -Title \"first backend\" -SkipCertificateChainValidation $true -Proxy $credential -Description \"backend with proxy server\" Creates a Backend Proxy Object and sets up Backend Incorrect Answers: A: The Import-AzureRmApiManagementApi cmdlet imports an Azure API Management API from a file or a URL in Web Application Description Language (WADL), Web Services Description Language (WSDL), or Swagger format. B: New-AzureRmApiManagementBackend creates a new backend entity in Api Management. C: The New-AzureRmApiManagement cmdlet creates an API Management deployment in Azure API Management. 6.13.0   Vano6k",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 7,
-    "id": "893ad293958d3cfadf5bd2804a18529114921c5fd3966f7508fda95dcd33e86c"
-  },
-  {
-    "question": "You are developing an Azure function that connects to an Azure SQL Database instance. The function is triggered by an Azure Storage queue. You receive reports of numerous System.InvalidOperationExceptions with the following message: `Timeout expired. The timeout period elapsed prior to obtaining a connection from the pool. This may have occurred because all pooled connections were in use and max pool size was reached.` You need to prevent the exception. What should you do?",
-    "options": [
-      "In the host.json file, decrease the value of the batchSize option",
-      "Convert the trigger to Azure Event Hub",
-      "Convert the Azure Function to the Premium plan",
-      "In the function.json file, change the value of the type option to queueScaling"
-    ],
-    "answerIndexes": [
-      2
-    ],
-    "answer": "With the Premium plan the max outbound connections per instance is unbounded compared to the 600 active (1200 total) in a Consumption plan. Note: The number of available connections is limited partly because a function app runs in a sandbox environment. One of the restrictions that the sandbox imposes on your code is a limit on the number of outbound connections, which is currently 600 active (1,200 total) connections per instance. When you reach this limit, the functions runtime writes the following message to the logs: Host thresholds exceeded: Connections. functions/functions-scale#service-limits   VK7Az204",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 9,
-    "id": "1aba737b4b7ca23d40037b84bdaa7a2b4e559373560fa857229e973abc978beb"
-  },
-  {
-    "question": "You are developing applications for a company. You plan to host the applications on Azure App Services. The company has the following requirements: ✑ Every five minutes verify that the websites are responsive. ✑ Verify that the websites respond within a specified time threshold. Dependent requests such as images and JavaScript files must load properly. ✑ Generate alerts if a website is experiencing issues. ✑ If a website fails to load, the system must attempt to reload the site three more times. You need to implement this process with the least amount of effort. What should you do?",
-    "options": [
-      "Create a Selenium web test and configure it to run from your workstation as a scheduled task.",
-      "Set up a URL ping test to query the home page.",
-      "Create an Azure function to query the home page.",
-      "Create a multi-step web test to query the home page.",
-      "Create a Custom Track Availability Test to query the home page."
-    ],
-    "answerIndexes": [
-      3
-    ],
-    "answer": "You can monitor a recorded sequence of URLs and interactions with a website via multi-step web tests. Incorrect Answers: A: Selenium is an umbrella project for a range of tools and libraries that enable and support the automation of web browsers. It provides extensions to emulate user interaction with browsers, a distribution server for scaling browser allocation, and the infrastructure for implementations of the W3C WebDriver specification that lets you write interchangeable code for all major web browsers.   kishe",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 15,
-    "id": "e14128eba77a40001aa8d3f579aed8c1ad700d7e50c0061cc47bc6730ec5be43"
-  },
-  {
-    "question": "You develop and add several functions to an Azure Function app that uses the latest runtime host. The functions contain several REST API endpoints secured by using SSL. The Azure Function app runs in a Consumption plan. You must send an alert when any of the function endpoints are unavailable or responding too slowly. You need to monitor the availability and responsiveness of the functions. What should you do?",
-    "options": [
-      "Create a URL ping test.",
-      "Create a timer triggered function that calls TrackAvailability() and send the results to Application Insights.",
-      "Create a timer triggered function that calls GetMetric(\"Request Size\") and send the results to Application Insights.",
-      "Add a new diagnostic setting to the Azure Function app. Enable the FunctionAppLogs and Send to Log Analytics options."
-    ],
-    "answerIndexes": [
-      1
-    ],
-    "answer": "You can create an Azure Function with TrackAvailability() that will run periodically according to the configuration given in TimerTrigger function with your own business logic. The results of this test will be sent to your Application Insights resource, where you will be able to query for and alert on the availability results data. This allows you to create customized tests similar to what you can do via Availability Monitoring in the portal. Customized tests will allow you to write more complex availability tests than is possible using the portal UI, monitor an app inside of your Azure VNET, change the endpoint address, or create an availability test even if this feature is not available in your region.   mlantonis",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 16,
-    "id": "ac6d26b01a9aaf112dbecaf56c9bb6ddd15ed31fd03f64911bafc9def7576c78"
-  },
-  {
-    "question": "An organization hosts web apps in Azure. The organization uses Azure Monitor. You discover that configuration changes were made to some of the web apps. You need to identify the configuration changes. Which Azure Monitor log should you review?",
-    "options": [
-      "AppServiceAppLogs",
-      "AppServiceEnvironmentPlatformlogs",
-      "AppServiceConsoleLogs",
-      "AppServiceAuditLogs"
-    ],
-    "answerIndexes": [
-      1
-    ],
-    "answer": "The log type AppServiceEnvironmentPlatformLogs handles the App Service Environment: scaling, configuration changes, and status logs. Incorrect: AppServiceAppLogs contains logs generated through your application. AppServiceAuditLogs logs generated when publishing users successfully log on via one of the App Service publishing protocols.",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 28,
-    "id": "8faf5242bf7e96f2975a2d97c3f99f8c7331dc353bb981d4de86322c270231d9"
-  },
-  {
-    "question": "You develop and deploy an Azure App Service web app to a production environment. You enable the Always On setting and the Application Insights site extensions. You deploy a code update and receive multiple failed requests and exceptions in the web app. You need to validate the performance and failure counts of the web app in near real time. Which Application Insights tool should you use?",
-    "options": [
-      "Profiler",
-      "Smart Detection",
-      "Live Metrics Stream",
-      "Application Map",
-      "Snapshot Debugger"
-    ],
-    "answerIndexes": [
-      2
-    ],
-    "answer": "Live Metrics Stream - Deploying the latest build can be an anxious experience. If there are any problems, you want to know about them right away, so that you can back out if necessary. Live Metrics Stream gives you key metrics with a latency of about one second. With Live Metrics Stream, you can: * Validate a fix while it's released, by watching performance and failure counts. * Etc. Incorrect: * Profiler Azure Application Insights Profiler provides performance traces for applications running in production in Azure. Profiler: Captures the data automatically at scale without negatively affecting your users. Helps you identify the ג€hotג€ code path spending the most time handling a particular web request. * Snapshot debugger When an exception occurs, you can automatically collect a debug snapshot from your live web application. The snapshot shows the state of source code and variables at the moment the exception was thrown. The Snapshot Debugger in Azure Application Insights monitors exception telemetry from your web app. It collects snapshots on your top-throwing exceptions so that you have the information you need to diagnose issues in production.",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 29,
-    "id": "2911efc34443ba7465e73b15efba9c47dcfb43593f42b98371c2eb782f60c4f5"
-  },
-  {
-    "question": "You are developing an Azure-based web application. The application goes ofiine periodically to perform ofiine data processing. While the application is ofiine, numerous Azure Monitor alerts fire which result in the on-call developer being paged. The application must always log when the application is ofiine for any reason. You need to ensure that the on-call developer is not paged during ofiine processing. What should you do?",
-    "options": [
-      "Add Azure Monitor alert processing rules to suppress notifications.",
-      "Disable Azure Monitor Service Health Alerts during ofiine processing.",
-      "Create an Azure Monitor Metric Alert.",
-      "Build an Azure Monitor action group that suppresses the alerts."
-    ],
-    "answerIndexes": [
-      3
-    ],
-    "answer": "You can use alert processing rules to add action groups or remove (suppress) action groups from your fired alerts.   finnishr",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 32,
-    "id": "2bcb781762abe2608a75fc6f48bdb6d53ba4de61bd1e6336857a8aeec82f8d4a"
-  },
-  {
-    "question": "You are developing an online game that includes a feature that allows players to interact with other players on the same team within a certain distance. The calculation to determine the players in range occurs when players move and are cached in an Azure Cache for Redis instance. The system should prioritize players based on how recently they have moved and should not prioritize players who have logged out of the game. You need to select an eviction policy. Which eviction policy should you use?",
-    "options": [
-      "allkeys-Iru",
-      "volatile-Iru",
-      "allkeys-lfu",
-      "volatile-ttl"
-    ],
-    "answerIndexes": [
-      0
-    ],
-    "answer": "  baroo1",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 33,
-    "id": "08414b4ea941cfe84fa7c570f35ca3e16fcc1ad60aab9057fa0c4ed65dd0f666"
-  },
-  {
-    "question": "You develop an Azure App Service web app and deploy to a production environment. You enable Application Insights for the web app. The web app is throwing multiple exceptions in the environment. You need to examine the state of the source code and variables when the exceptions are thrown. Which Application Insights feature should you configure?",
-    "options": [
-      "Smart detection",
-      "Profiler",
-      "Snapshot Debugger",
-      "Standard test"
-    ],
-    "answerIndexes": [
-      2
-    ],
-    "answer": "  alexein74",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 34,
-    "id": "b06fcf4231534cb61e2e4d37f9fd8b3771268d3cdff52e70fcaafde3cfa5586c"
-  },
-  {
-    "question": "You are building an application to track cell towers that are available to phones in near real time. A phone will send information to the application by using the Azure Web PubSub service. The data will be processed by using an Azure Functions app. Trafic will be transmitted by using a content delivery network (CDN). The Azure function must be protected against misconfigured or unauthorized invocations. You need to ensure that the CDN allows for the Azure function protection. Which HTTP header should be on the allowed list?",
-    "options": [
-      "Authorization",
-      "WebHook-Request-Callback",
-      "Resource",
-      "WebHook-Request-Origin"
-    ],
-    "answerIndexes": [
-      3
-    ],
-    "answer": "  halfway",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 40,
-    "id": "5719b0689547a0a680dfdb475e4fdc7c6a6049ba9b5178b5bef9bb461a76d6bd"
-  },
-  {
-    "question": "You have an Azure API Management (APIM) Standard tier instance named APIM1 that uses a managed gateway. You plan to use APIM1 to publish an API named API1 that uses a backend database that supports only a limited volume of requests per minute. You also need a policy for API1 that will minimize the possibility that the number of requests to the backend database from an individual IP address you specify exceeds the supported limit. You need to identify a policy for API1 that will meet the requirements. Which policy should you use?",
-    "options": [
-      "ip-filter",
-      "quota-by-key",
-      "rate-limit-by-key",
-      "rate-limit"
-    ],
-    "answerIndexes": [
-      2
-    ],
-    "answer": "  dddddd111 6 months ago",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 44,
-    "id": "401c551f73787129b90ca0a282bdc5527e60eae62b31541d6962ac107e6c4816"
-  },
-  {
-    "question": "You develop a web application that sells access to last-minute openings for child camps that run on the weekends. The application uses Azure Application Insights for all alerting and monitoring. The application must alert operators when a technical issue is preventing sales to camps. You need to build an alert to detect technical issues. Which alert type should you use?",
-    "options": [
-      "Metric alert using multiple time series",
-      "Metric alert using dynamic thresholds",
-      "Log alert using multiple time series",
-      "Log alert using dynamic thresholds"
-    ],
-    "answerIndexes": [
-      1
-    ],
-    "answer": "  Ciupaz",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 45,
-    "id": "7df428b8091c50761fda20f3b5f0f7ad83cfd5f5696100d01f6db2e009f8c496"
-  },
-  {
-    "question": "A company is implementing a publish-subscribe (Pub/Sub) messaging component by using Azure Service Bus. You are developing the first subscription application. In the Azure portal you see that messages are being sent to the subscription for each topic. You create and initialize a subscription client object by supplying the correct details, but the subscription application is still not consuming the messages. You need to ensure that the subscription client processes all messages. Which code segment should you use?",
-    "options": [
-      "await subscriptionClient.AddRuleAsync(new RuleDescription(RuleDescription.DefaultRuleName, new TrueFilter()));",
-      "subscriptionClient = new SubscriptionClient(ServiceBusConnectionString, TopicName, SubscriptionName);",
-      "await subscriptionClient.CloseAsync();",
-      "subscriptionClient.RegisterMessageHandler(ProcessMessagesAsync, messageHandlerOptions);"
-    ],
-    "answerIndexes": [
-      3
-    ],
-    "answer": "Using topic client, call RegisterMessageHandler which is used to receive messages continuously from the entity. It registers a message handler and begins a new thread to receive messages. This handler is waited on every time a new message is received by the receiver. subscriptionClient.RegisterMessageHandler(ReceiveMessagesAsync, messageHandlerOptions);   Ritesh073",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 15,
-    "id": "291f3c1870805dde99098c713108a6a0e89b95bf26112155e2421390157d61cf"
-  },
-  {
-    "question": "You are developing an e-commerce solution that uses a microservice architecture. You need to design a communication backplane for communicating transactional messages between various parts of the solution. Messages must be communicated in first-in-first-out (FIFO) order. What should you use?",
-    "options": [
-      "Azure Storage Queue",
-      "Azure Event Hub",
-      "Azure Service Bus",
-      "Azure Event Grid"
-    ],
-    "answerIndexes": [
-      0
-    ],
-    "answer": "As a solution architect/developer, you should consider using Service Bus queues when: ✑ Your solution requires the queue to provide a guaranteed first-in-first-out (FIFO) ordered delivery.   rahulrai19",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 26,
-    "id": "b69f0df04eb3eaf7024dc959d0a6b730706b35db4caf0ea7fc453ed70945a2eb"
-  },
-  {
-    "question": "You are building a loyalty program for a major snack producer. When customers buy a snack at any of 100 participating retailers the event is recorded in Azure Event Hub. Each retailer is given a unique identifier that is used as the primary identifier for the loyalty program. Retailers must be able to be added or removed at any time. Retailers must only be able to record sales for themselves. You need to ensure that retailers can record sales. What should you do?",
-    "options": [
-      "Use publisher policies for retailers.",
-      "Create a partition for each retailer.",
-      "Define a namespace for each retailer."
-    ],
-    "answerIndexes": [
-      0
-    ],
-    "answer": "Event Hubs enables granular control over event publishers through publisher policies. Publisher policies are run-time features designed to facilitate large numbers of independent event publishers. With publisher policies, each publisher uses its own unique identifier when publishing events to an event hub. Incorrect: Not C: An Event Hubs namespace is a management container for event hubs (or topics, in Kafka parlance). It provides DNS-integrated network endpoints and a range of access control and network integration management features such as IP filtering, virtual network service endpoint, and Private Link.   finnishr",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 30,
-    "id": "7d8c77c39485488d5c6f488f2ff1e21b27684beb690c831eb3b470f742ea4c97"
-  },
-  {
-    "question": "You are developing a road tollway tracking application that sends tracking events by using Azure Event Hubs using premium tier. Each road must have a throttling policy uniquely assigned. You need to configure the event hub to allow for per-road throttling. What should you do?",
-    "options": [
-      "Use a unique consumer group for each road.",
-      "Ensure each road stores events in a different partition.",
-      "Ensure each road has a unique connection string.",
-      "Use a unique application group for each road."
-    ],
-    "answerIndexes": [
-      1
-    ],
-    "answer": "  le129",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 33,
-    "id": "b9028953149540657ec848e12cddcc16fd5e64a792c7a3f958068dc8c95a62b3"
-  },
-  {
-    "question": "You are building a B2B web application that uses Azure B2B collaboration for authentication. Paying customers authenticate to Azure B2B using federation. The application allows users to sign up for trial accounts using any email address. When a user converts to a paying customer, the data associated with the trial should be kept, but the user must authenticate using federation. You need to update the user in Azure Active Directory (Azure AD) when they convert to a paying customer. Which Graph API parameter is used to change authentication from one-time passcodes to federation?",
-    "options": [
-      "resetRedemption",
-      "Status",
-      "userFlowType",
-      "invitedUser"
-    ],
-    "answerIndexes": [
-      1
-    ],
-    "answer": "  finnishr",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 35,
-    "id": "016aaa31f3aad6ad3bf07fd49638801cf97fa24ee04f5af8464a2681d971c207"
-  },
-  {
-    "question": "You are developing several Azure API Management (APIM) hosted APIs. The APIs have the following requirements: • Require a subscription key to access all APIs. • Include terms of use that subscribers must accept to use the APIs. • Administrators must review and accept or reject subscription attempts. • Limit the count of multiple simultaneous subscriptions. You need to implement the APIs. What should you do?",
-    "options": [
-      "Configure and apply header-based versioning.",
-      "Create and publish a product.",
-      "Configure and apply query string-based versioning.",
-      "Add a new revision to all APIs. Make the revisions current and add a change log entry."
-    ],
-    "answerIndexes": [
-      2
-    ],
-    "answer": "  HoneyMax",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 43,
-    "id": "d5c97d6e84e8a000f0ef117a9cff807df38ef9a4b11bbf497c9c94c8d05a6ea8"
-  },
-  {
-    "question": "You are developing several Azure API Management (APIM) hosted APIs. You must make several minor and non-breaking changes to one of the APIs. The API changes include the following requirements: • Must not disrupt callers of the API. • Enable roll back if you find issues. • Documented to enable developers to understand what is new. • Tested before publishing. You need to update the API. What should you do?",
-    "options": [
-      "Configure and apply header-based versioning.",
-      "Create and publish a product.",
-      "Configure and apply a custom policy.",
-      "Add a new revision to the API.",
-      "Configure and apply query string-based versioning."
-    ],
-    "answerIndexes": [
-      4
-    ],
-    "answer": "  james2033 4 weeks ago",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 50,
-    "id": "0c1500d09f95925a275a75eeb3c2efcb1607040f93db2ddaba56b243796b19a0"
-  },
-  {
-    "question": "Introductory Info Case study - This is a case study. Case studies are not timed separately. You can use as much exam time as you would like to complete each case. However, there may be additional case studies and sections on this exam. You must manage your time to ensure that you are able to complete all questions included on this exam in the time provided. To answer the questions included in a case study, you will need to reference information that is provided in the case study. Case studies might contain exhibits and other resources that provide more information about the scenario that is described in the case study. Each question is independent of the other questions in this case study. At the end of this case study, a review screen will appear. This screen allows you to review your answers and to make changes before you move to the next section of the exam. After you begin a new section, you cannot return to this section. To start the case study - To display the first question in this case study, click the Next button. Use the buttons in the left pane to explore the content of the case study before you answer the questions. Clicking these buttons displays information such as business requirements, existing environment, and problem statements. When you are ready to answer a question, click the Question button to return to the question. Background - VanArsdel, Ltd. is a global ofice supply company. The company is based in Canada and has retail store locations across the world. The company is developing several cloud-based solutions to support their stores, distributors, suppliers, and delivery services. Current environment - Corporate website - The company provides a public website located at The website consists of a React JavaScript user interface, HTML, CSS, image assets, and several APIs hosted in Azure Functions. Retail Store Locations - The company supports thousands of store locations globally. Store locations send data every hour to an Azure Blob storage account to support inventory, purchasing and delivery services. Each record includes a location identifier and sales transaction information. Requirements - The application components must meet the following requirements: Corporate website - Secure the website by using SSL. Minimize costs for data storage and hosting. Implement native GitHub workfiows for continuous integration and continuous deployment (CI/CD). Distribute the website content globally for local use. Implement monitoring by using Application Insights and availability web tests including SSL certificate validity and custom header value verification. The website must have 99.95 percent uptime. Retail store locations - Azure Functions must process data immediately when data is uploaded to Blob storage. Azure Functions must update Azure Cosmos DB by using native SQL language queries. Audit store sale transaction information nightly to validate data, process sales financials, and reconcile inventory. Delivery services - Store service telemetry data in Azure Cosmos DB by using an Azure Function. Data must include an item id, the delivery vehicle license plate, vehicle package capacity, and current vehicle location coordinates. Store delivery driver profile information in Azure Active Directory (Azure AD) by using an Azure Function called from the corporate website. Inventory services - The company has contracted a third-party to develop an API for inventory processing that requires access to a specific blob within the retail store storage account for three months to include read-only access to the data. Security - All Azure Functions must centralize management and distribution of configuration data for different environments and geographies, encrypted by using a company-provided RSA-HSM key. Authentication and authorization must use Azure AD and services must use managed identities where possible. Issues - Retail Store Locations - You must perform a point-in-time restoration of the retail store location data due to an unexpected and accidental deletion of data. Azure Cosmos DB queries from the Azure Function exhibit high Request Unit (RU) usage and contain multiple, complex queries that exhibit high point read latency for large items as the function app is scaling. Question You need to grant access to the retail store location data for the inventory service development effort. What should you use?",
-    "options": [
-      "Azure AD access token",
-      "Azure RBAC role",
-      "Shared access signature (SAS) token",
-      "Azure AD ID token",
-      "Azure AD refresh token"
-    ],
-    "answerIndexes": [
-      2
-    ],
-    "answer": "A shared access signature (SAS) provides secure delegated access to resources in your storage account. With a SAS, you have granular control over how a client can access your data. For example: What resources the client may access. What permissions they have to those resources. How long the SAS is valid. Note: Inventory services: The company has contracted a third-party to develop an API for inventory processing that requires access to a specific blob within the retail store storage account for three months to include read-only access to the data.   kampatra",
-    "topic": "Azure",
-    "hasCode": false,
-    "isPdf": true,
-    "pdfQuestionNumber": 2,
-    "id": "3a12b1d92340c6851985862c012220e93230b71ac6ce05b6a3f09b094368d4b8"
+    "topic": "API Management",
+    "isPdf": true
   }
 ]
