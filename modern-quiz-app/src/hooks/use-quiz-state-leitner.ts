@@ -38,6 +38,11 @@ export function useQuizStateWithLeitner(
   const [submissionStates, setSubmissionStates] = useState<Record<string, SubmissionState>>({});
   const [refreshTrigger, setRefreshTrigger] = useState(0); // Trigger for forcing re-evaluation of due questions
   const [isLoadingSession, setIsLoadingSession] = useState(true); // Loading state for session initialization
+  const [savedSessionResults, setSavedSessionResults] = useState<{
+    correct: number;
+    incorrect: number;
+    total: number;
+  } | null>(null);
   
   // Use ref for session ending flag to avoid race conditions with setTimeout
   const isEndingSessionRef = useRef(false);
@@ -126,6 +131,12 @@ export function useQuizStateWithLeitner(
 
   // 🎯 Session state tracking for end session functionality
   const isSessionComplete = useMemo(() => {
+    // If we have saved results (from End Quiz button), session is complete
+    if (savedSessionResults) {
+      debug('Session complete: Have saved results from End Quiz');
+      return true;
+    }
+    
     // For Leitner sessions, ignore topic filter - session completion is based on all session questions
     if (filteredQuestions.length === 0) {
       debug('Session incomplete: No filtered questions');
@@ -156,10 +167,16 @@ export function useQuizStateWithLeitner(
     }
     
     return isComplete;
-  }, [filteredQuestions, submissionStates]);
+  }, [filteredQuestions, submissionStates, savedSessionResults]);
 
-  // Session results for end session display
+  // Session results for end session display - use saved results if available
   const sessionResults = useMemo(() => {
+    // If we have saved results (from End Quiz button), show those
+    if (savedSessionResults) {
+      return savedSessionResults;
+    }
+    
+    // Otherwise calculate from current session
     if (!isSessionComplete) return null;
     
     const results = filteredQuestions.map(q => ({
@@ -170,8 +187,8 @@ export function useQuizStateWithLeitner(
     const correct = results.filter(r => r.submission?.isCorrect).length;
     const incorrect = results.length - correct;
     
-    return { correct, incorrect, total: results.length, results };
-  }, [isSessionComplete, filteredQuestions, submissionStates]);
+    return { correct, incorrect, total: results.length };
+  }, [isSessionComplete, filteredQuestions, submissionStates, savedSessionResults]);
 
   // Session progress tracking - simplified for Leitner mode
   const sessionProgress = useMemo(() => {
@@ -592,6 +609,7 @@ export function useQuizStateWithLeitner(
     setCurrentQuestionIndex(0);
     setAnswers({});
     setSubmissionStates({});
+    setSavedSessionResults(null); // Clear saved results from previous session
     setIsEndingSession(false);
     isEndingSessionRef.current = false;
     setRefreshTrigger(prev => prev + 1);
@@ -607,48 +625,40 @@ export function useQuizStateWithLeitner(
     setIsEndingSession(true);
     isEndingSessionRef.current = true;
     
-    setSubmissionStates(prev => {
-      debug('Current state:', {
-        filteredQuestionsCount: filteredQuestions.length,
-        submissionStatesCount: Object.keys(prev).length,
-        filteredQuestionIds: filteredQuestions.map(q => q.id),
-        submissionStateIds: Object.keys(prev)
-      });
-      
-      setAnswers({});
-      
-      const remainingQuestions = filteredQuestions.filter(q => 
-        !prev[q.id]?.isSubmitted
-      );
-      
-      debug(`📝 Ending session: ${remainingQuestions.length} remaining questions out of ${filteredQuestions.length} total`);
-      debug('Remaining question IDs:', remainingQuestions.map(q => q.id));
-      debug('Already submitted IDs:', filteredQuestions.filter(q => prev[q.id]?.isSubmitted).map(q => q.id));
-      
-      const endSessionStates = { ...prev };
-      remainingQuestions.forEach(q => {
-        debug(`Marking question ${q.id} as session-ended`);
-        endSessionStates[q.id] = {
-          isSubmitted: true,
-          isCorrect: false,
-          showAnswer: false,
-          submittedAt: Date.now(),
-          submittedAnswers: [],
-        };
-      });
-      
-      debug('Updated submission states count:', Object.keys(endSessionStates).length);
-      debug('Questions that will be submitted after update:', Object.keys(endSessionStates).filter(id => endSessionStates[id].isSubmitted).length);
-      debug('🔄 Session ending - preventing question regeneration');
-      
-      return endSessionStates;
+    // Calculate and save session results BEFORE clearing state
+    const results = filteredQuestions.map(q => ({
+      question: q,
+      submission: submissionStates[q.id]
+    }));
+    const correct = results.filter(r => r.submission?.isCorrect).length;
+    const total = results.length;
+    
+    // Save results so they persist through state clearing
+    setSavedSessionResults({
+      correct,
+      incorrect: total - correct,
+      total
     });
+    
+    debug('📊 Saved session results:', { correct, total });
+    
+    // Clear the current session to trigger the "Session Complete" view
+    saveToLocalStorage('leitner-current-session', null);
+    saveToLocalStorage('leitner-submission-states', {});
+    
+    // Clear local state (but savedSessionResults persists)
+    setSubmissionStates({});
+    setAnswers({});
+    setFilteredQuestions([]);
+    
+    debug('✅ Session ended - cleared state, results saved');
     
     setTimeout(() => {
       isEndingSessionRef.current = false;
       setIsEndingSession(false);
-    }, 2000);
-  }, [filteredQuestions]);
+      setRefreshTrigger(prev => prev + 1);
+    }, 500);
+  }, [filteredQuestions, submissionStates]);
 
   // Memoized actions object to prevent unnecessary re-renders
   const actions = useMemo(() => ({

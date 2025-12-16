@@ -395,6 +395,26 @@ export function LeitnerQuizCard({
                   </Button>
                 </motion.div>
               )}
+
+              {/* End Quiz Button - Show after submitting the last question */}
+              {cardState.showAnswer && 
+               sessionProgress?.isActive && 
+               sessionProgress.current === sessionProgress.total &&
+               onEndSession && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className='pt-2'
+                >
+                  <Button
+                    onClick={onEndSession}
+                    className='w-full bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600'
+                    size='lg'
+                  >
+                    🎉 End Quiz & View Results
+                  </Button>
+                </motion.div>
+              )}
             </div>
           )}
 
