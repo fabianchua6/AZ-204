@@ -183,11 +183,18 @@ function parseQuestions(markdownContent) {
       questionAndAnswer.includes('kubectl') ||
       questionAndAnswer.includes('docker');
 
-    // Only add if we have a valid question
-    if (question.question && question.topic && question.options.length > 0) {
+    // Only add if we have a valid question with answer indexes
+    if (question.question && question.topic && question.options.length > 0 && question.answerIndexes.length > 0) {
       // Generate ID after all data is collected, including answer for uniqueness
       question.id = generateQuestionId(question.question, question.options, question.answer);
       questions.push(question);
+    } else if (question.question) {
+      // Debug: log questions that were skipped
+      console.warn(`⚠️  Skipped question (section ${i}): Missing ${!question.topic ? 'topic' : !question.options.length ? 'options' : 'answer indexes'}`);
+      console.warn(`   Topic: ${question.topic || 'N/A'}`);
+      console.warn(`   Question: ${question.question.substring(0, 80)}...`);
+      console.warn(`   Options: ${question.options.length}`);
+      console.warn(`   Answer indexes: ${question.answerIndexes.length}`);
     }
   }
 
