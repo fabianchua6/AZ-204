@@ -130,44 +130,38 @@ export function useQuizStateWithLeitner(
   }, [filteredQuestions.length, selectedTopic]); // Run when questions are loaded
 
   // 🎯 Session state tracking for end session functionality
+  // Only complete when user explicitly clicks "End Quiz" button
   const isSessionComplete = useMemo(() => {
-    // If we have saved results (from End Quiz button), session is complete
+    // Session is only complete when user clicks End Quiz (which saves results)
     if (savedSessionResults) {
-      debug('Session complete: Have saved results from End Quiz');
+      debug('Session complete: User clicked End Quiz');
       return true;
     }
     
-    // For Leitner sessions, ignore topic filter - session completion is based on all session questions
+    return false;
+  }, [savedSessionResults]);
+  
+  // Track whether all questions have been answered (for showing End Quiz button)
+  const allQuestionsAnswered = useMemo(() => {
     if (filteredQuestions.length === 0) {
-      debug('Session incomplete: No filtered questions');
       return false;
     }
     
-    // Check if all questions in current session have been submitted
-    // Only count submission states for questions that are actually in the current session
     const currentSessionQuestionIds = new Set(filteredQuestions.map(q => q.id));
     const submittedInCurrentSession = Object.keys(submissionStates).filter(questionId => 
       currentSessionQuestionIds.has(questionId) && submissionStates[questionId]?.isSubmitted
     ).length;
     
-    const isComplete = submittedInCurrentSession === filteredQuestions.length && filteredQuestions.length > 0;
+    const allAnswered = submittedInCurrentSession === filteredQuestions.length && filteredQuestions.length > 0;
     
-    debug(`Session completion check:`, {
+    debug(`All questions answered check:`, {
       submittedCount: submittedInCurrentSession,
       totalQuestions: filteredQuestions.length,
-      isComplete,
-      totalSubmissionStates: Object.keys(submissionStates).length,
-      currentSessionQuestionIds: currentSessionQuestionIds.size,
-      filteredQuestionIds: filteredQuestions.map(q => q.id).slice(0, 5),
-      submissionStateKeys: Object.keys(submissionStates).slice(0, 10)
+      allAnswered
     });
     
-    if (isComplete) {
-      debug(`✅ Session complete: ${submittedInCurrentSession}/${filteredQuestions.length} questions submitted`);
-    }
-    
-    return isComplete;
-  }, [filteredQuestions, submissionStates, savedSessionResults]);
+    return allAnswered;
+  }, [filteredQuestions, submissionStates]);
 
   // Session results for end session display - use saved results if available
   const sessionResults = useMemo(() => {
