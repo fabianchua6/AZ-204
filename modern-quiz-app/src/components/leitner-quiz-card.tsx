@@ -1,12 +1,11 @@
 'use client';
 
 // React imports
-import { useCallback, useState, useMemo, useLayoutEffect, memo } from 'react';
+import { useCallback, useState, useMemo, useLayoutEffect, useEffect, useRef, memo } from 'react';
 import { flushSync } from 'react-dom';
 
 // Third-party imports
-import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Package, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Package, Target } from 'lucide-react';
 
 // UI component imports
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -52,11 +51,11 @@ interface LeitnerQuizCardProps {
     answerIndexes: number[]
   ) => Promise<
     | {
-        correct: boolean;
-        movedFromBox: number;
-        movedToBox: number;
-        nextReview: string;
-      }
+      correct: boolean;
+      movedFromBox: number;
+      movedToBox: number;
+      nextReview: string;
+    }
     | undefined
   >;
   onNext: () => void;
@@ -112,12 +111,23 @@ export function LeitnerQuizCard({
   onEndSession,
 }: LeitnerQuizCardProps) {
   const isMultipleChoice = question.answerIndexes.length > 1;
+  const answerSectionRef = useRef<HTMLDivElement>(null);
 
   // Local state to force showing answer after submission
   const [justSubmitted, setJustSubmitted] = useState(false);
   const [submissionResult, setSubmissionResult] = useState<boolean | null>(
     null
   );
+
+  // Auto-scroll to explanation when answer is shown
+  useEffect(() => {
+    if (justSubmitted && answerSectionRef.current) {
+      // Small delay to ensure render
+      setTimeout(() => {
+        answerSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [justSubmitted]);
 
   // CRITICAL: Reset local submission state BEFORE paint when question changes
   // This prevents the momentary flash of the answer
@@ -133,10 +143,10 @@ export function LeitnerQuizCard({
       const submissionState = getSubmissionState?.(question.id);
       return submissionState
         ? {
-            isSubmitted: submissionState.isSubmitted,
-            isCorrect: submissionState.isCorrect,
-            showAnswer: submissionState.showAnswer,
-          }
+          isSubmitted: submissionState.isSubmitted,
+          isCorrect: submissionState.isCorrect,
+          showAnswer: submissionState.showAnswer,
+        }
         : undefined;
     })(),
   });
@@ -193,7 +203,7 @@ export function LeitnerQuizCard({
       if (result) {
         // Trigger haptic feedback based on result
         triggerHaptic(result.correct ? 'success' : 'error');
-        
+
         // Set local state immediately for instant feedback
         setJustSubmitted(true);
         setSubmissionResult(result.correct);
@@ -259,7 +269,7 @@ export function LeitnerQuizCard({
   const boxTextClass = `leitner-box-text-${currentBox}`;
 
   return (
-    <div className='space-y-4'>
+    <div className='flex flex-col h-full'>
       {/* Contextual Toolbar */}
       <QuizControls
         topics={topics}
@@ -279,13 +289,16 @@ export function LeitnerQuizCard({
         }}
       />
 
+      {/* Spacer to prevent header overlap if we make toolbar sticky later */}
+      <div className='h-4' />
+
       {/* Main Quiz Card */}
-      <Card className='relative border border-border bg-card shadow-sm dark:shadow-sm'>
-        {/* Header with Box Info, Topic Badge and Navigation */}
-        <CardHeader className='sticky top-0 z-10 rounded-t-lg bg-card/95 px-4 pb-3 pt-4 backdrop-blur-sm sm:pt-6'>
+      <Card className='relative flex flex-col border border-border bg-card shadow-sm dark:shadow-sm mb-24'>
+        {/* Header with Box Info ONLY */}
+        <CardHeader className='rounded-t-lg bg-card/95 px-4 pb-0 pt-4'>
           <div className='flex flex-row items-center justify-between gap-3'>
             <div className='flex flex-wrap items-center gap-3'>
-              {/* Box Indicator with Icon - First */}
+              {/* Box Indicator */}
               <div
                 className={`flex h-8 items-center justify-center gap-1 rounded-md border-2 border-border px-2 text-[11px] font-bold shadow-sm ${boxBgClass} ${boxTextClass}`}
               >
@@ -293,74 +306,32 @@ export function LeitnerQuizCard({
                 <span className='leading-none'>{currentBox}</span>
               </div>
 
-              {/* Topic and Code Badges */}
+              {/* Badges */}
               <QuizBadges question={question} />
             </div>
 
-            {/* Navigation */}
-            <div className='flex-shrink-0'>
-              <div className='flex items-center gap-2'>
-                {/* Question Counter */}
-                {sessionProgress && (
-                  <div className='ml-2 hidden text-sm font-medium text-muted-foreground sm:block'>
-                    {sessionProgress.current}/{sessionProgress.total}
-                  </div>
-                )}
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={handlePrevious}
-                  className='h-8 w-8 p-0'
-                  disabled={!canGoPrevious}
-                >
-                  <ChevronLeft className='h-4 w-4' />
-                </Button>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={handleNext}
-                  className='h-8 w-8 p-0'
-                  disabled={!canGoNext}
-                >
-                  <ChevronRight className='h-4 w-4' />
-                </Button>
-
-                {/* End Session Button - Only show after all 20 questions are answered */}
-                {sessionProgress?.isActive &&
-                  onEndSession &&
-                  sessionProgress.current === sessionProgress.total && (
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      onClick={onEndSession}
-                      className='h-8 w-8 border-red-200 p-0 text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:border-red-700 dark:hover:bg-red-950/20'
-                      title='End Session'
-                    >
-                      <X className='h-4 w-4' />
-                    </Button>
-                  )}
+            {/* Question Counter - Passive */}
+            {sessionProgress && (
+              <div className='text-xs font-medium text-muted-foreground'>
+                {sessionProgress.current} / {sessionProgress.total}
               </div>
-            </div>
+            )}
           </div>
         </CardHeader>
 
-        {/* Question Content */}
-        <CardContent className='px-4 pb-4 pt-0 sm:pb-6'>
+        {/* Question Content - Scrollable area */}
+        <CardContent className='px-4 pb-4 pt-4 sm:pb-6'>
           <QuizQuestionContent question={question} />
 
           {/* Options */}
           {question.options.length > 0 && (
-            <div className='mb-4 space-y-2 sm:mb-6 sm:space-y-3'>
+            <div className='mt-6 space-y-3'>
               {question.options.map((option, index) => {
-                // Get the submission state to access submitted answers
                 const submissionState = getSubmissionState?.(question.id);
-
-                // Use submitted answers when showing answer, otherwise use current selection
                 const isSelected =
                   cardState.showAnswer && submissionState?.submittedAnswers
                     ? submissionState.submittedAnswers.includes(index)
                     : externalSelectedAnswers.includes(index);
-
                 const isCorrect = question.answerIndexes.includes(index);
 
                 return (
@@ -377,57 +348,72 @@ export function LeitnerQuizCard({
                   />
                 );
               })}
-
-              {/* Submit Answer Button */}
-              {buttonStates.showSubmitButton && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className='pt-2'
-                >
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={buttonStates.submitDisabled}
-                    className='smw-auto w-full'
-                    size='lg'
-                  >
-                    {cardState.isSubmitting ? 'Processing...' : 'Submit Answer'}
-                  </Button>
-                </motion.div>
-              )}
-
-              {/* End Quiz Button - Show after submitting the last question */}
-              {cardState.showAnswer && 
-               sessionProgress?.isActive && 
-               sessionProgress.current === sessionProgress.total &&
-               onEndSession && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className='pt-2'
-                >
-                  <Button
-                    onClick={onEndSession}
-                    className='w-full bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600'
-                    size='lg'
-                  >
-                    🎉 End Quiz & View Results
-                  </Button>
-                </motion.div>
-              )}
             </div>
           )}
 
-          {/* Answer Section */}
-          <QuizAnswer
-            answer={question.answer}
-            showAnswer={justSubmitted || cardState.showAnswer}
-            isCorrect={
-              submissionResult ?? cardState.lastSubmissionResult ?? true
-            }
-          />
+          {/* Answer Section (Explanation) */}
+          <div className="mt-4" ref={answerSectionRef}>
+            <QuizAnswer
+              answer={question.answer}
+              showAnswer={justSubmitted || cardState.showAnswer}
+              isCorrect={
+                submissionResult ?? cardState.lastSubmissionResult ?? true
+              }
+            />
+          </div>
         </CardContent>
       </Card>
+
+      {/* STICKY ACTION BAR (Thumb Zone) */}
+      <div className='fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-background/80 p-4 backdrop-blur-md safe-area-bottom'>
+        <div className='mx-auto grid max-w-4xl grid-cols-4 gap-3'>
+
+          <Button
+            variant='secondary'
+            size='lg'
+            onClick={handlePrevious}
+            disabled={!canGoPrevious}
+            className='col-span-1 h-14 w-full rounded-xl border-2 border-border/50 shadow-sm transition-all active:scale-95 disabled:opacity-30'
+            aria-label="Previous Question"
+          >
+            <ChevronLeft className='h-8 w-8' stroke="currentColor" style={{ color: 'hsl(var(--foreground))' }} strokeWidth={3} />
+          </Button>
+
+          {/* PRIMARY ACTION BUTTON (Morphing) */}
+          <div className="col-span-3">
+            {cardState.showAnswer ? (
+              // State: Result / Next
+              sessionProgress?.isActive && sessionProgress.current === sessionProgress.total ? (
+                <Button // End Session
+                  onClick={onEndSession}
+                  disabled={false}
+                  className='h-14 w-full rounded-xl bg-green-600 text-lg font-semibold shadow-md hover:bg-green-700'
+                >
+                  Finish <Target className="ml-2 h-5 w-5" />
+                </Button>
+              ) : (
+                <Button // Next Question
+                  onClick={handleNext}
+                  disabled={!canGoNext}
+                  className='h-14 w-full rounded-xl text-lg font-semibold shadow-md'
+                >
+                  Next <ChevronRight className="ml-2 h-5 w-5" />
+                </Button>
+              )
+            ) : (
+              // State: Submit
+              <Button
+                onClick={handleSubmit}
+                disabled={buttonStates.submitDisabled}
+                className={`h-14 w-full rounded-xl text-lg font-semibold shadow-md ${cardState.isSubmitting ? 'opacity-80' : ''
+                  }`}
+              >
+                {cardState.isSubmitting ? 'Checking...' : 'Check Answer'}
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
