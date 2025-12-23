@@ -16,12 +16,14 @@ import { DashboardStats } from '@/components/leitner/dashboard-stats';
 // Hook imports
 import { useQuizData } from '@/hooks/use-quiz-data';
 import { useQuizStateWithLeitner } from '@/hooks/use-quiz-state-leitner';
+import { useScrollDirection } from '@/hooks/use-scroll-direction';
 
 // Utility imports
 import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/lib/constants';
 
 export default function Home() {
   const { questions, topics, loading, error } = useQuizData();
+  const { isHeaderVisible } = useScrollDirection({ threshold: 15 });
 
   // Leitner mode is now the only mode
   const leitnerState = useQuizStateWithLeitner(
@@ -59,7 +61,7 @@ export default function Home() {
 
   return (
     <div className='via-background-secondary to-background-tertiary min-h-screen bg-gradient-to-br from-background'>
-      <Header />
+      <Header isVisible={isHeaderVisible} />
 
       <main className='container mx-auto px-2 py-2'>
         <div className='mx-auto max-w-4xl'>

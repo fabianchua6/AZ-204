@@ -6,7 +6,11 @@ import { Moon, Sun, BookOpen, BarChart3, Brain, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-export function Header() {
+interface HeaderProps {
+  isVisible?: boolean;
+}
+
+export function Header({ isVisible = true }: HeaderProps) {
   const { theme, setTheme } = useTheme();
   const pathname = usePathname();
 
@@ -25,7 +29,10 @@ export function Header() {
     : { href: '/dashboard', icon: BarChart3, srText: 'Dashboard' };
 
   return (
-    <header className='sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-sm'>
+    <header
+      className={`sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-sm transition-transform duration-300 ease-out ${isVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}
+    >
       <div className='container mx-auto px-4 py-4'>
         <div className='flex items-center justify-between'>
           <Link
@@ -63,9 +70,8 @@ export function Header() {
               variant='ghost'
               size='sm'
               asChild
-              className={`relative h-9 w-9 border border-border bg-background/50 p-0 transition-colors hover:bg-accent ${
-                isOnDebug ? 'bg-accent' : ''
-              }`}
+              className={`relative h-9 w-9 border border-border bg-background/50 p-0 transition-colors hover:bg-accent ${isOnDebug ? 'bg-accent' : ''
+                }`}
             >
               <Link href='/debug'>
                 <Settings className='h-4 w-4' />

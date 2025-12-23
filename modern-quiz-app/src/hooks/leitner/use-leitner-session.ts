@@ -132,17 +132,24 @@ export function useLeitnerSession({ questions, onSessionReset }: UseLeitnerSessi
 
                 const shuffledDueQuestions = shuffleArray(dueQuestions);
 
-                // Sort PDF first
-                shuffledDueQuestions.sort((a, b) => {
-                    const aIsPdf = isPdfQuestion(a);
-                    const bIsPdf = isPdfQuestion(b);
-                    if (aIsPdf && !bIsPdf) return -1;
-                    if (!aIsPdf && bIsPdf) return 1;
-                    return 0;
-                });
+                // 80% PDF, 20% non-PDF split
+                const PDF_RATIO = 0.8;
+                const SESSION_SIZE = 20;
+                const targetPdfCount = Math.ceil(SESSION_SIZE * PDF_RATIO); // 16
+                const targetNonPdfCount = SESSION_SIZE - targetPdfCount;    // 4
 
-                // Limit to 20
-                const sessionQuestions = shuffledDueQuestions.slice(0, 20);
+                const pdfQuestions = shuffledDueQuestions.filter(q => isPdfQuestion(q));
+                const nonPdfQuestions = shuffledDueQuestions.filter(q => !isPdfQuestion(q));
+
+                // Take as many PDF as possible up to target, fill remainder with non-PDF
+                const selectedPdf = pdfQuestions.slice(0, targetPdfCount);
+                const pdfShortfall = targetPdfCount - selectedPdf.length;
+
+                // Take non-PDF quota + any PDF shortfall
+                const selectedNonPdf = nonPdfQuestions.slice(0, targetNonPdfCount + pdfShortfall);
+
+                // Combine and shuffle the final selection for variety
+                const sessionQuestions = shuffleArray([...selectedPdf, ...selectedNonPdf]);
 
                 // Save
                 saveToLocalStorage('leitner-current-session', {

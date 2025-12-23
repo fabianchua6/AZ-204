@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { Target } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/lib/constants';
 import type { QuizStats } from '@/types/quiz';
 
@@ -34,54 +33,45 @@ export function QuizControls({
     (stats.answeredQuestions / stats.totalQuestions) * 100;
 
   return (
-    <Card className='dark:border-border-light border border-border bg-card shadow-sm dark:shadow-sm'>
-      {/* Always Visible Progress Bar - Mobile Style */}
-      <div className='w-full rounded-t-xl bg-card/80 p-3 backdrop-blur-sm'>
-        <div className='space-y-2'>
-          <div className='flex items-center justify-between text-xs text-muted-foreground'>
-            <div className='flex items-center gap-1.5'>
-              <Target className='h-3 w-3' />
-              <span className='font-mono'>
-                {stats.answeredQuestions}/{stats.totalQuestions}
-              </span>
-            </div>
-            <div className='flex items-center gap-3'>
-              {leitnerStats && (
-                <span className='flex items-center gap-1'>
-                  <span
-                    className={
-                      leitnerStats.dueToday > 0
-                        ? 'text-orange-600'
-                        : 'text-green-600'
-                    }
-                  >
-                    {leitnerStats.dueToday > 0
-                      ? `${leitnerStats.dueToday} left`
-                      : 'Good job 🥳'}
+    <>
+      {/* Compact inline progress bar - NOT fixed, flows with content */}
+      <div className="mb-4 rounded-xl border border-border/40 bg-card/80 shadow-sm backdrop-blur-sm">
+        <div className='w-full p-3'>
+          <div className='space-y-2'>
+            <div className='flex items-center justify-between text-xs text-muted-foreground'>
+              <div className='flex items-center gap-1.5'>
+                <Target className='h-3 w-3' />
+                <span className='font-mono font-medium'>
+                  {stats.answeredQuestions}/{stats.totalQuestions}
+                </span>
+              </div>
+              <div className='flex items-center gap-3'>
+                {leitnerStats && (
+                  <span className={leitnerStats.dueToday > 0 ? 'text-orange-500' : 'text-green-500'}>
+                    {leitnerStats.dueToday > 0 ? `${leitnerStats.dueToday} left` : '✓ Done'}
                   </span>
-                </span>
-              )}
-              {leitnerStats && leitnerStats.streakDays > 0 && (
-                <span className='flex items-center gap-0.5'>
-                  <span>🔥</span>
-                  <span>{leitnerStats.streakDays}</span>
-                </span>
-              )}
+                )}
+                {leitnerStats && leitnerStats.streakDays > 0 && (
+                  <span className='flex items-center gap-0.5'>
+                    🔥 {leitnerStats.streakDays}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-          <div className='h-1.5 w-full overflow-hidden rounded-full bg-muted'>
-            <motion.div
-              className='h-full rounded-full bg-primary'
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPercentage}%` }}
-              transition={{
-                duration: ANIMATION_DURATIONS.PROGRESS_ANIMATION,
-                ease: ANIMATION_EASINGS.EASE_OUT_CUBIC,
-              }}
-            />
+            <div className='h-1.5 w-full overflow-hidden rounded-full bg-muted'>
+              <motion.div
+                className='h-full rounded-full bg-primary'
+                initial={{ width: 0 }}
+                animate={{ width: `${progressPercentage}%` }}
+                transition={{
+                  duration: ANIMATION_DURATIONS.PROGRESS_ANIMATION,
+                  ease: ANIMATION_EASINGS.EASE_OUT_CUBIC,
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
-    </Card>
+    </>
   );
 }

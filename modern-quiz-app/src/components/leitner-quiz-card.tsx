@@ -289,9 +289,6 @@ export function LeitnerQuizCard({
         }}
       />
 
-      {/* Spacer to prevent header overlap if we make toolbar sticky later */}
-      <div className='h-4' />
-
       {/* Main Quiz Card */}
       <Card className='relative flex flex-col border border-border bg-card shadow-sm dark:shadow-sm mb-24'>
         {/* Header with Box Info ONLY */}
