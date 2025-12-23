@@ -1,708 +1,132 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { Question } from '@/types/quiz';
-import { isPdfQuestion } from '@/types/quiz';
-import { leitnerSystem, type LeitnerStats } from '@/lib/leitner';
-import { questionService } from '@/lib/question-service';
-import { saveToLocalStorage, loadFromLocalStorage } from '@/lib/utils';
-import { debug } from '@/lib/logger';
-
-interface SubmissionState {
-  isSubmitted: boolean;
-  isCorrect: boolean;
-  showAnswer: boolean;
-  submittedAt: number;
-  submittedAnswers: number[];
-}
-
-interface EnhancedQuizStats {
-  // Traditional stats
-  totalQuestions: number;
-  answeredQuestions: number;
-  correctAnswers: number;
-  incorrectAnswers: number;
-  accuracy: number;
-
-  // Leitner-specific stats
-  leitner: LeitnerStats;
-}
+import { leitnerSystem } from '@/lib/leitner';
+import { useLeitnerSession } from './leitner/use-leitner-session';
+import { useLeitnerProgress } from './leitner/use-leitner-progress';
+import { useLeitnerStats } from './leitner/use-leitner-stats';
 
 export function useQuizStateWithLeitner(
   questions: Question[],
-  selectedTopic: string | null,
-  setSelectedTopic: (topic: string | null) => void
+  selectedTopic: string | null, // Kept for API compatibility but unused
+  setSelectedTopic: (topic: string | null) => void // Kept for API compatibility
 ) {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, number[]>>({});
-  const [submissionStates, setSubmissionStates] = useState<Record<string, SubmissionState>>({});
-  const [refreshTrigger, setRefreshTrigger] = useState(0); // Trigger for forcing re-evaluation of due questions
-  const [isLoadingSession, setIsLoadingSession] = useState(true); // Loading state for session initialization
-  const [savedSessionResults, setSavedSessionResults] = useState<{
-    correct: number;
-    incorrect: number;
-    total: number;
-  } | null>(null);
-  
-  // Use ref for session ending flag to avoid race conditions with setTimeout
-  const isEndingSessionRef = useRef(false);
-  
-  // Initialize stats with safe defaults to prevent null reference errors
-  const [stats, setStats] = useState<EnhancedQuizStats>(() => ({
-    totalQuestions: 0,
-    answeredQuestions: 0,
-    correctAnswers: 0,
-    incorrectAnswers: 0,
-    accuracy: 0,
-    leitner: {
-      totalQuestions: 0,
-      questionsStarted: 0,
-      boxDistribution: {},
-      dueToday: 0,
-      accuracyRate: 0,
-      streakDays: 0,
-    },
-  }));
-
-  // Simple in-place shuffle helper
-  function shuffleArray<T>(arr: T[]): T[] {
-    const copy = [...arr];
-    for (let i = copy.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [copy[i], copy[j]] = [copy[j], copy[i]];
+  // 1. Session Management (Questions List, Lifecycle)
+  const session = useLeitnerSession({
+    questions,
+    onSessionReset: () => {
+      // This will be connected via the wrapper function below
     }
-    return copy;
-  }
+  });
 
-  // Load saved state (including submission states)
-  // Use mode-specific localStorage key to avoid conflicts with practice mode
-  // Only initialize if we're in Leitner mode (selectedTopic === null)
-  useEffect(() => {
-    if (selectedTopic !== null) {
-      // Not in Leitner mode - don't initialize or interfere with state
-      return;
-    }
-    
-    // Load submission states immediately
-    const savedSubmissionStates = loadFromLocalStorage('leitner-submission-states', {});
-    setSubmissionStates(savedSubmissionStates);
-    
-    // Note: currentQuestionIndex will be validated separately after questions load
-  }, [selectedTopic]); // Re-run when mode changes
+  // 2. Progress State (Answers, Index, Submissions)
+  const progress = useLeitnerProgress(session.filteredQuestions);
 
-  // Save state changes (including submission states)
-  // Use mode-specific localStorage key to avoid conflicts with practice mode
-  // Only save if we're in Leitner mode
-  useEffect(() => {
-    if (selectedTopic === null) {
-      saveToLocalStorage('leitner-quiz-index', currentQuestionIndex);
-    }
-  }, [currentQuestionIndex, selectedTopic]);
+  // 3. Stats Management
+  const stats = useLeitnerStats(questions, progress.submissionStates);
 
-  // Save submission states when they change - only in Leitner mode
-  useEffect(() => {
-    if (selectedTopic === null) {
-      saveToLocalStorage('leitner-submission-states', submissionStates);
-    }
-  }, [submissionStates, selectedTopic]);
+  // Wrapper for starting new session that syncs both hooks
+  const startNewSession = useCallback(() => {
+    progress.resetProgress();
+    session.startNewSession(); // This generates new questions
+  }, [progress, session]);
 
-  // Filter and sort questions based on topic and Leitner system
-  const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
-  const [isEndingSession, setIsEndingSession] = useState(false); // Flag to prevent regeneration during session end
-  
-  // Validate and restore currentQuestionIndex after questions load
-  useEffect(() => {
-    if (selectedTopic !== null || filteredQuestions.length === 0) {
-      return;
-    }
-    
-    const savedIndex = loadFromLocalStorage('leitner-quiz-index', 0);
-    
-    // Clamp index to valid range [0, filteredQuestions.length - 1]
-    const validIndex = Math.min(savedIndex, filteredQuestions.length - 1);
-    const clampedIndex = Math.max(0, validIndex);
-    
-    if (clampedIndex !== savedIndex) {
-      debug(`⚠️ Clamped questionIndex from ${savedIndex} to ${clampedIndex} (max: ${filteredQuestions.length - 1})`);
-    }
-    
-    setCurrentQuestionIndex(clampedIndex);
-  }, [filteredQuestions.length, selectedTopic]); // Run when questions are loaded
+  // Wrapper for ending session
+  const endCurrentSession = useCallback(() => {
+    session.endCurrentSession(progress.submissionStates);
+  }, [session, progress.submissionStates]);
 
-  // 🎯 Session state tracking for end session functionality
-  // Only complete when user explicitly clicks "End Quiz" button
-  const isSessionComplete = useMemo(() => {
-    // Session is only complete when user clicks End Quiz (which saves results)
-    if (savedSessionResults) {
-      debug('Session complete: User clicked End Quiz');
-      return true;
-    }
-    
-    return false;
-  }, [savedSessionResults]);
-  
-  // Track whether all questions have been answered (for showing End Quiz button)
-  const allQuestionsAnswered = useMemo(() => {
-    if (filteredQuestions.length === 0) {
-      return false;
-    }
-    
-    const currentSessionQuestionIds = new Set(filteredQuestions.map(q => q.id));
-    const submittedInCurrentSession = Object.keys(submissionStates).filter(questionId => 
-      currentSessionQuestionIds.has(questionId) && submissionStates[questionId]?.isSubmitted
-    ).length;
-    
-    const allAnswered = submittedInCurrentSession === filteredQuestions.length && filteredQuestions.length > 0;
-    
-    debug(`All questions answered check:`, {
-      submittedCount: submittedInCurrentSession,
-      totalQuestions: filteredQuestions.length,
-      allAnswered
-    });
-    
-    return allAnswered;
-  }, [filteredQuestions, submissionStates]);
+  // Submit Answer Logic (Coordinator)
+  const submitAnswer = useCallback(async (questionId: string, answerIndexes: number[]) => {
+    if (!questions || questions.length === 0) return;
 
-  // Session results for end session display - use saved results if available
-  const sessionResults = useMemo(() => {
-    // If we have saved results (from End Quiz button), show those
-    if (savedSessionResults) {
-      return savedSessionResults;
-    }
-    
-    // Otherwise calculate from current session
-    if (!isSessionComplete) return null;
-    
-    const results = filteredQuestions.map(q => ({
-      question: q,
-      submission: submissionStates[q.id]
-    }));
-    
-    const correct = results.filter(r => r.submission?.isCorrect).length;
-    const incorrect = results.length - correct;
-    
-    return { correct, incorrect, total: results.length };
-  }, [isSessionComplete, filteredQuestions, submissionStates, savedSessionResults]);
-
-  // Session progress tracking - simplified for Leitner mode
-  const sessionProgress = useMemo(() => {
-    if (filteredQuestions.length === 0) {
-      return { current: 0, total: 0, isActive: false };
-    }
-    
-    const submittedCount = Object.keys(submissionStates).filter(questionId => 
-      filteredQuestions.some(q => q.id === questionId) && submissionStates[questionId]?.isSubmitted
-    ).length;
-    
-    const progress = {
-      current: currentQuestionIndex + 1, // Which question we're currently on (1-based)
-      total: filteredQuestions.length,
-      isActive: !isSessionComplete && filteredQuestions.length > 0, // Active if not complete and has questions
-    };
-    
-    debug('📊 Session progress:', progress, {
-      currentQuestionIndex,
-      isSessionComplete,
-      submittedCount
-    });
-    
-    return progress;
-  }, [filteredQuestions, submissionStates, currentQuestionIndex, isSessionComplete]);
-
-  // Update filtered questions when dependencies change
-  useEffect(() => {
-    // Don't regenerate questions if we're ending a session (use ref for immediate check)
-    if (isEndingSession || isEndingSessionRef.current) {
-      debug('⚠️ Skipping question regeneration - session is ending');
-      return;
-    }
-    
-    // Don't regenerate questions if session is complete - stay on results screen
-    if (isSessionComplete) {
-      debug('⚠️ Skipping question regeneration - session is complete');
-      return;
-    }
-    
-    // Only run Leitner system logic when in Leitner mode
-    if (selectedTopic !== null) {
-      // In Practice mode - just use regular filtering without Leitner system
-      const baseQuestions = questions.filter(question => {
-        // Filter out code questions and questions with no select options
-        if (question.hasCode) return false;
-        if (question.options.length === 0) return false;
-        return true;
-      });
-      
-      // Filter by topic
-      const topicFiltered = baseQuestions.filter(q => q.topic === selectedTopic);
-      
-      // Sort to prioritize PDF questions first (same as practice mode)
-      topicFiltered.sort((a, b) => {
-        const aIsPdf = isPdfQuestion(a);
-        const bIsPdf = isPdfQuestion(b);
-        
-        if (aIsPdf && !bIsPdf) return -1;
-        if (!aIsPdf && bIsPdf) return 1;
-        return 0;
-      });
-      
-      setFilteredQuestions(topicFiltered);
-      return;
-    }
-
-    // Track if component is still mounted to prevent state updates after unmount
-    let isMounted = true;
-
-    const updateQuestions = async () => {
-      try {
-        setIsLoadingSession(true);
-        await leitnerSystem.ensureInitialized();
-        
-        // Check if still mounted after async operation
-        if (!isMounted) return;
-        
-        // Use centralized filtering first
-        let baseQuestions = questionService.filterQuestions(questions);
-
-        if (selectedTopic) {
-          baseQuestions = baseQuestions.filter(q => q.topic === selectedTopic);
-          
-          // Sort to prioritize PDF questions first, then shuffle within each group
-          const pdfQuestions = baseQuestions.filter(q => isPdfQuestion(q));
-          const regularQuestions = baseQuestions.filter(q => !isPdfQuestion(q));
-          
-          // Shuffle each group separately, then combine with PDF questions first
-          const shuffledPdf = shuffleArray(pdfQuestions);
-          const shuffledRegular = shuffleArray(regularQuestions);
-          baseQuestions = [...shuffledPdf, ...shuffledRegular];
-          
-          // Check again before setState
-          if (!isMounted) return;
-          setFilteredQuestions(baseQuestions);
-          setIsLoadingSession(false);
-        } else {
-          // 🎯 SESSION-BASED: Try to restore existing session first
-          const savedSession = loadFromLocalStorage<{
-            questionIds: string[];
-            createdAt: number;
-            totalQuestions?: number; // Track question count for invalidation
-          } | null>('leitner-current-session', null);
-          
-          const SESSION_EXPIRY = 4 * 60 * 60 * 1000; // 4 hours - shorter to ensure fresh questions each session
-          const now = Date.now();
-          
-          // Invalidate session if question pool changed significantly (>10% difference)
-          const questionCountChanged = savedSession?.totalQuestions && 
-            Math.abs(savedSession.totalQuestions - baseQuestions.length) > baseQuestions.length * 0.1;
-          
-          // Check if we have a valid saved session that's not expired
-          // Also check if all questions have been answered - if so, start fresh
-          if (savedSession && 
-              savedSession.questionIds && 
-              Array.isArray(savedSession.questionIds) &&
-              savedSession.questionIds.length > 0 &&
-              (now - savedSession.createdAt) < SESSION_EXPIRY &&
-              !questionCountChanged) {
-            
-            debug('🔄 Restoring saved session with', savedSession.questionIds.length, 'questions');
-            
-            // Restore the exact same questions in the exact same order
-            const restoredQuestions = savedSession.questionIds
-              .map(id => baseQuestions.find(q => q.id === id))
-              .filter((q): q is Question => q !== undefined);
-            
-            // Check if all questions were answered (session complete)
-            const savedSubmissions = loadFromLocalStorage<Record<string, { isSubmitted: boolean }>>('leitner-submission-states', {});
-            const allAnswered = restoredQuestions.length > 0 && 
-              restoredQuestions.every(q => savedSubmissions[q.id]?.isSubmitted);
-            
-            if (allAnswered) {
-              debug('⚠️ All questions answered - generating fresh session');
-              // Clear old session and fall through to generate new one
-              saveToLocalStorage('leitner-current-session', null);
-              saveToLocalStorage('leitner-submission-states', {});
-              // Don't return - fall through to generate new session
-            } else if (restoredQuestions.length >= savedSession.questionIds.length * 0.5) {
-              if (!isMounted) return;
-              setFilteredQuestions(restoredQuestions);
-              setIsLoadingSession(false);
-              debug('✅ Session restored:', restoredQuestions.length, 'questions');
-              return; // Early exit - session restored successfully
-            } else {
-              debug('⚠️ Saved session invalid - too few questions restored. Generating new session.');
-              // Fall through to generate new session
-            }
-          }
-          
-          // No valid saved session - generate new one
-          debug('🆕 Generating new session');
-          const dueQuestions = await leitnerSystem.getDueQuestions(baseQuestions);
-          
-          // Check if still mounted after async operation
-          if (!isMounted) return;
-          
-          // Shuffle the due questions to ensure variety each session
-          // This prevents the same order appearing every time
-          const shuffledDueQuestions = shuffleArray(dueQuestions);
-          
-          // Sort shuffled questions to prioritize PDF questions first (stable sort)
-          shuffledDueQuestions.sort((a, b) => {
-            // PDF questions come first (handle undefined safely)
-            const aIsPdf = isPdfQuestion(a);
-            const bIsPdf = isPdfQuestion(b);
-            
-            if (aIsPdf && !bIsPdf) return -1;
-            if (!aIsPdf && bIsPdf) return 1;
-            // Within same type (PDF or regular), maintain shuffled order
-            return 0;
-          });
-          
-          // 🎯 SESSION-BASED: Limit to 20 most due questions per session
-          const sessionQuestions = shuffledDueQuestions.slice(0, 20);
-          
-          // Save the session to localStorage for restoration on refresh
-          saveToLocalStorage('leitner-current-session', {
-            questionIds: sessionQuestions.map(q => q.id),
-            createdAt: now,
-            totalQuestions: baseQuestions.length // Track for invalidation when questions change
-          });
-          
-          debug('💾 Saved new session:', sessionQuestions.length, 'questions');
-          
-          // Final mount check before setting state
-          if (!isMounted) return;
-          setFilteredQuestions(sessionQuestions);
-          setIsLoadingSession(false);
-          
-          // Clear answer state for all due questions to ensure fresh review
-          setAnswers(prev => {
-            const cleaned = { ...prev };
-            dueQuestions.forEach(question => {
-              delete cleaned[question.id];
-            });
-            return cleaned;
-          });
-          
-          // DO NOT clear submission states - this destroys user progress!
-          // Submission states should persist to track completion progress
-          // Only clear them explicitly when user chooses to reset progress
-        }
-      } catch (error) {
-        console.error('Failed to update questions:', error);
-        setIsLoadingSession(false);
-        // Don't update state on error to maintain current questions
-      }
-    };
-
-    updateQuestions();
-    
-    // Cleanup function to prevent state updates after unmount
-    return () => {
-      isMounted = false;
-    };
-  }, [questions, selectedTopic, refreshTrigger, isEndingSession, isSessionComplete]); // Add refreshTrigger to refresh after clearing progress
-
-  // Initialize and update stats (consolidated with debounced submission updates)
-  useEffect(() => {
-    if (questions.length === 0) return;
-
-    // Debounce stats calculation to handle rapid submissions
-    const timeoutId = setTimeout(() => {
-      try {
-        const filteredQs = questionService.filterQuestions(questions);
-        const leitnerCompletion = leitnerSystem.getCompletionProgress(filteredQs);
-        const leitnerStats = leitnerSystem.getStats(filteredQs);
-
-        setStats({
-          totalQuestions: leitnerCompletion.totalQuestions,
-          answeredQuestions: leitnerCompletion.answeredQuestions,
-          correctAnswers: leitnerCompletion.correctAnswers,
-          incorrectAnswers: leitnerCompletion.incorrectAnswers,
-          accuracy: leitnerCompletion.accuracy,
-          leitner: leitnerStats,
-        });
-      } catch (error) {
-        console.error('Failed to update stats:', error);
-      }
-    }, 100); // 100ms debounce - faster for initial load, still prevents rapid re-renders
-
-    return () => clearTimeout(timeoutId);
-  }, [questions, selectedTopic, refreshTrigger, submissionStates]);
-
-  // Consolidated cleanup effect: reset index, clean stale answers and submission states
-  useEffect(() => {
-    // Reset index when topic changes
-    setCurrentQuestionIndex(0);
-    
-    if (filteredQuestions.length === 0) return;
-    
-    const currentQuestionIds = new Set(filteredQuestions.map(q => q.id));
-    
-    // Clean stale answer state
-    setAnswers(prev => {
-      const cleaned = { ...prev };
-      let hasChanges = false;
-      Object.keys(cleaned).forEach(questionId => {
-        if (!currentQuestionIds.has(questionId)) {
-          delete cleaned[questionId];
-          hasChanges = true;
-        }
-      });
-      return hasChanges ? cleaned : prev;
-    });
-    
-    // Clean stale submission states (but protect recent ones)
-    if (!isSessionComplete) {
-      const RECENT_THRESHOLD = 60 * 60 * 1000; // 1 hour
-      const now = Date.now();
-      
-      setSubmissionStates(prev => {
-        const cleaned = { ...prev };
-        let hasChanges = false;
-        
-        Object.keys(cleaned).forEach(questionId => {
-          const state = cleaned[questionId];
-          const isRecent = state && (now - state.submittedAt) < RECENT_THRESHOLD;
-          
-          if (!currentQuestionIds.has(questionId) && !isRecent) {
-            delete cleaned[questionId];
-            hasChanges = true;
-          }
-        });
-        
-        if (hasChanges) {
-          debug('🧹 Cleaned up old submission states (kept recent submissions)');
-          saveToLocalStorage('leitner-submission-states', cleaned);
-          return cleaned;
-        }
-        return prev;
-      });
-    }
-  }, [selectedTopic, filteredQuestions, isSessionComplete]);
-
-  // Separate function for just updating selected answers (no Leitner processing)
-  const updateSelectedAnswers = useCallback(
-    (questionId: string, answerIndexes: number[]) => {
-      setAnswers(prev => ({
-        ...prev,
-        [questionId]: answerIndexes,
-      }));
-    },
-    []
-  );
-
-  // Memoized action callbacks
-  const handleSetSelectedTopic = useCallback((topic: string | null) => {
-    setSelectedTopic(topic);
-  }, [setSelectedTopic]);
-
-  const handleSubmitAnswer = useCallback(async (questionId: string, answerIndexes: number[]) => {
-    if (!questions || questions.length === 0) {
-      console.error('[Leitner] No questions available');
-      return;
-    }
-
-    // First update the local answers state for immediate UI feedback
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: answerIndexes,
-    }));
-
-    // Find the question to check correctness
+    // 1. Find Question
     const question = questions.find(q => q.id === questionId);
     if (!question) {
       console.error('[Leitner] Question not found', { questionId });
       return;
     }
 
-    // Check if answer is correct
+    // 2. Check Correctness
     const isCorrect =
       answerIndexes.length === question.answerIndexes.length &&
-      answerIndexes.every(answer =>
-        question.answerIndexes.includes(answer)
-      );
+      answerIndexes.every(answer => question.answerIndexes.includes(answer));
 
-    // Store submission state with submitted answers
-    setSubmissionStates(prev => {
-      const newState = {
-        ...prev,
-        [questionId]: {
-          isSubmitted: true,
-          isCorrect,
-          showAnswer: true,
-          submittedAt: Date.now(),
-          submittedAnswers: answerIndexes, // Store the submitted answers
-        },
-      };
-      
-      // Save to localStorage for mobile persistence
-      saveToLocalStorage('leitner-submission-states', newState);
-      
-      return newState;
-    });
+    // 3. Update UI State (Progress)
+    // Update answers first for immediate feedback (if not already done via select)
+    progress.updateAnswers(questionId, answerIndexes);
+    progress.submitQuestion(questionId, answerIndexes, isCorrect);
 
+    // 4. Update Business Logic (Leitner System)
     try {
-      debug(`🔍 submitAnswer called: questionId=${questionId.slice(-8)}, answerIndexes=[${answerIndexes.join(',')}]`);
-      
-      // Ensure Leitner system is initialized first
       await leitnerSystem.ensureInitialized();
-      
-      debug(`🔍 Leitner system initialized, processing answer: isCorrect=${isCorrect}`);
-      
-      // Process with Leitner system (synchronous operation)
       const result = leitnerSystem.processAnswer(questionId, isCorrect);
-
-      debug(`🔍 Leitner processAnswer result:`, result);
-
-      // Stats are updated inline with submission state to prevent race conditions
-      // No separate updateStatsAfterSubmission call needed
-
-      // Return result for UI feedback without auto-navigation
       return result;
     } catch (error) {
-      console.error('🔍 [DEBUG] [Leitner] Failed to process answer:', error);
+      console.error('[Leitner] Failed to process answer:', error);
       throw error;
     }
-  }, [questions]);
+  }, [questions, progress]);
 
-  const handleNextQuestion = useCallback(() => {
-    setCurrentQuestionIndex(prev => {
-      if (prev < filteredQuestions.length - 1) {
-        return prev + 1;
-      }
-      return prev;
-    });
-  }, [filteredQuestions.length]);
-
-  const handlePreviousQuestion = useCallback(() => {
-    setCurrentQuestionIndex(prev => {
-      if (prev > 0) {
-        return prev - 1;
-      }
-      return prev;
-    });
-  }, []);
-
-  const handleGoToQuestion = useCallback((index: number) => {
-    if (index >= 0 && index < filteredQuestions.length) {
-      setCurrentQuestionIndex(index);
+  // Session Progress Derivation
+  const sessionProgress = useMemo(() => {
+    if (session.filteredQuestions.length === 0) {
+      return { current: 0, total: 0, isActive: false };
     }
-  }, [filteredQuestions.length]);
 
-  const handleClearAllProgress = useCallback(() => {
-    leitnerSystem.clearProgress();
-    setRefreshTrigger(prev => prev + 1);
+    // const submittedCount = Object.keys(progress.submissionStates).filter(id =>
+    //   session.filteredQuestions.some(q => q.id === id) && progress.submissionStates[id]?.isSubmitted
+    // ).length;
+
+    return {
+      current: progress.currentQuestionIndex + 1,
+      total: session.filteredQuestions.length,
+      isActive: !session.isSessionComplete && session.filteredQuestions.length > 0
+    };
+  }, [session.filteredQuestions, progress.currentQuestionIndex, session.isSessionComplete]);
+
+  // Question Progress Derivation
+  const getQuestionProgress = useCallback((questionId: string) => {
+    return leitnerSystem.getQuestionProgress(questionId);
   }, []);
 
-  const handleGetSubmissionState = useCallback((questionId: string) => {
-    return submissionStates[questionId] || null;
-  }, [submissionStates]);
-
-  const handleStartNewSession = useCallback(() => {
-    debug('🚀 Starting new session - clearing all states');
-    setCurrentQuestionIndex(0);
-    setAnswers({});
-    setSubmissionStates({});
-    setSavedSessionResults(null); // Clear saved results from previous session
-    setIsEndingSession(false);
-    isEndingSessionRef.current = false;
-    setRefreshTrigger(prev => prev + 1);
-    
-    saveToLocalStorage('leitner-quiz-index', 0);
-    saveToLocalStorage('leitner-submission-states', {});
-    saveToLocalStorage('leitner-current-session', null);
-  }, []);
-
-  const handleEndCurrentSession = useCallback(() => {
-    debug('🚨 endCurrentSession called');
-    
-    setIsEndingSession(true);
-    isEndingSessionRef.current = true;
-    
-    // Calculate and save session results BEFORE clearing state
-    const results = filteredQuestions.map(q => ({
-      question: q,
-      submission: submissionStates[q.id]
-    }));
-    const correct = results.filter(r => r.submission?.isCorrect).length;
-    const total = results.length;
-    
-    // Save results so they persist through state clearing
-    setSavedSessionResults({
-      correct,
-      incorrect: total - correct,
-      total
-    });
-    
-    debug('📊 Saved session results:', { correct, total });
-    
-    // Clear the current session to trigger the "Session Complete" view
-    saveToLocalStorage('leitner-current-session', null);
-    saveToLocalStorage('leitner-submission-states', {});
-    
-    // Clear local state (but savedSessionResults persists)
-    setSubmissionStates({});
-    setAnswers({});
-    setFilteredQuestions([]);
-    
-    debug('✅ Session ended - cleared state, results saved');
-    
-    setTimeout(() => {
-      isEndingSessionRef.current = false;
-      setIsEndingSession(false);
-      setRefreshTrigger(prev => prev + 1);
-    }, 500);
-  }, [filteredQuestions, submissionStates]);
-
-  // Memoized actions object to prevent unnecessary re-renders
+  // Construct Actions API
   const actions = useMemo(() => ({
-    setSelectedTopic: handleSetSelectedTopic,
-    updateAnswers: updateSelectedAnswers,
-    submitAnswer: handleSubmitAnswer,
-    setAnswer: updateSelectedAnswers,
-    nextQuestion: handleNextQuestion,
-    previousQuestion: handlePreviousQuestion,
-    goToQuestion: handleGoToQuestion,
-    clearAllProgress: handleClearAllProgress,
-    getSubmissionState: handleGetSubmissionState,
-    startNewSession: handleStartNewSession,
-    endCurrentSession: handleEndCurrentSession,
+    setSelectedTopic: setSelectedTopic, // No-op
+    updateAnswers: progress.updateAnswers,
+    submitAnswer,
+    setAnswer: progress.updateAnswers, // Alias
+    nextQuestion: progress.nextQuestion,
+    previousQuestion: progress.previousQuestion,
+    goToQuestion: progress.goToQuestion,
+    clearAllProgress: () => { leitnerSystem.clearProgress(); window.location.reload(); }, // Simple reset for now
+    getSubmissionState: progress.getSubmissionState,
+    startNewSession,
+    endCurrentSession,
   }), [
-    handleSetSelectedTopic,
-    updateSelectedAnswers,
-    handleSubmitAnswer,
-    handleNextQuestion,
-    handlePreviousQuestion,
-    handleGoToQuestion,
-    handleClearAllProgress,
-    handleGetSubmissionState,
-    handleStartNewSession,
-    handleEndCurrentSession,
+    setSelectedTopic,
+    progress.updateAnswers,
+    progress.nextQuestion,
+    progress.previousQuestion,
+    progress.goToQuestion,
+    progress.getSubmissionState,
+    submitAnswer,
+    startNewSession,
+    endCurrentSession
   ]);
 
-  // Removed render debug log
-
-  // Reactive question progress that updates when answers change
-  const getQuestionProgress = useCallback(
-    (questionId: string) => {
-      // This will be called fresh each time refreshTrigger changes
-      return leitnerSystem.getQuestionProgress(questionId);
-    },
-    [] // Remove refreshTrigger dependency as it's not actually needed
-  );
-
   return {
-    currentQuestionIndex,
-    selectedTopic,
-    filteredQuestions,
-    answers,
+    currentQuestionIndex: progress.currentQuestionIndex,
+    selectedTopic: null,
+    filteredQuestions: session.filteredQuestions,
+    answers: progress.answers,
     stats,
     actions,
     getQuestionProgress,
-    // 🎯 Session-based functionality
-    isSessionComplete,
-    sessionResults,
+    isSessionComplete: session.isSessionComplete,
+    sessionResults: session.savedSessionResults,
     sessionProgress,
-    isLoadingSession, // Add loading state for UI
+    isLoadingSession: session.isLoadingSession,
   };
 }
