@@ -483,16 +483,28 @@ export class LeitnerSystem {
     // Combine new questions and questions with progress
     const questionsWithPriority = [...newQuestions, ...questionsWithProgress];
 
-    // Filter to only questions that are due or new, plus some review questions
+    // Filter to only questions that are due or new, plus limited review questions
+    let reviewQuestionsAdded = 0;
+    const maxReviewQuestions = LEITNER_CONFIG.LIMITS.MAX_REVIEW_QUESTIONS;
+    
     const dueAndNewQuestions = questionsWithPriority.filter(q => {
       // Include all due questions and new questions
       if (q.isDue) return true;
 
-      // Include some questions from box 3 for review (25% chance - increased from 10%)
-      if (q.currentBox === LEITNER_CONFIG.LIMITS.MAX_BOX && Math.random() < LEITNER_CONFIG.LIMITS.REVIEW_PROBABILITY) return true;
+      // Cap the number of random review questions to prevent Box 3 overload
+      if (reviewQuestionsAdded >= maxReviewQuestions) return false;
 
-      // Also include some questions from box 2 for extra variety (15% chance)
-      if (q.currentBox === 2 && Math.random() < 0.15) return true;
+      // Include some questions from box 3 for review (10% chance, capped)
+      if (q.currentBox === LEITNER_CONFIG.LIMITS.MAX_BOX && Math.random() < LEITNER_CONFIG.LIMITS.REVIEW_PROBABILITY) {
+        reviewQuestionsAdded++;
+        return true;
+      }
+
+      // Include some questions from box 2 for extra variety (5% chance, capped)
+      if (q.currentBox === 2 && Math.random() < LEITNER_CONFIG.LIMITS.BOX2_REVIEW_PROBABILITY) {
+        reviewQuestionsAdded++;
+        return true;
+      }
 
       return false;
     });
