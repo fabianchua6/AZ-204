@@ -59,10 +59,6 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: 'upgrade-insecure-requests',
           },
-          {
-            key: 'Vary',
-            value: 'Accept-Encoding',
-          },
         ],
       },
       {
@@ -89,15 +85,6 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'no-cache, no-store, must-revalidate',
-          },
-        ],
-      },
-      {
-        source: '/api/clear-cache',
-        headers: [
-          {
-            key: 'Clear-Site-Data',
-            value: '"cache"',
           },
         ],
       },
