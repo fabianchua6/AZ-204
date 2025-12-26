@@ -18,7 +18,7 @@
       "headers": [
         {
           "key": "Clear-Site-Data",
-          "value": "\"cache\", \"storage\""
+          "value": "\"cache\""
         }
       ]
     }

@@ -52,10 +52,6 @@ const nextConfig = {
             value: 'strict-origin-when-cross-origin',
           },
           {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains; preload',
-          },
-          {
             key: 'Vary',
             value: 'Accept-Encoding',
           },
@@ -84,7 +80,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Clear-Site-Data',
-            value: '"cache", "storage"',
+            value: '"cache"',
           },
         ],
       },
