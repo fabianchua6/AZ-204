@@ -50,9 +50,10 @@ const nextConfig = {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
           },
+          // DISABLE HSTS to fix stuck browser state on iOS
           {
             key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload',
+            value: 'max-age=0',
           },
           {
             key: 'Content-Security-Policy',
