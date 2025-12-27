@@ -2,25 +2,5 @@
   "buildCommand": "cd modern-quiz-app && npm run build",
   "outputDirectory": "modern-quiz-app/.next",
   "installCommand": "cd modern-quiz-app && npm install",
-  "framework": "nextjs",
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Strict-Transport-Security",
-          "value": "max-age=0"
-        }
-      ]
-    },
-    {
-      "source": "/api/clear-cache",
-      "headers": [
-        {
-          "key": "Clear-Site-Data",
-          "value": "\"cache\""
-        }
-      ]
-    }
-  ]
+  "framework": "nextjs"
 }
