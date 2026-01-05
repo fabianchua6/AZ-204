@@ -1,6 +1,6 @@
 {
   "name": "az-204-quiz-app",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "private": true,
   "author": "Fabian Chua",
   "description": "A modern, responsive quiz application for AZ-204 Azure Developer certification preparation",
