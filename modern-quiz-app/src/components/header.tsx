@@ -44,7 +44,7 @@ export function Header({ isVisible = true }: HeaderProps) {
             </div>
             <div>
               <h1 className='text-xl font-bold text-foreground'>
-                AZ-204 Quiz App
+                AZ-204
               </h1>
             </div>
           </Link>
