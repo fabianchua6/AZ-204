@@ -3,15 +3,18 @@
 @tailwind utilities;
 
 @layer base {
-  /* Disable iOS Dynamic Type - use app's own font sizes */
+
+  /* Disable iOS Dynamic Type - force consistent font sizes */
   html {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
+    font-size: 16px !important;
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
   }
-  
+
   body {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
+    font-size: 16px !important;
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
   }
 
   :root {
@@ -55,17 +58,20 @@
     --success: 142 71% 45%;
     --success-light: 142 71% 94%;
     --success-foreground: 210 40% 98%;
-    --success-light-foreground: 142 71% 25%; /* Dark green for light backgrounds */
+    --success-light-foreground: 142 71% 25%;
+    /* Dark green for light backgrounds */
 
     --warning: 38 92% 50%;
     --warning-light: 38 92% 95%;
     --warning-foreground: 222.2 84% 4.9%;
-    --warning-light-foreground: 38 92% 30%; /* Dark orange for light backgrounds */
+    --warning-light-foreground: 38 92% 30%;
+    /* Dark orange for light backgrounds */
 
     --destructive: 0 84.2% 60.2%;
     --destructive-light: 0 84.2% 97%;
     --destructive-foreground: 210 40% 98%;
-    --destructive-light-foreground: 0 84.2% 35%; /* Dark red for light backgrounds */
+    --destructive-light-foreground: 0 84.2% 35%;
+    /* Dark red for light backgrounds */
 
     /* Refined borders */
     --border: 220 13% 91%;
@@ -77,7 +83,8 @@
     /* Leitner box semantic tokens (light) */
     --box1-bg: 210 40% 96%;
     --box1-fg: 215 25% 27%;
-    --box1-bg-transparent: 215 25% 50% / 0.08; /* Subtle transparency */
+    --box1-bg-transparent: 215 25% 50% / 0.08;
+    /* Subtle transparency */
     --box2-bg: 45 100% 94%;
     --box2-fg: 32 84% 30%;
     --box2-bg-transparent: 32 84% 45% / 0.1;
@@ -92,81 +99,128 @@
     --box5-bg-transparent: 258 60% 45% / 0.1;
 
     /* Dashboard metric semantic tokens (light) */
-    --metric-due-bg: 48 100% 94%; /* Soft amber background */
-    --metric-due-fg: 34 85% 32%; /* Amber/ochre text */
-    --metric-streak-bg: 20 95% 95%; /* Soft orange background */
-    --metric-streak-fg: 18 78% 34%; /* Orange text */
-    --metric-best-bg: 160 55% 94%; /* Teal background */
-    --metric-best-fg: 160 55% 28%; /* Teal text */
-    --metric-started-bg: 217 90% 95%; /* Blue background */
-    --metric-started-fg: 217 82% 42%; /* Blue text */
-    --metric-accuracy-bg: 142 55% 94%; /* Green background */
-    --metric-accuracy-fg: 142 55% 30%; /* Green text */
+    --metric-due-bg: 48 100% 94%;
+    /* Soft amber background */
+    --metric-due-fg: 34 85% 32%;
+    /* Amber/ochre text */
+    --metric-streak-bg: 20 95% 95%;
+    /* Soft orange background */
+    --metric-streak-fg: 18 78% 34%;
+    /* Orange text */
+    --metric-best-bg: 160 55% 94%;
+    /* Teal background */
+    --metric-best-fg: 160 55% 28%;
+    /* Teal text */
+    --metric-started-bg: 217 90% 95%;
+    /* Blue background */
+    --metric-started-fg: 217 82% 42%;
+    /* Blue text */
+    --metric-accuracy-bg: 142 55% 94%;
+    /* Green background */
+    --metric-accuracy-fg: 142 55% 30%;
+    /* Green text */
   }
 
   .dark {
     /* Sophisticated layered dark theme - inspired by GitHub, Discord, Linear */
-    --background: 220 6% 4%; /* #0a0a0b - Deepest background */
-    --background-secondary: 220 7% 7%; /* #111113 - Secondary areas */
-    --background-tertiary: 220 8% 10%; /* #191a1c - Tertiary surfaces */
-    --foreground: 220 9% 96%; /* #f4f4f5 - Primary text */
+    --background: 220 6% 4%;
+    /* #0a0a0b - Deepest background */
+    --background-secondary: 220 7% 7%;
+    /* #111113 - Secondary areas */
+    --background-tertiary: 220 8% 10%;
+    /* #191a1c - Tertiary surfaces */
+    --foreground: 220 9% 96%;
+    /* #f4f4f5 - Primary text */
 
     /* Enhanced card system with proper elevation */
-    --card: 220 8% 10%; /* #1a1a1d - Main cards */
-    --card-secondary: 220 7% 7%; /* #111113 - Recessed elements */
-    --card-foreground: 220 9% 96%; /* #f4f4f5 - Card text */
-    --card-border: 220 13% 18%; /* #2a2a2e - Subtle borders */
+    --card: 220 8% 10%;
+    /* #1a1a1d - Main cards */
+    --card-secondary: 220 7% 7%;
+    /* #111113 - Recessed elements */
+    --card-foreground: 220 9% 96%;
+    /* #f4f4f5 - Card text */
+    --card-border: 220 13% 18%;
+    /* #2a2a2e - Subtle borders */
 
     --popover: 220 8% 10%;
     --popover-foreground: 220 9% 96%;
 
     /* Vibrant primary that pops in dark mode */
-    --primary: 217 91% 60%; /* #3b82f6 - Primary blue */
-    --primary-light: 217 91% 70%; /* Lighter variant */
-    --primary-dark: 217 91% 50%; /* Darker variant */
-    --primary-foreground: 220 9% 96%; /* White text on primary */
+    --primary: 217 91% 60%;
+    /* #3b82f6 - Primary blue */
+    --primary-light: 217 91% 70%;
+    /* Lighter variant */
+    --primary-dark: 217 91% 50%;
+    /* Darker variant */
+    --primary-foreground: 220 9% 96%;
+    /* White text on primary */
 
     /* Better contrast secondary */
-    --secondary: 220 13% 18%; /* #2a2a2e - Muted backgrounds */
-    --secondary-light: 220 13% 23%; /* #3a3a3e - Hover states */
+    --secondary: 220 13% 18%;
+    /* #2a2a2e - Muted backgrounds */
+    --secondary-light: 220 13% 23%;
+    /* #3a3a3e - Hover states */
     --secondary-foreground: 220 9% 96%;
 
     /* Improved muted with better hierarchy */
-    --muted: 220 13% 18%; /* #2a2a2e - Subtle elements */
-    --muted-light: 220 13% 23%; /* #3a3a3e - Hover states */
-    --muted-foreground: 220 9% 66%; /* #a1a1aa - Secondary text */
+    --muted: 220 13% 18%;
+    /* #2a2a2e - Subtle elements */
+    --muted-light: 220 13% 23%;
+    /* #3a3a3e - Hover states */
+    --muted-foreground: 220 9% 66%;
+    /* #a1a1aa - Secondary text */
 
     /* Accent for interactive elements */
-    --accent: 220 30% 14%; /* #1e293b - Accent background */
-    --accent-light: 220 30% 20%; /* Lighter accent */
-    --accent-foreground: 220 84% 88%; /* #e2e8f0 - Accent text */
+    --accent: 220 30% 14%;
+    /* #1e293b - Accent background */
+    --accent-light: 220 30% 20%;
+    /* Lighter accent */
+    --accent-foreground: 220 84% 88%;
+    /* #e2e8f0 - Accent text */
 
     /* Enhanced status colors for dark mode */
-    --success: 142 76% 36%; /* #059669 - Green that works on dark */
-    --success-light: 142 69% 12%; /* #064e3b - Dark green background */
-    --success-foreground: 142 76% 86%; /* Light green text */
-    --success-light-foreground: 142 76% 80%; /* Lighter green for dark backgrounds */
+    --success: 142 76% 36%;
+    /* #059669 - Green that works on dark */
+    --success-light: 142 69% 12%;
+    /* #064e3b - Dark green background */
+    --success-foreground: 142 76% 86%;
+    /* Light green text */
+    --success-light-foreground: 142 76% 80%;
+    /* Lighter green for dark backgrounds */
 
-    --warning: 38 92% 50%; /* #f59e0b - Warm yellow */
-    --warning-light: 45 93% 12%; /* #451a03 - Dark amber background */
-    --warning-foreground: 45 96% 89%; /* Light amber text */
-    --warning-light-foreground: 45 96% 85%; /* Lighter amber for dark backgrounds */
+    --warning: 38 92% 50%;
+    /* #f59e0b - Warm yellow */
+    --warning-light: 45 93% 12%;
+    /* #451a03 - Dark amber background */
+    --warning-foreground: 45 96% 89%;
+    /* Light amber text */
+    --warning-light-foreground: 45 96% 85%;
+    /* Lighter amber for dark backgrounds */
 
-    --destructive: 0 72% 51%; /* #dc2626 - Red that pops */
-    --destructive-light: 0 63% 15%; /* #450a0a - Dark red background */
-    --destructive-foreground: 0 86% 97%; /* Light red text */
-    --destructive-light-foreground: 0 86% 90%; /* Lighter red for dark backgrounds */
+    --destructive: 0 72% 51%;
+    /* #dc2626 - Red that pops */
+    --destructive-light: 0 63% 15%;
+    /* #450a0a - Dark red background */
+    --destructive-foreground: 0 86% 97%;
+    /* Light red text */
+    --destructive-light-foreground: 0 86% 90%;
+    /* Lighter red for dark backgrounds */
 
     /* Refined border system */
-    --border: 220 13% 18%; /* #2a2a2e - Default borders */
-    --border-light: 220 13% 23%; /* #3a3a3e - Stronger borders */
-    --input: 220 13% 18%; /* Input borders */
-    --ring: 217 91% 60%; /* Focus rings */
+    --border: 220 13% 18%;
+    /* #2a2a2e - Default borders */
+    --border-light: 220 13% 23%;
+    /* #3a3a3e - Stronger borders */
+    --input: 220 13% 18%;
+    /* Input borders */
+    --ring: 217 91% 60%;
+    /* Focus rings */
 
     /* Leitner box semantic tokens (dark) */
     --box1-bg: 220 7% 14%;
     --box1-fg: 220 9% 92%;
-    --box1-bg-transparent: 220 9% 80% / 0.15; /* More transparency for softer feel */
+    --box1-bg-transparent: 220 9% 80% / 0.15;
+    /* More transparency for softer feel */
     --box2-bg: 38 72% 18%;
     --box2-fg: 38 92% 70%;
     --box2-bg-transparent: 38 85% 65% / 0.18;
@@ -198,6 +252,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings:
@@ -284,7 +339,7 @@
     @apply inline-flex space-x-1;
   }
 
-  .loading-dots > div {
+  .loading-dots>div {
     @apply h-2 w-2 animate-pulse rounded-full bg-primary;
     animation-delay: calc(var(--i) * 0.1s);
   }
@@ -333,15 +388,19 @@
   .leitner-box-bg-1 {
     background-color: hsl(var(--box1-bg));
   }
+
   .leitner-box-bg-2 {
     background-color: hsl(var(--box2-bg));
   }
+
   .leitner-box-bg-3 {
     background-color: hsl(var(--box3-bg));
   }
+
   .leitner-box-bg-4 {
     background-color: hsl(var(--box4-bg));
   }
+
   .leitner-box-bg-5 {
     background-color: hsl(var(--box5-bg));
   }
@@ -350,15 +409,19 @@
   .leitner-box-bg-transparent-1 {
     background-color: hsl(var(--box1-bg-transparent));
   }
+
   .leitner-box-bg-transparent-2 {
     background-color: hsl(var(--box2-bg-transparent));
   }
+
   .leitner-box-bg-transparent-3 {
     background-color: hsl(var(--box3-bg-transparent));
   }
+
   .leitner-box-bg-transparent-4 {
     background-color: hsl(var(--box4-bg-transparent));
   }
+
   .leitner-box-bg-transparent-5 {
     background-color: hsl(var(--box5-bg-transparent));
   }
@@ -366,15 +429,19 @@
   .leitner-box-text-1 {
     color: hsl(var(--box1-fg));
   }
+
   .leitner-box-text-2 {
     color: hsl(var(--box2-fg));
   }
+
   .leitner-box-text-3 {
     color: hsl(var(--box3-fg));
   }
+
   .leitner-box-text-4 {
     color: hsl(var(--box4-fg));
   }
+
   .leitner-box-text-5 {
     color: hsl(var(--box5-fg));
   }
@@ -382,15 +449,19 @@
   .leitner-box-surface-1 {
     @apply leitner-box-bg-1 leitner-box-text-1;
   }
+
   .leitner-box-surface-2 {
     @apply leitner-box-bg-2 leitner-box-text-2;
   }
+
   .leitner-box-surface-3 {
     @apply leitner-box-bg-3 leitner-box-text-3;
   }
+
   .leitner-box-surface-4 {
     @apply leitner-box-bg-4 leitner-box-text-4;
   }
+
   .leitner-box-surface-5 {
     @apply leitner-box-bg-5 leitner-box-text-5;
   }
@@ -400,18 +471,22 @@
     background-color: hsl(var(--box1-bg-transparent));
     color: hsl(var(--box1-fg));
   }
+
   .leitner-box-surface-transparent-2 {
     background-color: hsl(var(--box2-bg-transparent));
     color: hsl(var(--box2-fg));
   }
+
   .leitner-box-surface-transparent-3 {
     background-color: hsl(var(--box3-bg-transparent));
     color: hsl(var(--box3-fg));
   }
+
   .leitner-box-surface-transparent-4 {
     background-color: hsl(var(--box4-bg-transparent));
     color: hsl(var(--box4-fg));
   }
+
   .leitner-box-surface-transparent-5 {
     background-color: hsl(var(--box5-bg-transparent));
     color: hsl(var(--box5-fg));
@@ -420,15 +495,19 @@
   .leitner-box-dot-1 {
     background-color: hsl(var(--box1-fg));
   }
+
   .leitner-box-dot-2 {
     background-color: hsl(var(--box2-fg));
   }
+
   .leitner-box-dot-3 {
     background-color: hsl(var(--box3-fg));
   }
+
   .leitner-box-dot-4 {
     background-color: hsl(var(--box4-fg));
   }
+
   .leitner-box-dot-5 {
     background-color: hsl(var(--box5-fg));
   }
@@ -436,15 +515,19 @@
   .leitner-accent-1 {
     background-color: hsl(var(--box1-fg) / 0.15);
   }
+
   .leitner-accent-2 {
     background-color: hsl(var(--box2-fg) / 0.15);
   }
+
   .leitner-accent-3 {
     background-color: hsl(var(--box3-fg) / 0.15);
   }
+
   .leitner-accent-4 {
     background-color: hsl(var(--box4-fg) / 0.15);
   }
+
   .leitner-accent-5 {
     background-color: hsl(var(--box5-fg) / 0.15);
   }
@@ -482,11 +565,15 @@
 
 /* Hide scrollbars (user request). Note: may impact discoverability; adjust if needed */
 body {
-  -ms-overflow-style: none; /* IE/Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
+
 body::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none;
+  /* Chrome/Safari */
 }
 
 /* Optional: still allow scroll on elements with explicit class if needed */
@@ -494,6 +581,7 @@ body::-webkit-scrollbar {
   -ms-overflow-style: auto;
   scrollbar-width: auto;
 }
+
 .show-scrollbar::-webkit-scrollbar {
   display: initial;
   width: 8px;
