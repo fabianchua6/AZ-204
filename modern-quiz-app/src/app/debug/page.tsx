@@ -1,6 +1,5 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { leitnerSystem } from '@/lib/leitner';
 import { useQuizData } from '@/hooks/use-quiz-data';
@@ -11,11 +10,13 @@ import {
   RefreshCw,
   CheckCircle,
   XCircle,
-  Database,
-  Zap,
+  ChevronLeft,
+  HardDrive,
   RotateCcw,
   AlertTriangle,
+  Sparkles,
 } from 'lucide-react';
+import Link from 'next/link';
 
 interface StorageStats {
   leitnerProgress: number;
@@ -41,7 +42,7 @@ export default function DebugPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
-    document.title = 'Debug - AZ-204 Quiz';
+    document.title = 'Settings - AZ-204 Quiz';
     loadStats();
   }, []);
 
@@ -91,7 +92,7 @@ export default function DebugPage() {
     try {
       await leitnerSystem.ensureInitialized();
       const filtered = questionService.filterQuestions(questions);
-      const stats = leitnerSystem.getStats();
+      const stats = leitnerSystem.getStats(filtered);
 
       setQuestionStats({
         total: questions.length,
@@ -102,8 +103,8 @@ export default function DebugPage() {
         box3: stats.boxDistribution[3] || 0,
         mastered: stats.boxDistribution[3] || 0,
       });
-    } catch {
-      console.error('Failed to load question stats');
+    } catch (e) {
+      console.error('Failed to load question stats', e);
     }
   };
 
@@ -112,20 +113,18 @@ export default function DebugPage() {
     setTimeout(() => setMessage(null), 3000);
   };
 
-  // Keep progress, clear session cache (allows new question order)
   const handleRefreshSession = () => {
     try {
       localStorage.removeItem('leitner-current-session');
       localStorage.removeItem('quiz-practice-state');
       localStorage.removeItem('quiz-leitner-state');
-      showMessage('success', 'Session cleared! Refresh the page for new question order.');
+      showMessage('success', 'Session cleared! Refresh for new questions.');
       loadStats();
     } catch {
       showMessage('error', 'Failed to clear session');
     }
   };
 
-  // Clear everything except Leitner progress
   const handleClearCacheKeepProgress = () => {
     try {
       const progressData = localStorage.getItem('leitner-progress');
@@ -140,26 +139,24 @@ export default function DebugPage() {
 
       keysToRemove.forEach(key => localStorage.removeItem(key));
 
-      // Restore progress
       if (progressData) {
         localStorage.setItem('leitner-progress', progressData);
       }
 
-      showMessage('success', 'Cache cleared! Your learning progress is preserved. Refresh the page.');
+      showMessage('success', 'Cache cleared, progress saved.');
       loadStats();
     } catch {
       showMessage('error', 'Failed to clear cache');
     }
   };
 
-  // Nuclear option - clear everything
   const handleClearAll = () => {
-    if (confirm('This will DELETE all your learning progress. Are you sure?')) {
+    if (confirm('DELETE all progress? This cannot be undone.')) {
       try {
         const theme = localStorage.getItem('theme');
         localStorage.clear();
         if (theme) localStorage.setItem('theme', theme);
-        showMessage('success', 'All data cleared. Refresh the page.');
+        showMessage('success', 'All data cleared.');
         loadStats();
         loadQuestionStats();
       } catch {
@@ -168,240 +165,196 @@ export default function DebugPage() {
     }
   };
 
-  // Force reload from server
   const handleForceReload = () => {
     handleRefreshSession();
     window.location.reload();
   };
 
   return (
-    <div className="container mx-auto max-w-2xl p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Debug Console</h1>
-        <Button variant="outline" size="sm" onClick={() => window.location.href = '/'}>
-          Back to Quiz
-        </Button>
-      </div>
-
-      {message && (
-        <div className={`p-3 rounded-lg flex items-center gap-2 ${message.type === 'success' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'
-          }`}>
-          {message.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-          {message.text}
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur-sm">
+        <div className="container mx-auto max-w-2xl px-4 py-3 flex items-center gap-3">
+          <Link href="/" className="p-2 -ml-2 rounded-lg hover:bg-muted transition-colors">
+            <ChevronLeft className="h-5 w-5" />
+          </Link>
+          <h1 className="text-lg font-semibold">Settings</h1>
         </div>
-      )}
+      </header>
 
-      {/* Question Stats */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Database className="h-5 w-5" />
-            Question Pool
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <p className="text-muted-foreground">Loading...</p>
-          ) : questionStats ? (
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <span className="text-muted-foreground">Total Questions:</span>
-                <span className="ml-2 font-mono">{questionStats.total}</span>
+      <div className="container mx-auto max-w-2xl px-4 py-6 space-y-8">
+        {/* Toast Message */}
+        {message && (
+          <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium ${message.type === 'success'
+              ? 'bg-green-500 text-white'
+              : 'bg-red-500 text-white'
+            }`}>
+            {message.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+            {message.text}
+          </div>
+        )}
+
+        {/* Stats Overview */}
+        <section>
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Overview</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Questions */}
+            <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {loading ? '...' : questionStats?.total || 0}
               </div>
-              <div>
-                <span className="text-muted-foreground">After Filtering:</span>
-                <span className="ml-2 font-mono">{questionStats.filtered}</span>
+              <div className="text-sm text-muted-foreground">Total Questions</div>
+            </div>
+            {/* In Progress */}
+            <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20">
+              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                {loading ? '...' : questionStats?.inProgress || 0}
               </div>
-              <div>
-                <span className="text-muted-foreground">In Progress:</span>
-                <span className="ml-2 font-mono">{questionStats.inProgress}</span>
+              <div className="text-sm text-muted-foreground">In Progress</div>
+            </div>
+            {/* Mastered */}
+            <div className="p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {loading ? '...' : questionStats?.mastered || 0}
               </div>
-              <div>
-                <span className="text-muted-foreground">Mastered (Box 3):</span>
-                <span className="ml-2 font-mono">{questionStats.mastered}</span>
+              <div className="text-sm text-muted-foreground">Mastered</div>
+            </div>
+            {/* Storage */}
+            <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20">
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                {storageStats?.totalSize || '0 KB'}
               </div>
-              <div className="col-span-2 pt-2 border-t">
-                <span className="text-muted-foreground">Box Distribution:</span>
-                <div className="flex gap-4 mt-1">
-                  <span className="font-mono text-red-500">Box 1: {questionStats.box1}</span>
-                  <span className="font-mono text-yellow-500">Box 2: {questionStats.box2}</span>
-                  <span className="font-mono text-green-500">Box 3: {questionStats.box3}</span>
-                </div>
+              <div className="text-sm text-muted-foreground">Storage Used</div>
+            </div>
+          </div>
+        </section>
+
+        {/* Box Distribution */}
+        {questionStats && (
+          <section>
+            <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Learning Progress</h2>
+            <div className="flex gap-2">
+              <div className="flex-1 text-center py-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                <div className="text-xl font-bold text-red-500">{questionStats.box1}</div>
+                <div className="text-xs text-muted-foreground">Box 1</div>
+              </div>
+              <div className="flex-1 text-center py-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <div className="text-xl font-bold text-amber-500">{questionStats.box2}</div>
+                <div className="text-xs text-muted-foreground">Box 2</div>
+              </div>
+              <div className="flex-1 text-center py-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                <div className="text-xl font-bold text-green-500">{questionStats.box3}</div>
+                <div className="text-xs text-muted-foreground">Box 3</div>
               </div>
             </div>
-          ) : (
-            <p className="text-muted-foreground">Unable to load stats</p>
-          )}
-        </CardContent>
-      </Card>
+          </section>
+        )}
 
-      {/* Storage Stats */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Zap className="h-5 w-5" />
-            Storage
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {storageStats ? (
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <span className="text-muted-foreground">Total Size:</span>
-                <span className="ml-2 font-mono">{storageStats.totalSize}</span>
+        {/* Actions */}
+        <section>
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Actions</h2>
+          <div className="space-y-2">
+            {/* Primary Action */}
+            <button
+              onClick={handleRefreshSession}
+              className="w-full flex items-center gap-3 p-4 rounded-xl bg-primary/10 hover:bg-primary/15 border border-primary/20 transition-colors text-left"
+            >
+              <div className="p-2 rounded-lg bg-primary/20">
+                <RefreshCw className="h-5 w-5 text-primary" />
               </div>
-              <div>
-                <span className="text-muted-foreground">Keys:</span>
-                <span className="ml-2 font-mono">{storageStats.totalKeys}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Progress Data:</span>
-                <span className="ml-2 font-mono">{(storageStats.leitnerProgress / 1024).toFixed(1)} KB</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Session Cache:</span>
-                <span className="ml-2 font-mono">{(storageStats.sessionData / 1024).toFixed(1)} KB</span>
-              </div>
-            </div>
-          ) : (
-            <p className="text-muted-foreground">Unable to load storage stats</p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Actions */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {/* Recommended action */}
-          <div className="p-3 border rounded-lg bg-primary/5 border-primary/20">
-            <div className="flex items-start gap-3">
-              <RefreshCw className="h-5 w-5 text-primary mt-0.5" />
               <div className="flex-1">
-                <h3 className="font-medium">Refresh Session (Recommended)</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Clears session cache for new question order. Keeps all your learning progress.
-                </p>
-                <Button
-                  className="mt-2"
-                  size="sm"
-                  onClick={handleRefreshSession}
-                >
-                  Clear Session Cache
-                </Button>
+                <div className="font-medium">Refresh Session</div>
+                <div className="text-sm text-muted-foreground">New question order, keeps progress</div>
               </div>
-            </div>
-          </div>
+              <Sparkles className="h-4 w-4 text-primary" />
+            </button>
 
-          {/* Clear cache keep progress */}
-          <div className="p-3 border rounded-lg">
-            <div className="flex items-start gap-3">
-              <RotateCcw className="h-5 w-5 text-muted-foreground mt-0.5" />
+            {/* Secondary Actions */}
+            <button
+              onClick={handleClearCacheKeepProgress}
+              className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-muted/50 border border-border/50 transition-colors text-left"
+            >
+              <div className="p-2 rounded-lg bg-muted">
+                <RotateCcw className="h-5 w-5 text-muted-foreground" />
+              </div>
               <div className="flex-1">
-                <h3 className="font-medium">Clear All Cache (Keep Progress)</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Clears all cached data but preserves your Leitner box progress.
-                </p>
-                <Button
-                  variant="outline"
-                  className="mt-2"
-                  size="sm"
-                  onClick={handleClearCacheKeepProgress}
-                >
-                  Clear Cache
-                </Button>
+                <div className="font-medium">Clear Cache</div>
+                <div className="text-sm text-muted-foreground">Keeps learning progress</div>
               </div>
-            </div>
-          </div>
+            </button>
 
-          {/* Force reload */}
-          <div className="p-3 border rounded-lg">
-            <div className="flex items-start gap-3">
-              <Zap className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <button
+              onClick={handleForceReload}
+              className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-muted/50 border border-border/50 transition-colors text-left"
+            >
+              <div className="p-2 rounded-lg bg-muted">
+                <HardDrive className="h-5 w-5 text-muted-foreground" />
+              </div>
               <div className="flex-1">
-                <h3 className="font-medium">Force Reload</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Clear session cache and immediately reload the page.
-                </p>
-                <Button
-                  variant="outline"
-                  className="mt-2"
-                  size="sm"
-                  onClick={handleForceReload}
-                >
-                  Clear & Reload
-                </Button>
+                <div className="font-medium">Force Reload</div>
+                <div className="text-sm text-muted-foreground">Clear cache & refresh page</div>
               </div>
-            </div>
-          </div>
+            </button>
 
-          {/* Nuclear option */}
-          <div className="p-3 border rounded-lg border-destructive/30 bg-destructive/5">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
+            {/* Danger Zone */}
+            <button
+              onClick={handleClearAll}
+              className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-destructive/10 border border-destructive/30 transition-colors text-left mt-4"
+            >
+              <div className="p-2 rounded-lg bg-destructive/20">
+                <Trash2 className="h-5 w-5 text-destructive" />
+              </div>
               <div className="flex-1">
-                <h3 className="font-medium text-destructive">Reset Everything</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Deletes ALL data including your learning progress. Cannot be undone.
-                </p>
-                <Button
-                  variant="destructive"
-                  className="mt-2"
-                  size="sm"
-                  onClick={handleClearAll}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete All Data
-                </Button>
+                <div className="font-medium text-destructive">Reset Everything</div>
+                <div className="text-sm text-muted-foreground">Delete all data permanently</div>
+              </div>
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+            </button>
+          </div>
+        </section>
+
+        {/* Changelog */}
+        <section>
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Changelog</h2>
+          <div className="space-y-4 text-sm">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">v1.5.0</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">Latest</span>
+              </div>
+              <div className="text-muted-foreground mt-1">
+                Fixed iOS font scaling • Next.js 15.5.9 • Arc TLS fix
+              </div>
+            </div>
+            <div>
+              <div className="font-semibold">v1.4.0</div>
+              <div className="text-muted-foreground mt-1">
+                Auto-hide header • 80% PDF priority • Sticky footer
+              </div>
+            </div>
+            <div>
+              <div className="font-semibold">v1.3.0</div>
+              <div className="text-muted-foreground mt-1">
+                Hook refactoring • Removed Practice Mode • Mobile UX
+              </div>
+            </div>
+            <div>
+              <div className="font-semibold">v1.2.0</div>
+              <div className="text-muted-foreground mt-1">
+                48 PDF questions • Session auto-refresh • Box 3 tuning
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </section>
 
-      {/* Changelog */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Changelog</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm space-y-3">
-          <div className="border-l-2 border-primary pl-3">
-            <div className="font-medium">v1.5.0 - Jan 5, 2026</div>
-            <ul className="text-muted-foreground mt-1 space-y-1">
-              <li>• Fixed iOS font scaling for consistent sizing</li>
-              <li>• Upgraded Next.js to 15.5.9 (security patches)</li>
-              <li>• Disabled HSTS to fix Arc browser TLS issues</li>
-            </ul>
+        {/* App Info */}
+        <section className="pb-8">
+          <div className="text-center text-xs text-muted-foreground">
+            <div>AZ-204 Quiz App</div>
+            <div className="mt-1">Made with ❤️ for Azure certification</div>
           </div>
-          <div className="border-l-2 border-muted pl-3">
-            <div className="font-medium">v1.4.0 - Dec 24, 2025</div>
-            <ul className="text-muted-foreground mt-1 space-y-1">
-              <li>• Auto-hide header (macOS dock style)</li>
-              <li>• 80% PDF question priority in sessions</li>
-              <li>• Sticky footer with 1:3 grid layout</li>
-              <li>• Auto-scroll to answer explanation</li>
-            </ul>
-          </div>
-          <div className="border-l-2 border-muted pl-3">
-            <div className="font-medium">v1.3.0 - Dec 23, 2025</div>
-            <ul className="text-muted-foreground mt-1 space-y-1">
-              <li>• Refactored hooks: useLeitnerSession, useLeitnerProgress, useLeitnerStats</li>
-              <li>• Removed Practice Mode (Leitner-only)</li>
-              <li>• Improved mobile UX for one-thumb interaction</li>
-            </ul>
-          </div>
-          <div className="border-l-2 border-muted pl-3">
-            <div className="font-medium">v1.2.0 - Dec 10, 2025</div>
-            <ul className="text-muted-foreground mt-1 space-y-1">
-              <li>• Added 48 PDF-sourced questions</li>
-              <li>• Session auto-refresh when question pool changes</li>
-              <li>• Reduced Box 3 question frequency</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
+        </section>
+      </div>
     </div>
   );
 }
