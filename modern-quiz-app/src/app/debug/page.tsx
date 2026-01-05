@@ -130,21 +130,21 @@ export default function DebugPage() {
     try {
       const progressData = localStorage.getItem('leitner-progress');
       const keysToRemove: string[] = [];
-      
+
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key !== 'leitner-progress' && !key.includes('theme')) {
           keysToRemove.push(key);
         }
       }
-      
+
       keysToRemove.forEach(key => localStorage.removeItem(key));
-      
+
       // Restore progress
       if (progressData) {
         localStorage.setItem('leitner-progress', progressData);
       }
-      
+
       showMessage('success', 'Cache cleared! Your learning progress is preserved. Refresh the page.');
       loadStats();
     } catch {
@@ -184,9 +184,8 @@ export default function DebugPage() {
       </div>
 
       {message && (
-        <div className={`p-3 rounded-lg flex items-center gap-2 ${
-          message.type === 'success' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'
-        }`}>
+        <div className={`p-3 rounded-lg flex items-center gap-2 ${message.type === 'success' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'
+          }`}>
           {message.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
           {message.text}
         </div>
@@ -285,8 +284,8 @@ export default function DebugPage() {
                 <p className="text-sm text-muted-foreground mt-1">
                   Clears session cache for new question order. Keeps all your learning progress.
                 </p>
-                <Button 
-                  className="mt-2" 
+                <Button
+                  className="mt-2"
                   size="sm"
                   onClick={handleRefreshSession}
                 >
@@ -305,9 +304,9 @@ export default function DebugPage() {
                 <p className="text-sm text-muted-foreground mt-1">
                   Clears all cached data but preserves your Leitner box progress.
                 </p>
-                <Button 
+                <Button
                   variant="outline"
-                  className="mt-2" 
+                  className="mt-2"
                   size="sm"
                   onClick={handleClearCacheKeepProgress}
                 >
@@ -326,9 +325,9 @@ export default function DebugPage() {
                 <p className="text-sm text-muted-foreground mt-1">
                   Clear session cache and immediately reload the page.
                 </p>
-                <Button 
+                <Button
                   variant="outline"
-                  className="mt-2" 
+                  className="mt-2"
                   size="sm"
                   onClick={handleForceReload}
                 >
@@ -347,9 +346,9 @@ export default function DebugPage() {
                 <p className="text-sm text-muted-foreground mt-1">
                   Deletes ALL data including your learning progress. Cannot be undone.
                 </p>
-                <Button 
+                <Button
                   variant="destructive"
-                  className="mt-2" 
+                  className="mt-2"
                   size="sm"
                   onClick={handleClearAll}
                 >
@@ -362,16 +361,45 @@ export default function DebugPage() {
         </CardContent>
       </Card>
 
-      {/* Help */}
+      {/* Changelog */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Troubleshooting</CardTitle>
+          <CardTitle className="text-lg">Changelog</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm text-muted-foreground space-y-2">
-          <p><strong>Same questions appearing?</strong> Click "Clear Session Cache" then refresh.</p>
-          <p><strong>Wrong question count?</strong> Click "Clear & Reload" to fetch latest from server.</p>
-          <p><strong>App acting weird?</strong> Try "Clear All Cache (Keep Progress)" first.</p>
-          <p><strong>Starting fresh?</strong> Use "Reset Everything" to wipe all data.</p>
+        <CardContent className="text-sm space-y-3">
+          <div className="border-l-2 border-primary pl-3">
+            <div className="font-medium">v1.5.0 - Jan 5, 2026</div>
+            <ul className="text-muted-foreground mt-1 space-y-1">
+              <li>• Fixed iOS font scaling for consistent sizing</li>
+              <li>• Upgraded Next.js to 15.5.9 (security patches)</li>
+              <li>• Disabled HSTS to fix Arc browser TLS issues</li>
+            </ul>
+          </div>
+          <div className="border-l-2 border-muted pl-3">
+            <div className="font-medium">v1.4.0 - Dec 24, 2025</div>
+            <ul className="text-muted-foreground mt-1 space-y-1">
+              <li>• Auto-hide header (macOS dock style)</li>
+              <li>• 80% PDF question priority in sessions</li>
+              <li>• Sticky footer with 1:3 grid layout</li>
+              <li>• Auto-scroll to answer explanation</li>
+            </ul>
+          </div>
+          <div className="border-l-2 border-muted pl-3">
+            <div className="font-medium">v1.3.0 - Dec 23, 2025</div>
+            <ul className="text-muted-foreground mt-1 space-y-1">
+              <li>• Refactored hooks: useLeitnerSession, useLeitnerProgress, useLeitnerStats</li>
+              <li>• Removed Practice Mode (Leitner-only)</li>
+              <li>• Improved mobile UX for one-thumb interaction</li>
+            </ul>
+          </div>
+          <div className="border-l-2 border-muted pl-3">
+            <div className="font-medium">v1.2.0 - Dec 10, 2025</div>
+            <ul className="text-muted-foreground mt-1 space-y-1">
+              <li>• Added 48 PDF-sourced questions</li>
+              <li>• Session auto-refresh when question pool changes</li>
+              <li>• Reduced Box 3 question frequency</li>
+            </ul>
+          </div>
         </CardContent>
       </Card>
     </div>
