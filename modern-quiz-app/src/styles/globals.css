@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 @layer base {
+  /* Disable iOS Dynamic Type - use app's own font sizes */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   :root {
     /* Warmer, richer background with subtle gradients */
     --background: 0 0% 99%;
