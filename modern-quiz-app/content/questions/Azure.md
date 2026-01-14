@@ -37,19 +37,6 @@ Notification Hubs are used for sending mobile push notifications, not for subscr
 
 ---
 
-Question: What is the level of awesomeness of the services part of the AZ-204 exam?
-
-- [x] Amazing
-- [ ] Good
-- [ ] Adequate
-- [ ] Meh
-- [ ] 3.6
-- [ ] I prefer using Google Cloud / AWS / Something else
-
-Answer: This is my F-U to Microsoft for providing insufficient, ad-like information in the Learning Path, while also making the exam needlessly hard. Thanks.
-
----
-
 Question: You need to configure an application performance management (APM) service to collect and monitor the application log data. Which Azure service should you configure?
 
 - [ ] Azure Monitor

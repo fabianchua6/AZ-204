@@ -2625,24 +2625,6 @@
     "topic": "Azure"
   },
   {
-    "id": "7afb243ebc1bfe181fe6763d117f4a2539f830da03307053e5dfd2fbe01a4b73",
-    "question": "What is the level of awesomeness of the services part of the AZ-204 exam?",
-    "answer": "This is my F-U to Microsoft for providing insufficient, ad-like information in the Learning Path, while also making the exam needlessly hard. Thanks.",
-    "options": [
-      "Amazing",
-      "Good",
-      "Adequate",
-      "Meh",
-      "3.6",
-      "I prefer using Google Cloud / AWS / Something else"
-    ],
-    "answerIndexes": [
-      0
-    ],
-    "hasCode": false,
-    "topic": "Azure"
-  },
-  {
     "id": "26eaa30f5e917cbe9b0e4e9ca941d7937c0f680cc464f481d83a2b7f58bb4cf3",
     "question": "You need to configure an application performance management (APM) service to collect and monitor the application log data. Which Azure service should you configure?",
     "answer": "Application Insights is a feature of Azure Monitor that provides extensible application performance management (APM) and monitoring for live web applications. Azure Monitor helps you maximize the availability and performance of applications and services.",
