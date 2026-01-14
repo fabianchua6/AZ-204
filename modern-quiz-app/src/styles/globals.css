@@ -5,16 +5,31 @@
 @layer base {
 
   /* Disable iOS Dynamic Type - force consistent font sizes */
+  /* Use explicit px values instead of rem to bypass Dynamic Type scaling */
   html {
     font-size: 16px !important;
     -webkit-text-size-adjust: 100% !important;
+    -moz-text-size-adjust: 100% !important;
     text-size-adjust: 100% !important;
   }
 
   body {
     font-size: 16px !important;
     -webkit-text-size-adjust: 100% !important;
+    -moz-text-size-adjust: 100% !important;
     text-size-adjust: 100% !important;
+  }
+
+  /* Override all text elements to use fixed px sizes instead of rem */
+  /* This prevents iOS Dynamic Type from scaling text */
+  h1 { font-size: 36px !important; }
+  h2 { font-size: 30px !important; }
+  h3 { font-size: 24px !important; }
+  h4 { font-size: 20px !important; }
+  h5 { font-size: 18px !important; }
+  h6 { font-size: 16px !important; }
+  p, span, div, li, td, th, label, input, textarea, select, button, a {
+    font-size: inherit;
   }
 
   :root {
