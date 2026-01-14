@@ -2,7 +2,7 @@
 
 import { useTheme } from 'next-themes';
 import { usePathname } from 'next/navigation';
-import { Moon, Sun, BookOpen, BarChart3, Brain, Settings } from 'lucide-react';
+import { Moon, Sun, BarChart3, Brain, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -33,23 +33,18 @@ export function Header({ isVisible = true }: HeaderProps) {
       className={`sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-sm transition-transform duration-300 ease-out ${isVisible ? 'translate-y-0' : '-translate-y-full'
         }`}
     >
-      <div className='container mx-auto px-4 py-4'>
+      <div className='container mx-auto px-4 py-2'>
         <div className='flex items-center justify-between'>
           <Link
             href='/'
-            className='flex items-center space-x-3 transition-opacity hover:opacity-80'
+            className='flex items-center transition-opacity hover:opacity-80'
           >
-            <div className='rounded-xl border border-primary/20 bg-primary/10 p-2'>
-              <BookOpen className='h-6 w-6 text-primary' />
-            </div>
-            <div>
-              <h1 className='text-xl font-bold text-foreground'>
-                AZ-204
-              </h1>
-            </div>
+            <h1 className='text-lg font-bold text-foreground'>
+              AZ-204
+            </h1>
           </Link>
 
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-1.5'>
             <Button
               variant='ghost'
               size='sm'
