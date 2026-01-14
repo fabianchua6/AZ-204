@@ -24,7 +24,7 @@ export function QuizStats({ stats }: QuizStatsProps) {
         </div>
 
         <div className='text-center'>
-          <div className='text-2xl font-bold text-blue-600'>
+          <div className='text-2xl font-bold text-primary dark:text-blue-400'>
             {answeredQuestions}
           </div>
           <div className='text-sm text-muted-foreground'>Answered</div>
@@ -32,8 +32,8 @@ export function QuizStats({ stats }: QuizStatsProps) {
 
         <div className='text-center'>
           <div className='flex items-center justify-center gap-1'>
-            <CheckCircle className='h-4 w-4 text-green-600' />
-            <span className='text-2xl font-bold text-green-600'>
+            <CheckCircle className='h-4 w-4 text-success dark:text-emerald-400' />
+            <span className='text-2xl font-bold text-success dark:text-emerald-400'>
               {correctAnswers}
             </span>
           </div>
@@ -42,8 +42,8 @@ export function QuizStats({ stats }: QuizStatsProps) {
 
         <div className='text-center'>
           <div className='flex items-center justify-center gap-1'>
-            <Target className='h-4 w-4 text-orange-600' />
-            <span className='text-2xl font-bold text-orange-600'>
+            <Target className='h-4 w-4 text-warning dark:text-amber-400' />
+            <span className='text-2xl font-bold text-warning dark:text-amber-400'>
               {accuracy}%
             </span>
           </div>

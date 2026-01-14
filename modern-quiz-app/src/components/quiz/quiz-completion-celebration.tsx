@@ -126,23 +126,23 @@ export function QuizCompletionCelebration({
                 >
                   <div className='rounded-lg bg-white/50 p-4 dark:bg-black/20'>
                     <div className='mb-2 flex items-center justify-center gap-2'>
-                      <Target className='h-4 w-4 text-green-600' />
-                      <span className='text-sm font-medium text-green-700 dark:text-green-300'>
+                      <Target className='h-4 w-4 text-success dark:text-emerald-400' />
+                      <span className='text-sm font-medium text-success-light-foreground dark:text-emerald-300'>
                         Questions
                       </span>
                     </div>
-                    <div className='text-2xl font-bold text-green-800 dark:text-green-200'>
+                    <div className='text-2xl font-bold text-success-light-foreground dark:text-emerald-200'>
                       {stats.answeredQuestions}
                     </div>
                   </div>
                   <div className='rounded-lg bg-white/50 p-4 dark:bg-black/20'>
                     <div className='mb-2 flex items-center justify-center gap-2'>
-                      <CheckCircle className='h-4 w-4 text-green-600' />
-                      <span className='text-sm font-medium text-green-700 dark:text-green-300'>
+                      <CheckCircle className='h-4 w-4 text-success dark:text-emerald-400' />
+                      <span className='text-sm font-medium text-success-light-foreground dark:text-emerald-300'>
                         Accuracy
                       </span>
                     </div>
-                    <div className='text-2xl font-bold text-green-800 dark:text-green-200'>
+                    <div className='text-2xl font-bold text-success-light-foreground dark:text-emerald-200'>
                       {Math.round(stats.accuracy)}%
                     </div>
                   </div>
@@ -157,7 +157,8 @@ export function QuizCompletionCelebration({
                 >
                   <Button
                     onClick={onContinue}
-                    className='w-full bg-green-600 text-white hover:bg-green-700'
+                    variant='success'
+                    className='w-full'
                     size='lg'
                   >
                     <Sparkles className='mr-2 h-4 w-4' />

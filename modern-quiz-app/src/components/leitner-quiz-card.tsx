@@ -384,7 +384,8 @@ export function LeitnerQuizCard({
                 <Button // End Session
                   onClick={onEndSession}
                   disabled={false}
-                  className='h-14 w-full rounded-xl bg-green-600 text-lg font-semibold shadow-md hover:bg-green-700'
+                  variant="success"
+                  className='h-14 w-full rounded-xl text-lg font-semibold shadow-md'
                 >
                   Finish <Target className="ml-2 h-5 w-5" />
                 </Button>

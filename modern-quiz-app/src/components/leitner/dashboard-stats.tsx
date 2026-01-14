@@ -21,7 +21,7 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
                     </div>
                 </div>
                 <div className='rounded-lg border bg-card p-4'>
-                    <div className='text-2xl font-bold text-green-600'>
+                    <div className='text-2xl font-bold text-success dark:text-emerald-400'>
                         {stats.leitner.accuracyRate.toFixed(0)}%
                     </div>
                     <div className='text-sm text-muted-foreground'>
@@ -29,7 +29,7 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
                     </div>
                 </div>
                 <div className='rounded-lg border bg-card p-4'>
-                    <div className='text-2xl font-bold text-blue-600'>
+                    <div className='text-2xl font-bold text-primary dark:text-blue-400'>
                         {stats.leitner.streakDays}
                     </div>
                     <div className='text-sm text-muted-foreground'>
@@ -43,19 +43,19 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
                 <h3 className='mb-3 font-medium'>Progress by Box</h3>
                 <div className='grid grid-cols-3 gap-3 text-sm'>
                     <div className='text-center'>
-                        <div className='text-lg font-bold text-red-600'>
+                        <div className='text-lg font-bold text-destructive dark:text-red-400'>
                             {stats.leitner.boxDistribution[1] || 0}
                         </div>
                         <div className='text-muted-foreground'>Box 1 (New)</div>
                     </div>
                     <div className='text-center'>
-                        <div className='text-lg font-bold text-yellow-600'>
+                        <div className='text-lg font-bold text-warning dark:text-amber-400'>
                             {stats.leitner.boxDistribution[2] || 0}
                         </div>
                         <div className='text-muted-foreground'>Box 2 (Learning)</div>
                     </div>
                     <div className='text-center'>
-                        <div className='text-lg font-bold text-green-600'>
+                        <div className='text-lg font-bold text-success dark:text-emerald-400'>
                             {stats.leitner.boxDistribution[3] || 0}
                         </div>
                         <div className='text-muted-foreground'>Box 3 (Mastered)</div>
