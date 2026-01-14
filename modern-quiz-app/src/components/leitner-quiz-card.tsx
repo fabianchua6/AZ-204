@@ -290,7 +290,7 @@ export function LeitnerQuizCard({
       />
 
       {/* Main Quiz Card */}
-      <Card className='relative flex flex-col border border-border bg-card shadow-sm dark:shadow-sm mb-24'>
+      <Card className='relative flex flex-col border border-border bg-card shadow-sm dark:shadow-sm mb-20'>
         {/* Header with Box Info ONLY */}
         <CardHeader className='rounded-t-lg bg-card/95 px-4 pb-0 pt-4'>
           <div className='flex flex-row items-center justify-between gap-3'>
@@ -362,18 +362,18 @@ export function LeitnerQuizCard({
       </Card>
 
       {/* STICKY ACTION BAR (Thumb Zone) */}
-      <div className='fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-background/80 p-4 backdrop-blur-md safe-area-bottom'>
-        <div className='mx-auto grid max-w-4xl grid-cols-4 gap-3'>
+      <div className='fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-background/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md'>
+        <div className='mx-auto grid max-w-4xl grid-cols-4 gap-2'>
 
           <Button
             variant='secondary'
-            size='lg'
+            size='default'
             onClick={handlePrevious}
             disabled={!canGoPrevious}
-            className='col-span-1 h-14 w-full rounded-xl border-2 border-border/50 shadow-sm transition-all active:scale-95 disabled:opacity-30'
+            className='col-span-1 h-11 w-full rounded-lg border border-border/50 shadow-sm transition-all active:scale-95 disabled:opacity-30'
             aria-label="Previous Question"
           >
-            <ChevronLeft className='h-8 w-8' stroke="currentColor" style={{ color: 'hsl(var(--foreground))' }} strokeWidth={3} />
+            <ChevronLeft className='h-6 w-6' stroke="currentColor" style={{ color: 'hsl(var(--foreground))' }} strokeWidth={2.5} />
           </Button>
 
           {/* PRIMARY ACTION BUTTON (Morphing) */}
@@ -385,17 +385,17 @@ export function LeitnerQuizCard({
                   onClick={onEndSession}
                   disabled={false}
                   variant="success"
-                  className='h-14 w-full rounded-xl text-lg font-semibold shadow-md'
+                  className='h-11 w-full rounded-lg text-base font-semibold shadow-sm'
                 >
-                  Finish <Target className="ml-2 h-5 w-5" />
+                  Finish <Target className="ml-2 h-4 w-4" />
                 </Button>
               ) : (
                 <Button // Next Question
                   onClick={handleNext}
                   disabled={!canGoNext}
-                  className='h-14 w-full rounded-xl text-lg font-semibold shadow-md'
+                  className='h-11 w-full rounded-lg text-base font-semibold shadow-sm'
                 >
-                  Next <ChevronRight className="ml-2 h-5 w-5" />
+                  Next <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               )
             ) : (
@@ -403,7 +403,7 @@ export function LeitnerQuizCard({
               <Button
                 onClick={handleSubmit}
                 disabled={buttonStates.submitDisabled}
-                className={`h-14 w-full rounded-xl text-lg font-semibold shadow-md ${cardState.isSubmitting ? 'opacity-80' : ''
+                className={`h-11 w-full rounded-lg text-base font-semibold shadow-sm ${cardState.isSubmitting ? 'opacity-80' : ''
                   }`}
               >
                 {cardState.isSubmitting ? 'Checking...' : 'Check Answer'}
