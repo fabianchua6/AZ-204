@@ -91,8 +91,6 @@ TLDR;
 - Implement solutions that use Azure Service Bus
 - Implement solutions that use Azure Queue Storage queues
 
-## Topics
-
 ## Sync Your Progress Across Devices 🔄
 
 Never lose your study progress! The [sync backend](/sync-backend/) allows you to continue your AZ-204 exam preparation on any device.
