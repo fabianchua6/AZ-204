@@ -2,3 +2,8 @@ TODO.md
 # macOS
 .DS_Store
 **/.DS_Store
+
+# Sync backend
+sync-backend/node_modules/
+sync-backend/data/
+sync-backend/*.log
