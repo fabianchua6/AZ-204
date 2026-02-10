@@ -13,7 +13,7 @@ npm start
 You should see:
 ```
 🚀 Sync backend running on http://localhost:3001
-📁 Data directory: /home/runner/work/AZ-204/AZ-204/sync-backend/data
+📁 Data directory: ./data
 
 Endpoints:
   GET  /health                - Health check
