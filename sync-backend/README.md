@@ -144,13 +144,53 @@ Currently uses file system (`./data/*.json`). For production:
 
 This is a **simple** backend for personal use. For production:
 
-1. Add proper authentication (Azure AD, OAuth2)
-2. Implement rate limiting
-3. Add request validation
-4. Use HTTPS only
-5. Implement data encryption at rest
-6. Add access logs
-7. Set up proper CORS policies
+### Current Implementation
+- ⚠️ No rate limiting (CodeQL finding - acceptable for personal use)
+- ⚠️ No authentication
+- ⚠️ Device ID-based access only
+- ⚠️ Data stored in plain text
+- ⚠️ CORS enabled for all origins
+
+### Production Recommendations
+
+1. **Add Rate Limiting**
+   ```javascript
+   const rateLimit = require('express-rate-limit');
+   
+   const limiter = rateLimit({
+     windowMs: 15 * 60 * 1000, // 15 minutes
+     max: 100 // limit each IP to 100 requests per windowMs
+   });
+   
+   app.use('/api/', limiter);
+   ```
+
+2. **Add Authentication**
+   - Use Azure AD authentication
+   - Implement OAuth2
+   - Add JWT tokens
+
+3. **Implement Input Validation**
+   - Validate device IDs
+   - Sanitize input data
+   - Set size limits
+
+4. **Security Headers**
+   - Use helmet.js
+   - Configure HTTPS only
+   - Set proper CORS policies
+
+5. **Data Protection**
+   - Encrypt data at rest
+   - Use Azure Key Vault for secrets
+   - Implement data retention policies
+
+6. **Access Logs**
+   - Log all API calls
+   - Monitor for suspicious activity
+   - Set up Azure Application Insights
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for production deployment guides.
 
 ## Environment Variables
 
