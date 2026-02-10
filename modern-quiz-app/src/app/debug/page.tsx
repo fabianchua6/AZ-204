@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { leitnerSystem } from '@/lib/leitner';
 import { useQuizData } from '@/hooks/use-quiz-data';
 import { questionService } from '@/lib/question-service';
@@ -118,6 +117,8 @@ export default function DebugPage() {
       localStorage.removeItem('leitner-current-session');
       localStorage.removeItem('quiz-practice-state');
       localStorage.removeItem('quiz-leitner-state');
+      localStorage.removeItem('leitner-submission-states');
+      localStorage.removeItem('leitner-quiz-index');
       showMessage('success', 'Session cleared! Refresh for new questions.');
       loadStats();
     } catch {
