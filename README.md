@@ -5,6 +5,7 @@ TLDR;
 - Read the [disclaimer](https://github.com/arvigeus/AZ-204#disclaimer)
 - Go through [Topics](/Topics/) (check [Study Plan](./Study%20Plan.md) for a suggested order)
 - Practice with [quiz app](https://az-204.vercel.app/) ([by topic](https://az-204.vercel.app/topics))
+- **NEW!** [Sync your quiz progress across devices](/sync-backend/) 🔄
 
 ## [Study guide for Exam AZ-204: Developing Solutions for Microsoft Azure](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-204#skills-measured-prior-to-august-21-2023)
 
@@ -89,6 +90,30 @@ TLDR;
 
 - Implement solutions that use Azure Service Bus
 - Implement solutions that use Azure Queue Storage queues
+
+## Sync Your Progress Across Devices 🔄
+
+Never lose your study progress! The [sync backend](/sync-backend/) allows you to continue your AZ-204 exam preparation on any device.
+
+### Features:
+- ✅ Sync quiz progress across desktop, laptop, mobile
+- ✅ Continue exactly where you left off
+- ✅ Smart merging of data from multiple devices
+- ✅ Multiple deployment options (local, Azure App Service, Azure Functions)
+- ✅ Aligns with AZ-204 exam topics (Functions, Storage, App Service)
+
+### Quick Start:
+```bash
+cd sync-backend
+npm install
+npm start
+```
+
+Then open `demo.html` in your browser to test!
+
+See the [sync-backend README](/sync-backend/README.md) for full documentation.
+
+---
 
 ## Topics
 
