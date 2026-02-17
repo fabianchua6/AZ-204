@@ -13,7 +13,18 @@ We welcome contributions to the AZ-204 Exam Study Guide repository! Whether it's
 
 ## Before You Push
 
-The CI pipeline runs automatically on every push and PR. To avoid surprises, run these checks locally first:
+Git hooks are set up via [husky](https://typicode.github.io/husky/) to catch issues early:
+
+| Hook | What runs | When |
+|------|-----------|------|
+| **pre-commit** | `lint-staged` — ESLint + Prettier on staged `.ts`/`.tsx` files | Every commit |
+| **pre-push** | `tsc --noEmit` + `jest --ci` — type-check and full test suite | Every push |
+
+After cloning, run `cd modern-quiz-app && npm install` to install dependencies **and** set up the hooks automatically (via the `prepare` script).
+
+> **Tip:** To skip hooks in an emergency, use `git commit --no-verify` or `git push --no-verify`.
+
+### Running checks manually
 
 ```bash
 cd modern-quiz-app
