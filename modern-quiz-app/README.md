@@ -37,9 +37,9 @@ This app lives in a monorepo. **You must set the Root Directory in the Vercel Da
 
 ### Required Environment Variables (Vercel Dashboard)
 
-| Variable | Description |
-|---|---|
-| `KV_REST_API_URL` | Upstash Redis REST URL |
+| Variable            | Description              |
+| ------------------- | ------------------------ |
+| `KV_REST_API_URL`   | Upstash Redis REST URL   |
 | `KV_REST_API_TOKEN` | Upstash Redis REST token |
 
 ## Architecture

@@ -96,6 +96,7 @@ TLDR;
 Never lose your study progress! The [sync backend](/sync-backend/) allows you to continue your AZ-204 exam preparation on any device.
 
 ### Features:
+
 - ✅ Sync quiz progress across desktop, laptop, mobile
 - ✅ Continue exactly where you left off
 - ✅ Smart merging of data from multiple devices
@@ -103,6 +104,7 @@ Never lose your study progress! The [sync backend](/sync-backend/) allows you to
 - ✅ Aligns with AZ-204 exam topics (Functions, Storage, App Service)
 
 ### Quick Start:
+
 ```bash
 cd sync-backend
 npm install
