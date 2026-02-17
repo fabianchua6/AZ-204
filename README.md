@@ -93,27 +93,13 @@ TLDR;
 
 ## Sync Your Progress Across Devices 🔄
 
-Never lose your study progress! The [sync backend](/sync-backend/) allows you to continue your AZ-204 exam preparation on any device.
+Never lose your study progress! The quiz app has built-in sync powered by Upstash Redis — continue your AZ-204 exam preparation on any device.
 
-### Features:
-
-- ✅ Sync quiz progress across desktop, laptop, mobile
+- ✅ Sync quiz progress, Leitner box assignments, and settings across devices
 - ✅ Continue exactly where you left off
-- ✅ Smart merging of data from multiple devices
-- ✅ Multiple deployment options (local, Azure App Service, Azure Functions)
-- ✅ Aligns with AZ-204 exam topics (Functions, Storage, App Service)
+- ✅ No login required — just a short sync code like `AZ-X7K9M2`
 
-### Quick Start:
-
-```bash
-cd sync-backend
-npm install
-npm start
-```
-
-Then open `demo.html` in your browser to test!
-
-See the [sync-backend README](/sync-backend/README.md) for full documentation.
+See the [quiz app README](/modern-quiz-app/README.md) for full documentation.
 
 ---
 
