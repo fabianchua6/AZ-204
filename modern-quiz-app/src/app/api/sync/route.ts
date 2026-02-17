@@ -20,12 +20,10 @@ interface SyncData {
 }
 
 /**
- * GET /api/sync/:code — Retrieve synced data by sync code
+ * GET /api/sync?code=AZ-XXXXXX
+ * Retrieve synced data by sync code
  */
-export async function GET(
-    _request: NextRequest,
-    { params }: { params: Promise<{ code: string }> }
-) {
+export async function GET(request: NextRequest) {
     if (!redis) {
         return NextResponse.json(
             { success: false, error: 'Sync backend not configured (Redis missing)' },
@@ -34,7 +32,16 @@ export async function GET(
     }
 
     try {
-        const { code } = await params;
+        const { searchParams } = new URL(request.url);
+        const code = searchParams.get('code');
+
+        if (!code) {
+            return NextResponse.json(
+                { success: false, error: 'Missing sync code' },
+                { status: 400 }
+            );
+        }
+
         const syncCode = code.toUpperCase();
 
         if (!/^AZ-[A-HJ-KM-NP-Z2-9]{6}$/.test(syncCode)) {
@@ -69,12 +76,10 @@ export async function GET(
 }
 
 /**
- * POST /api/sync/:code — Save data under a sync code
+ * POST /api/sync?code=AZ-XXXXXX
+ * Save data under a sync code
  */
-export async function POST(
-    request: NextRequest,
-    { params }: { params: Promise<{ code: string }> }
-) {
+export async function POST(request: NextRequest) {
     if (!redis) {
         return NextResponse.json(
             { success: false, error: 'Sync backend not configured (Redis missing)' },
@@ -83,7 +88,16 @@ export async function POST(
     }
 
     try {
-        const { code } = await params;
+        const { searchParams } = new URL(request.url);
+        const code = searchParams.get('code');
+
+        if (!code) {
+            return NextResponse.json(
+                { success: false, error: 'Missing sync code' },
+                { status: 400 }
+            );
+        }
+
         const syncCode = code.toUpperCase();
 
         if (!/^AZ-[A-HJ-KM-NP-Z2-9]{6}$/.test(syncCode)) {
