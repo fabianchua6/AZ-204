@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
+import { isValidSyncCode, SYNC_TTL_SECONDS, type SyncData } from '@/lib/generate-sync-code';
 
 // Initialize Redis only if env vars are present (prevents crash on build)
 const redis = process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN
@@ -8,16 +9,6 @@ const redis = process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN
         token: process.env.KV_REST_API_TOKEN,
     })
     : null;
-
-const SYNC_TTL_SECONDS = 90 * 24 * 60 * 60; // 90 days
-
-interface SyncData {
-    quizProgress: Record<string, unknown>;
-    answeredQuestions: Record<string, unknown>;
-    leitnerProgress: Record<string, unknown>;
-    settings: Record<string, unknown>;
-    lastSync: string;
-}
 
 /**
  * GET /api/sync/:code — Retrieve synced data by sync code
@@ -37,7 +28,7 @@ export async function GET(
         const { code } = await params;
         const syncCode = code.toUpperCase();
 
-        if (!/^AZ-[A-HJ-KM-NP-Z2-9]{6}$/.test(syncCode)) {
+        if (!isValidSyncCode(syncCode)) {
             return NextResponse.json(
                 { success: false, error: 'Invalid sync code format' },
                 { status: 400 }
@@ -86,7 +77,7 @@ export async function POST(
         const { code } = await params;
         const syncCode = code.toUpperCase();
 
-        if (!/^AZ-[A-HJ-KM-NP-Z2-9]{6}$/.test(syncCode)) {
+        if (!isValidSyncCode(syncCode)) {
             return NextResponse.json(
                 { success: false, error: 'Invalid sync code format' },
                 { status: 400 }

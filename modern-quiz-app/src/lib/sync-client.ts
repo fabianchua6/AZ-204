@@ -5,13 +5,8 @@
  * Push your progress, pull it on another device.
  */
 
-export interface SyncData {
-    quizProgress: Record<string, unknown>;
-    answeredQuestions: Record<string, unknown>;
-    leitnerProgress: Record<string, unknown>;
-    settings: Record<string, unknown>;
-    lastSync?: string;
-}
+import type { SyncData } from './generate-sync-code';
+export type { SyncData } from './generate-sync-code';
 
 export interface SyncResponse {
     success: boolean;

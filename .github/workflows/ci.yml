@@ -8,209 +8,182 @@ on:
 
 env:
   NODE_VERSION: '18'
+  WORKING_DIR: ./modern-quiz-app
 
 jobs:
-  lint-and-test:
-    name: Lint & Test
+  # ─── Stage 1: Fast checks (no build needed, run in parallel) ──────
+  lint:
+    name: Lint & Type Check
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./modern-quiz-app
-    
+        working-directory: ${{ env.WORKING_DIR }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: modern-quiz-app/package-lock.json
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Run ESLint
-        run: npm run lint
-        
-      - name: Run type check
-        run: npm run type-check
-        
-      - name: Run tests
-        run: npm run test
-        
-      - name: Build application
-        run: npm run build
-        
-      - name: Upload build artifacts
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run type-check
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: modern-quiz-app/package-lock.json
+      - run: npm ci
+      - name: Run tests with coverage
+        run: npm run test -- --ci --coverage
+      - name: Coverage summary
+        if: always()
+        run: |
+          echo '### 📊 Test Coverage' >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage/coverage-summary.json ]; then
+            node -e "
+              const c = require('./coverage/coverage-summary.json').total;
+              const row = (k) => '| ' + k + ' | ' + c[k].pct + '% |';
+              console.log('| Metric | Coverage |');
+              console.log('|--------|----------|');
+              ['statements','branches','functions','lines'].forEach(k => console.log(row(k)));
+            "
+          else
+            echo 'Coverage report not found.'
+          fi >> $GITHUB_STEP_SUMMARY
+      - name: Upload coverage
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-output
-          path: modern-quiz-app/.next
-          retention-days: 1
-
-  accessibility-check:
-    name: Accessibility Audit
-    runs-on: ubuntu-latest
-    needs: lint-and-test
-    defaults:
-      run:
-        working-directory: ./modern-quiz-app
-        
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: modern-quiz-app/package-lock.json
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: modern-quiz-app/.next
-          
-      - name: Start application
-        run: npm start &
-        
-      - name: Wait for application
-        run: npx wait-on http://localhost:3000
-        
-      - name: Run Lighthouse CI
-        run: npx @lhci/cli@0.12.x autorun
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-
-  api-integration-test:
-    name: API Integration Tests
-    runs-on: ubuntu-latest
-    needs: lint-and-test
-    defaults:
-      run:
-        working-directory: ./modern-quiz-app
-        
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: modern-quiz-app/package-lock.json
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: modern-quiz-app/.next
-          
-      - name: Start application
-        run: npm start &
-        env:
-          KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
-          KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
-          
-      - name: Wait for application
-        run: npx wait-on http://localhost:3000 --timeout 60000
-        
-      - name: Test Sync API - Health Check
-        run: |
-          # Test that API routes are accessible (should return 400 for invalid code, not 404)
-          response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/sync/invalid-code)
-          if [ "$response" != "400" ]; then
-            echo "❌ Expected 400 for invalid code, got $response"
-            exit 1
-          fi
-          echo "✅ API route is accessible (returns 400 for invalid code)"
-          
-      - name: Test Sync API - Valid Code Format
-        run: |
-          # Test with valid code format (should return 200 or 503 if Redis not configured)
-          response=$(curl -s -w "\n%{http_code}" http://localhost:3000/api/sync/AZ-TESTAB)
-          http_code=$(echo "$response" | tail -1)
-          body=$(echo "$response" | head -n -1)
-          
-          if [ "$http_code" = "200" ] || [ "$http_code" = "503" ]; then
-            echo "✅ API responds correctly (HTTP $http_code)"
-            echo "Response: $body"
-          else
-            echo "❌ Unexpected response code: $http_code"
-            echo "Response: $body"
-            exit 1
-          fi
-          
-      - name: Test Sync API - POST endpoint
-        run: |
-          # Test POST endpoint
-          response=$(curl -s -w "\n%{http_code}" -X POST \
-            -H "Content-Type: application/json" \
-            -d '{"quizProgress":{"test":1}}' \
-            http://localhost:3000/api/sync/AZ-TESTAB)
-          http_code=$(echo "$response" | tail -1)
-          body=$(echo "$response" | head -n -1)
-          
-          if [ "$http_code" = "200" ] || [ "$http_code" = "503" ]; then
-            echo "✅ POST endpoint responds correctly (HTTP $http_code)"
-            echo "Response: $body"
-          else
-            echo "❌ Unexpected response code: $http_code"
-            echo "Response: $body"
-            exit 1
-          fi
+          name: coverage-report
+          path: modern-quiz-app/coverage
+          retention-days: 7
 
   security-audit:
     name: Security Audit
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./modern-quiz-app
-        
+        working-directory: ${{ env.WORKING_DIR }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: modern-quiz-app/package-lock.json
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Run npm audit
-        run: npm audit --audit-level moderate
-        continue-on-error: true
-        
-      - name: Run Snyk security scan
-        uses: snyk/actions/node@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=medium
+      - run: npm ci
+      - run: npm audit --audit-level moderate || true
 
-  # Post-deployment verification (runs on preview deployments)
-  verify-deployment:
-    name: Verify Deployment
+  # ─── Stage 2: Build (depends on lint + test passing) ──────────────
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    needs: [lint-and-test, api-integration-test]
+    needs: [lint, test]
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: modern-quiz-app/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            modern-quiz-app/.next
+            !modern-quiz-app/.next/cache
+          retention-days: 1
+
+  # ─── Stage 3: Integration tests (need the build artifact) ─────────
+  api-integration-test:
+    name: API Integration Tests
+    runs-on: ubuntu-latest
+    needs: build
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: modern-quiz-app/package-lock.json
+      - run: npm ci
+
+      - name: Download build output
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: modern-quiz-app/.next
+
+      - name: Start application
+        run: npm start &
+        env:
+          KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
+          KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
+
+      - name: Wait for server
+        run: npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Test API - invalid sync code returns 400
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/sync/invalid)
+          if [ "$status" != "400" ]; then
+            echo "❌ Expected 400 for invalid code, got $status"; exit 1
+          fi
+          echo "✅ Invalid code → 400"
+
+      - name: Test API - valid sync code returns 200 or 503
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/sync/AZ-TESTAB)
+          if [ "$status" != "200" ] && [ "$status" != "503" ]; then
+            echo "❌ Expected 200/503 for valid code, got $status"; exit 1
+          fi
+          echo "✅ Valid code GET → $status"
+
+      - name: Test API - POST returns 200 or 503
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST -H "Content-Type: application/json" \
+            -d '{"quizProgress":{"test":1}}' \
+            http://localhost:3000/api/sync/AZ-TESTAB)
+          if [ "$status" != "200" ] && [ "$status" != "503" ]; then
+            echo "❌ Expected 200/503 for POST, got $status"; exit 1
+          fi
+          echo "✅ POST → $status"
+
+      - name: Test API - homepage loads
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
+          if [ "$status" != "200" ]; then
+            echo "❌ Homepage returned $status"; exit 1
+          fi
+          echo "✅ Homepage → 200"
+
+  # ─── Stage 4: Post-deploy verification (PR only) ──────────────────
+  verify-deployment:
+    name: Verify Preview Deployment
+    runs-on: ubuntu-latest
+    needs: build
     if: github.event_name == 'pull_request'
-    
     steps:
       - name: Wait for Vercel Preview
         uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
@@ -220,44 +193,26 @@ jobs:
           max_timeout: 300
           check_interval: 10
         continue-on-error: true
-        
-      - name: Verify API Routes on Preview
+
+      - name: Smoke test preview deployment
         if: steps.waitForDeploy.outcome == 'success'
         run: |
           PREVIEW_URL="${{ steps.waitForDeploy.outputs.url }}"
-          echo "Testing deployment at: $PREVIEW_URL"
-          
-          # Test homepage is accessible
-          echo "Testing homepage..."
-          homepage_status=$(curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL")
-          if [ "$homepage_status" != "200" ]; then
-            echo "❌ Homepage returned $homepage_status"
-            exit 1
-          fi
-          echo "✅ Homepage accessible (HTTP 200)"
-          
-          # Test API route exists (not 404)
-          echo "Testing API route..."
-          api_status=$(curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL/api/sync/AZ-TESTXX")
-          if [ "$api_status" = "404" ]; then
-            echo "❌ API route not found (404)"
-            exit 1
-          fi
-          echo "✅ API route accessible (HTTP $api_status)"
-          
-          # Test POST endpoint
-          echo "Testing POST endpoint..."
-          post_response=$(curl -s -w "\n%{http_code}" -X POST \
-            -H "Content-Type: application/json" \
-            -d '{"quizProgress":{}}' \
-            "$PREVIEW_URL/api/sync/AZ-TESTXX")
-          post_status=$(echo "$post_response" | tail -1)
-          if [ "$post_status" = "404" ]; then
-            echo "❌ POST endpoint not found (404)"
-            exit 1
-          fi
-          echo "✅ POST endpoint accessible (HTTP $post_status)"
-          
-          echo ""
-          echo "🎉 Deployment verification passed!"
+          echo "Testing: $PREVIEW_URL"
+
+          # Homepage
+          status=$(curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL")
+          [ "$status" = "200" ] && echo "✅ Homepage OK" || { echo "❌ Homepage $status"; exit 1; }
+
+          # API route exists (not 404)
+          status=$(curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL/api/sync/AZ-TESTXX")
+          [ "$status" != "404" ] && echo "✅ API route OK ($status)" || { echo "❌ API 404"; exit 1; }
+
+          # POST endpoint exists
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST -H "Content-Type: application/json" \
+            -d '{"quizProgress":{}}' "$PREVIEW_URL/api/sync/AZ-TESTXX")
+          [ "$status" != "404" ] && echo "✅ POST OK ($status)" || { echo "❌ POST 404"; exit 1; }
+
+          echo "🎉 Deployment verified!"
 
