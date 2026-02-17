@@ -1,15 +1,6 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "modern-quiz-app/package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/modern-quiz-app/$1"
-    }
-  ]
+  "framework": "nextjs",
+  "installCommand": "cd modern-quiz-app && npm install",
+  "buildCommand": "cd modern-quiz-app && npm run build",
+  "outputDirectory": "modern-quiz-app/.next"
 }
