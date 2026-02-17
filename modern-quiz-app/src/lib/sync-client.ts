@@ -152,7 +152,7 @@ export async function pushData(syncCode: string): Promise<SyncResponse> {
  * Pull data from the cloud and apply it locally
  */
 export async function pullData(syncCode: string): Promise<SyncResponse> {
-    const response = await fetch(`/api/sync?code=${syncCode}`);
+    const response = await fetch(`/api/sync/${syncCode}`);
 
     if (!response.ok) {
         throw new Error(`Pull failed: ${response.statusText}`);

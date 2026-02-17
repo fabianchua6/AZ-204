@@ -5,6 +5,9 @@
 
 const CHARSET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
+/** Regex for validating sync codes */
+export const SYNC_CODE_REGEX = /^AZ-[A-HJ-KM-NP-Z2-9]{6}$/;
+
 export function generateSyncCode(): string {
     const chars: string[] = [];
     for (let i = 0; i < 6; i++) {
@@ -18,5 +21,5 @@ export function generateSyncCode(): string {
  * Validate that a sync code matches the expected format
  */
 export function isValidSyncCode(code: string): boolean {
-    return /^AZ-[A-HJ-KM-NP-Z2-9]{6}$/.test(code.toUpperCase());
+    return SYNC_CODE_REGEX.test(code.toUpperCase());
 }
