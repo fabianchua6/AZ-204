@@ -3,10 +3,7 @@
   "builds": [
     {
       "src": "modern-quiz-app/package.json",
-      "use": "@vercel/next",
-      "config": {
-        "rootDirectory": "modern-quiz-app"
-      }
+      "use": "@vercel/next"
     }
   ]
 }
