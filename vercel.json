@@ -5,5 +5,11 @@
       "src": "modern-quiz-app/package.json",
       "use": "@vercel/next"
     }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/modern-quiz-app/$1"
+    }
   ]
 }
