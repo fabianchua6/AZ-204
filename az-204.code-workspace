@@ -8,5 +8,10 @@
       "name": "Quiz App",
       "path": "quiz-app"
     }
-  ]
+  ],
+  "settings": {
+    "chat.tools.terminal.autoApprove": {
+      "npx jest": true
+    }
+  }
 }
