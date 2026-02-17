@@ -11,6 +11,30 @@ We welcome contributions to the AZ-204 Exam Study Guide repository! Whether it's
 5. **Push to GitHub**: Push your changes to your fork on GitHub using `git push origin new-branch-name`.
 6. **Create a Pull Request**: Go to your fork on GitHub and click the 'New Pull Request' button, and fill out the form.
 
+## Before You Push
+
+The CI pipeline runs automatically on every push and PR. To avoid surprises, run these checks locally first:
+
+```bash
+cd modern-quiz-app
+npm run lint          # ESLint
+npm run type-check    # TypeScript compiler
+npm run test          # Unit tests
+npm run test -- --coverage  # Tests + coverage report
+npm run build         # Production build
+```
+
+### CI Pipeline Stages
+
+1. **Lint & Type Check** — ESLint + `tsc --noEmit`
+2. **Unit Tests** — Jest with coverage report
+3. **Security Audit** — `npm audit`
+4. **Build** — Next.js production build (runs after lint + test pass)
+5. **API Integration Tests** — Starts the app and curl-tests the sync endpoints
+6. **Verify Preview Deployment** — Smoke tests the Vercel preview (PR only)
+
+All stages must pass for a PR to be mergeable.
+
 ## Guidelines
 
 - Please ensure that your contributions are relevant to the AZ-204 exam and adhere to the official guidelines.

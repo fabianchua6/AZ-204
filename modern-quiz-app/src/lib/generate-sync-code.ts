@@ -17,7 +17,7 @@ export interface SyncData {
     answeredQuestions: Record<string, unknown>;
     leitnerProgress: Record<string, unknown>;
     settings: Record<string, unknown>;
-    lastSync: string;
+    lastSync?: string;
 }
 
 export function generateSyncCode(): string {

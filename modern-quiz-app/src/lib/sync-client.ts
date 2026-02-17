@@ -5,6 +5,7 @@
  * Push your progress, pull it on another device.
  */
 
+import type { SyncData } from './generate-sync-code';
 export type { SyncData } from './generate-sync-code';
 
 export interface SyncResponse {

@@ -43,7 +43,24 @@ jobs:
           cache: 'npm'
           cache-dependency-path: modern-quiz-app/package-lock.json
       - run: npm ci
-      - run: npm run test -- --ci --coverage
+      - name: Run tests with coverage
+        run: npm run test -- --ci --coverage
+      - name: Coverage summary
+        if: always()
+        run: |
+          echo '### 📊 Test Coverage' >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage/coverage-summary.json ]; then
+            node -e "
+              const c = require('./coverage/coverage-summary.json').total;
+              const row = (k) => '| ' + k + ' | ' + c[k].pct + '% |';
+              console.log('| Metric | Coverage |');
+              console.log('|--------|----------|');
+              ['statements','branches','functions','lines'].forEach(k => console.log(row(k)));
+            "
+          else
+            echo 'Coverage report not found.'
+          fi >> $GITHUB_STEP_SUMMARY
       - name: Upload coverage
         if: always()
         uses: actions/upload-artifact@v4
