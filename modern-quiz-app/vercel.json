@@ -1,6 +1,3 @@
 {
-  "buildCommand": "cd modern-quiz-app && npm run build",
-  "outputDirectory": "modern-quiz-app/.next",
-  "installCommand": "cd modern-quiz-app && npm install",
   "framework": "nextjs"
 }
