@@ -20,7 +20,12 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { generateSyncCode, isValidSyncCode } from '@/lib/generate-sync-code';
-import { pushData, pullData, getStoredSyncCode, getLastSyncTime } from '@/lib/sync-client';
+import {
+  pushData,
+  pullData,
+  getStoredSyncCode,
+  getLastSyncTime,
+} from '@/lib/sync-client';
 
 interface StorageStats {
   leitnerProgress: number;
@@ -42,8 +47,13 @@ interface QuestionStats {
 export default function DebugPage() {
   const { questions, loading } = useQuizData();
   const [storageStats, setStorageStats] = useState<StorageStats | null>(null);
-  const [questionStats, setQuestionStats] = useState<QuestionStats | null>(null);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [questionStats, setQuestionStats] = useState<QuestionStats | null>(
+    null
+  );
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
   const [syncCode, setSyncCode] = useState<string>('');
   const [syncInput, setSyncInput] = useState<string>('');
   const [lastSync, setLastSync] = useState<string | null>(null);
@@ -83,7 +93,10 @@ export default function DebugPage() {
           if (key.includes('leitner-progress')) {
             leitnerProgress = size;
           }
-          if (key.includes('leitner-current-session') || key.includes('quiz-')) {
+          if (
+            key.includes('leitner-current-session') ||
+            key.includes('quiz-')
+          ) {
             sessionData += size;
           }
         }
@@ -185,60 +198,74 @@ export default function DebugPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className='min-h-screen bg-background'>
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur-sm">
-        <div className="container mx-auto max-w-2xl px-4 py-3 flex items-center gap-3">
-          <Link href="/" className="p-2 -ml-2 rounded-lg hover:bg-muted transition-colors">
-            <ChevronLeft className="h-5 w-5" />
+      <header className='sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur-sm'>
+        <div className='container mx-auto flex max-w-2xl items-center gap-3 px-4 py-3'>
+          <Link
+            href='/'
+            className='-ml-2 rounded-lg p-2 transition-colors hover:bg-muted'
+          >
+            <ChevronLeft className='h-5 w-5' />
           </Link>
-          <h1 className="text-lg font-semibold">Settings</h1>
+          <h1 className='text-lg font-semibold'>Settings</h1>
         </div>
       </header>
 
-      <div className="container mx-auto max-w-2xl px-4 py-6 space-y-8">
+      <div className='container mx-auto max-w-2xl space-y-8 px-4 py-6'>
         {/* Toast Message */}
         {message && (
-          <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium ${message.type === 'success'
-            ? 'bg-green-500 text-white'
-            : 'bg-red-500 text-white'
-            }`}>
-            {message.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+          <div
+            className={`fixed left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium shadow-lg ${
+              message.type === 'success'
+                ? 'bg-green-500 text-white'
+                : 'bg-red-500 text-white'
+            }`}
+          >
+            {message.type === 'success' ? (
+              <CheckCircle className='h-4 w-4' />
+            ) : (
+              <XCircle className='h-4 w-4' />
+            )}
             {message.text}
           </div>
         )}
 
         {/* Stats Overview */}
         <section>
-          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Overview</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <h2 className='mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+            Overview
+          </h2>
+          <div className='grid grid-cols-2 gap-3'>
             {/* Questions */}
-            <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+            <div className='rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-blue-600/5 p-4'>
+              <div className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
                 {loading ? '...' : questionStats?.total || 0}
               </div>
-              <div className="text-sm text-muted-foreground">Total Questions</div>
+              <div className='text-sm text-muted-foreground'>
+                Total Questions
+              </div>
             </div>
             {/* In Progress */}
-            <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20">
-              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+            <div className='rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-4'>
+              <div className='text-2xl font-bold text-amber-600 dark:text-amber-400'>
                 {loading ? '...' : questionStats?.inProgress || 0}
               </div>
-              <div className="text-sm text-muted-foreground">In Progress</div>
+              <div className='text-sm text-muted-foreground'>In Progress</div>
             </div>
             {/* Mastered */}
-            <div className="p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+            <div className='rounded-xl border border-green-500/20 bg-gradient-to-br from-green-500/10 to-green-600/5 p-4'>
+              <div className='text-2xl font-bold text-green-600 dark:text-green-400'>
                 {loading ? '...' : questionStats?.mastered || 0}
               </div>
-              <div className="text-sm text-muted-foreground">Mastered</div>
+              <div className='text-sm text-muted-foreground'>Mastered</div>
             </div>
             {/* Storage */}
-            <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20">
-              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+            <div className='rounded-xl border border-purple-500/20 bg-gradient-to-br from-purple-500/10 to-purple-600/5 p-4'>
+              <div className='text-2xl font-bold text-purple-600 dark:text-purple-400'>
                 {storageStats?.totalSize || '0 KB'}
               </div>
-              <div className="text-sm text-muted-foreground">Storage Used</div>
+              <div className='text-sm text-muted-foreground'>Storage Used</div>
             </div>
           </div>
         </section>
@@ -246,19 +273,27 @@ export default function DebugPage() {
         {/* Box Distribution */}
         {questionStats && (
           <section>
-            <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Learning Progress</h2>
-            <div className="flex gap-2">
-              <div className="flex-1 text-center py-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                <div className="text-xl font-bold text-red-500">{questionStats.box1}</div>
-                <div className="text-xs text-muted-foreground">Box 1</div>
+            <h2 className='mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+              Learning Progress
+            </h2>
+            <div className='flex gap-2'>
+              <div className='flex-1 rounded-lg border border-red-500/20 bg-red-500/10 py-3 text-center'>
+                <div className='text-xl font-bold text-red-500'>
+                  {questionStats.box1}
+                </div>
+                <div className='text-xs text-muted-foreground'>Box 1</div>
               </div>
-              <div className="flex-1 text-center py-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <div className="text-xl font-bold text-amber-500">{questionStats.box2}</div>
-                <div className="text-xs text-muted-foreground">Box 2</div>
+              <div className='flex-1 rounded-lg border border-amber-500/20 bg-amber-500/10 py-3 text-center'>
+                <div className='text-xl font-bold text-amber-500'>
+                  {questionStats.box2}
+                </div>
+                <div className='text-xs text-muted-foreground'>Box 2</div>
               </div>
-              <div className="flex-1 text-center py-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                <div className="text-xl font-bold text-green-500">{questionStats.box3}</div>
-                <div className="text-xs text-muted-foreground">Box 3</div>
+              <div className='flex-1 rounded-lg border border-green-500/20 bg-green-500/10 py-3 text-center'>
+                <div className='text-xl font-bold text-green-500'>
+                  {questionStats.box3}
+                </div>
+                <div className='text-xs text-muted-foreground'>Box 3</div>
               </div>
             </div>
           </section>
@@ -266,35 +301,40 @@ export default function DebugPage() {
 
         {/* Cloud Sync */}
         <section>
-          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Cloud Sync</h2>
-          <div className="space-y-3">
-            {/* Current sync code display */}
+          <h2 className='mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+            Cloud Sync
+          </h2>
+          <div className='overflow-hidden rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-cyan-500/5'>
+            {/* Sync code display — only when a code exists */}
             {syncCode && (
-              <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-muted-foreground">Your Sync Code</span>
+              <div className='border-b border-blue-500/10 px-4 pb-3 pt-4'>
+                <div className='mb-1 flex items-center justify-between'>
+                  <span className='text-xs text-muted-foreground'>
+                    Your Sync Code
+                  </span>
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(syncCode);
                       showMessage('success', 'Code copied!');
                     }}
-                    className="p-1 rounded hover:bg-blue-500/20 transition-colors"
+                    className='flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-blue-500 transition-colors hover:bg-blue-500/10'
                   >
-                    <Copy className="h-3.5 w-3.5 text-blue-500" />
+                    <Copy className='h-3 w-3' />
+                    Copy
                   </button>
                 </div>
-                <div className="text-xl font-mono font-bold text-blue-600 dark:text-blue-400 tracking-widest">
+                <div className='font-mono text-2xl font-bold tracking-widest text-blue-600 dark:text-blue-400'>
                   {syncCode}
                 </div>
                 {lastSync && (
-                  <div className="text-xs text-muted-foreground mt-1">
+                  <div className='mt-1 text-xs text-muted-foreground'>
                     Last synced: {new Date(lastSync).toLocaleString()}
                   </div>
                 )}
               </div>
             )}
 
-            {/* Backup button */}
+            {/* Backup to Cloud */}
             <button
               disabled={syncing}
               onClick={async () => {
@@ -312,34 +352,38 @@ export default function DebugPage() {
                   setSyncing(false);
                 }
               }}
-              className="w-full flex items-center gap-3 p-4 rounded-xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 transition-colors text-left disabled:opacity-50"
+              className='flex w-full items-center gap-3 border-b border-blue-500/10 px-4 py-3.5 text-left transition-colors hover:bg-blue-500/10 disabled:opacity-50'
             >
-              <div className="p-2 rounded-lg bg-blue-500/20">
-                <Cloud className="h-5 w-5 text-blue-500" />
-              </div>
-              <div className="flex-1">
-                <div className="font-medium text-blue-600 dark:text-blue-400">
-                  {syncing ? 'Backing up...' : syncCode ? 'Update Backup' : 'Backup to Cloud'}
+              <Cloud className='h-4 w-4 shrink-0 text-blue-500' />
+              <div className='min-w-0 flex-1'>
+                <div className='text-sm font-medium text-blue-600 dark:text-blue-400'>
+                  {syncing
+                    ? 'Backing up...'
+                    : syncCode
+                      ? 'Update Backup'
+                      : 'Backup to Cloud'}
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {syncCode ? 'Push latest progress' : 'Generate a sync code & save'}
+                <div className='text-xs text-muted-foreground'>
+                  {syncCode
+                    ? 'Push latest progress to cloud'
+                    : 'Generate a sync code & save'}
                 </div>
               </div>
             </button>
 
-            {/* Restore section */}
-            <div className="p-4 rounded-xl border border-border/50 space-y-3">
-              <div className="flex items-center gap-2">
-                <Download className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Restore from another device</span>
+            {/* Restore from another device */}
+            <div className='space-y-2 px-4 py-3.5'>
+              <div className='flex items-center gap-1.5 text-xs font-medium text-muted-foreground'>
+                <Download className='h-3.5 w-3.5 shrink-0' />
+                Restore from another device
               </div>
-              <div className="flex gap-2">
+              <div className='flex flex-col gap-2 sm:flex-row'>
                 <input
-                  type="text"
-                  placeholder="Enter code (e.g. AZ-X7K9M2)"
+                  type='text'
+                  placeholder='Enter code (e.g. AZ-X7K9M2)'
                   value={syncInput}
-                  onChange={(e) => setSyncInput(e.target.value.toUpperCase())}
-                  className="flex-1 px-3 py-2 rounded-lg bg-muted/50 border border-border text-sm font-mono tracking-wider placeholder:text-muted-foreground/50 placeholder:tracking-normal placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                  onChange={e => setSyncInput(e.target.value.toUpperCase())}
+                  className='min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm tracking-wider placeholder:font-sans placeholder:tracking-normal placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-blue-500/30'
                   maxLength={9}
                 />
                 <button
@@ -362,14 +406,17 @@ export default function DebugPage() {
                       }
                     } catch (e) {
                       console.error(e);
-                      showMessage('error', 'Restore failed. Check code & try again.');
+                      showMessage(
+                        'error',
+                        'Restore failed. Check code & try again.'
+                      );
                     } finally {
                       setSyncing(false);
                     }
                   }}
-                  className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                  className='w-full shrink-0 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:opacity-50 sm:w-auto'
                 >
-                  {syncing ? '...' : 'Restore'}
+                  {syncing ? 'Restoring...' : 'Restore'}
                 </button>
               </div>
             </div>
@@ -378,95 +425,111 @@ export default function DebugPage() {
 
         {/* Actions */}
         <section>
-          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Actions</h2>
-          <div className="space-y-2">
+          <h2 className='mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+            Actions
+          </h2>
+          <div className='space-y-2'>
             {/* Primary Action */}
             <button
               onClick={handleRefreshSession}
-              className="w-full flex items-center gap-3 p-4 rounded-xl bg-primary/10 hover:bg-primary/15 border border-primary/20 transition-colors text-left"
+              className='flex w-full items-center gap-3 rounded-xl border border-primary/20 bg-primary/10 p-4 text-left transition-colors hover:bg-primary/15'
             >
-              <div className="p-2 rounded-lg bg-primary/20">
-                <RefreshCw className="h-5 w-5 text-primary" />
+              <div className='rounded-lg bg-primary/20 p-2'>
+                <RefreshCw className='h-5 w-5 text-primary' />
               </div>
-              <div className="flex-1">
-                <div className="font-medium">Refresh Session</div>
-                <div className="text-sm text-muted-foreground">New question order, keeps progress</div>
+              <div className='flex-1'>
+                <div className='font-medium'>Refresh Session</div>
+                <div className='text-sm text-muted-foreground'>
+                  New question order, keeps progress
+                </div>
               </div>
-              <Sparkles className="h-4 w-4 text-primary" />
+              <Sparkles className='h-4 w-4 text-primary' />
             </button>
 
             {/* Secondary Actions */}
             <button
               onClick={handleClearCacheKeepProgress}
-              className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-muted/50 border border-border/50 transition-colors text-left"
+              className='flex w-full items-center gap-3 rounded-xl border border-border/50 p-4 text-left transition-colors hover:bg-muted/50'
             >
-              <div className="p-2 rounded-lg bg-muted">
-                <RotateCcw className="h-5 w-5 text-muted-foreground" />
+              <div className='rounded-lg bg-muted p-2'>
+                <RotateCcw className='h-5 w-5 text-muted-foreground' />
               </div>
-              <div className="flex-1">
-                <div className="font-medium">Clear Cache</div>
-                <div className="text-sm text-muted-foreground">Keeps learning progress</div>
+              <div className='flex-1'>
+                <div className='font-medium'>Clear Cache</div>
+                <div className='text-sm text-muted-foreground'>
+                  Keeps learning progress
+                </div>
               </div>
             </button>
 
             <button
               onClick={handleForceReload}
-              className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-muted/50 border border-border/50 transition-colors text-left"
+              className='flex w-full items-center gap-3 rounded-xl border border-border/50 p-4 text-left transition-colors hover:bg-muted/50'
             >
-              <div className="p-2 rounded-lg bg-muted">
-                <HardDrive className="h-5 w-5 text-muted-foreground" />
+              <div className='rounded-lg bg-muted p-2'>
+                <HardDrive className='h-5 w-5 text-muted-foreground' />
               </div>
-              <div className="flex-1">
-                <div className="font-medium">Force Reload</div>
-                <div className="text-sm text-muted-foreground">Clear cache & refresh page</div>
+              <div className='flex-1'>
+                <div className='font-medium'>Force Reload</div>
+                <div className='text-sm text-muted-foreground'>
+                  Clear cache & refresh page
+                </div>
               </div>
             </button>
 
             {/* Danger Zone */}
             <button
               onClick={handleClearAll}
-              className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-destructive/10 border border-destructive/30 transition-colors text-left mt-4"
+              className='mt-4 flex w-full items-center gap-3 rounded-xl border border-destructive/30 p-4 text-left transition-colors hover:bg-destructive/10'
             >
-              <div className="p-2 rounded-lg bg-destructive/20">
-                <Trash2 className="h-5 w-5 text-destructive" />
+              <div className='rounded-lg bg-destructive/20 p-2'>
+                <Trash2 className='h-5 w-5 text-destructive' />
               </div>
-              <div className="flex-1">
-                <div className="font-medium text-destructive">Reset Everything</div>
-                <div className="text-sm text-muted-foreground">Delete all data permanently</div>
+              <div className='flex-1'>
+                <div className='font-medium text-destructive'>
+                  Reset Everything
+                </div>
+                <div className='text-sm text-muted-foreground'>
+                  Delete all data permanently
+                </div>
               </div>
-              <AlertTriangle className="h-4 w-4 text-destructive" />
+              <AlertTriangle className='h-4 w-4 text-destructive' />
             </button>
           </div>
         </section>
 
         {/* Changelog */}
         <section>
-          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Changelog</h2>
-          <div className="space-y-4 text-sm">
+          <h2 className='mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+            Changelog
+          </h2>
+          <div className='space-y-4 text-sm'>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold">v1.5.0</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">Latest</span>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.5.0</span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
               </div>
-              <div className="text-muted-foreground mt-1">
+              <div className='mt-1 text-muted-foreground'>
                 Fixed iOS font scaling • Next.js 15.5.9 • Arc TLS fix
               </div>
             </div>
             <div>
-              <div className="font-semibold">v1.4.0</div>
-              <div className="text-muted-foreground mt-1">
+              <div className='font-semibold'>v1.4.0</div>
+              <div className='mt-1 text-muted-foreground'>
                 Auto-hide header • 80% PDF priority • Sticky footer
               </div>
             </div>
             <div>
-              <div className="font-semibold">v1.3.0</div>
-              <div className="text-muted-foreground mt-1">
+              <div className='font-semibold'>v1.3.0</div>
+              <div className='mt-1 text-muted-foreground'>
                 Hook refactoring • Removed Practice Mode • Mobile UX
               </div>
             </div>
             <div>
-              <div className="font-semibold">v1.2.0</div>
-              <div className="text-muted-foreground mt-1">
+              <div className='font-semibold'>v1.2.0</div>
+              <div className='mt-1 text-muted-foreground'>
                 48 PDF questions • Session auto-refresh • Box 3 tuning
               </div>
             </div>
@@ -474,10 +537,10 @@ export default function DebugPage() {
         </section>
 
         {/* App Info */}
-        <section className="pb-8">
-          <div className="text-center text-xs text-muted-foreground">
+        <section className='pb-8'>
+          <div className='text-center text-xs text-muted-foreground'>
             <div>AZ-204 Quiz App</div>
-            <div className="mt-1">Made with ❤️ for Azure certification</div>
+            <div className='mt-1'>Made with ❤️ for Azure certification</div>
           </div>
         </section>
       </div>
