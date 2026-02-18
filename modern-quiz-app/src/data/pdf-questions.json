@@ -9,9 +9,7 @@
       "From the Redeploy blade, click Redeploy.",
       "From the Profile blade, modify the usage location."
     ],
-    "answerIndexes": [
-      2
-    ],
+    "answerIndexes": [2],
     "hasCode": false,
     "topic": "Compute Solutions",
     "isPdf": true
@@ -20,13 +18,8 @@
     "id": "5ab0b2ba60309dbad58791fcbc8f95bffc8f75191faefa5009d1fda2bbea7d94",
     "question": "Your company has an Azure Kubernetes Service (AKS) cluster that you manage from an Azure AD-joined device. The cluster is located in a resource group. Developers have created an application named MyApp. MyApp was packaged into a container image. You need to deploy the YAML manifest file for the application. Does this meet the goal?",
     "answer": "`kubectl apply -f myapp.yaml` applies a configuration change to a resource from a file or stdin. This is the correct approach for deploying YAML manifest files to AKS clusters.",
-    "options": [
-      "Yes",
-      "No"
-    ],
-    "answerIndexes": [
-      0
-    ],
+    "options": ["Yes", "No"],
+    "answerIndexes": [0],
     "hasCode": true,
     "topic": "Containers",
     "isPdf": true
@@ -35,13 +28,8 @@
     "id": "3e7b97d121bb0b9ced197b25774adfa3fc19cc352235e8d26bdc8de250e953e8",
     "question": "Your company has an Azure Kubernetes Service (AKS) cluster that you manage from an Azure AD-joined device. The cluster is located in a resource group. Developers have created an application named MyApp. MyApp was packaged into a container image. You need to deploy the YAML manifest file for the application. Does this meet the goal?",
     "answer": "Running a Docker container with Azure CLI does not directly deploy a YAML manifest to AKS. You need to use `kubectl apply` command with the proper authentication to the AKS cluster.",
-    "options": [
-      "Yes",
-      "No"
-    ],
-    "answerIndexes": [
-      1
-    ],
+    "options": ["Yes", "No"],
+    "answerIndexes": [1],
     "hasCode": true,
     "topic": "Containers",
     "isPdf": true
@@ -50,15 +38,8 @@
     "id": "a1055a34d1d55ef28ea50243afc029610f2c77c53b2dea976e26691bb1bfc59b",
     "question": "Your company has a web app named WebApp1. You use the WebJobs SDK to design a triggered App Service background task that automatically invokes a function in the code every time new data is received in a queue. You are preparing to configure the service processes a queue data item. Which of the following is the service you should use?",
     "answer": "WebJobs is the correct service for creating background tasks in Azure App Service that can be triggered by queue messages. WebJobs SDK provides the framework for building these triggered applications.",
-    "options": [
-      "Logic Apps",
-      "WebJobs",
-      "Flow",
-      "Functions"
-    ],
-    "answerIndexes": [
-      1
-    ],
+    "options": ["Logic Apps", "WebJobs", "Flow", "Functions"],
+    "answerIndexes": [1],
     "hasCode": true,
     "topic": "App Service",
     "isPdf": true
@@ -67,15 +48,8 @@
     "id": "ee475bac7fad6da01a25bac7a71ff5f32e90bd6e5b94f6861308f22bb2012065",
     "question": "Your company has an Azure subscription. You need to deploy a number of Azure virtual machines to the subscription by using Azure Resource Manager (ARM) templates. The virtual machines will be included in a single availability set. You need to ensure that the ARM template allows for as many virtual machines as possible to remain accessible in the event of fabric failure or maintenance. Which of the following is the value that you should configure for the platformFaultDomainCount property?",
     "answer": "The number of fault domains for managed availability sets varies by region - either two or three per region. Setting this to the maximum value ensures the highest availability.",
-    "options": [
-      "10",
-      "30",
-      "Min Value",
-      "Max Value"
-    ],
-    "answerIndexes": [
-      3
-    ],
+    "options": ["10", "30", "Min Value", "Max Value"],
+    "answerIndexes": [3],
     "hasCode": true,
     "topic": "Compute Solutions",
     "isPdf": true
@@ -84,15 +58,8 @@
     "id": "736a2bbb33dadeaf9d2fc897ffe60976fef1b5d5b15ab2a7f8b6b4dab04ff07c",
     "question": "Your company has an Azure subscription. You need to deploy a number of Azure virtual machines to the subscription by using Azure Resource Manager (ARM) templates. The virtual machines will be included in a single availability set. You need to ensure that the ARM template allows for as many virtual machines as possible to remain accessible in the event of fabric failure or maintenance. Which of the following is the value that you should configure for the platformUpdateDomainCount property?",
     "answer": "Each virtual machine in your availability set is assigned an update domain and a fault domain by the underlying Azure platform. For a given availability set, five non-user-configurable update domains are assigned by default (Resource Manager deployments can then be increased to provide up to 20 update domains).",
-    "options": [
-      "10",
-      "20",
-      "30",
-      "40"
-    ],
-    "answerIndexes": [
-      1
-    ],
+    "options": ["10", "20", "30", "40"],
+    "answerIndexes": [1],
     "hasCode": true,
     "topic": "Compute Solutions",
     "isPdf": true
@@ -101,15 +68,8 @@
     "id": "ef0a8501357f0729d392a3d7c2c13182aa46979618a484c2b24ab8b664559eba",
     "question": "Your Azure Active Directory (Azure AD) tenant has an Azure subscription linked to it. Your developer has created a mobile application that obtains Azure AD access tokens using the OAuth 2 implicit grant type. The mobile application must be registered in Azure AD. You require a redirect URI from the developer for registration purposes.",
     "answer": "For Native Applications you need to provide a Redirect URI, which Azure AD will use to return token responses.",
-    "options": [
-      "No change required.",
-      "a secret",
-      "a login hint",
-      "a client ID"
-    ],
-    "answerIndexes": [
-      0
-    ],
+    "options": ["No change required.", "a secret", "a login hint", "a client ID"],
+    "answerIndexes": [0],
     "hasCode": true,
     "topic": "Entra ID",
     "isPdf": true
@@ -118,16 +78,8 @@
     "id": "b5a1f9adcb5e70821728b562c3d97251f6fcfe709eb8dd09458b7e85b58203b7",
     "question": "You are creating an Azure key vault using PowerShell. Objects deleted from the key vault must be kept for a set period of 90 days. Which two of the following parameters must be used in conjunction to meet the requirement? (Choose two.)",
     "answer": "Both EnableSoftDelete and EnablePurgeProtection must be configured together. Soft delete allows recovery of deleted objects within the retention period, while purge protection prevents permanent deletion during the retention period.",
-    "options": [
-      "EnabledForDeployment",
-      "EnablePurgeProtection",
-      "EnabledForTemplateDeployment",
-      "EnableSoftDelete"
-    ],
-    "answerIndexes": [
-      1,
-      3
-    ],
+    "options": ["EnabledForDeployment", "EnablePurgeProtection", "EnabledForTemplateDeployment", "EnableSoftDelete"],
+    "answerIndexes": [1, 3],
     "hasCode": true,
     "topic": "Key Vault",
     "isPdf": true
@@ -142,9 +94,7 @@
       "Active Directory integrated authentication.",
       "OATH software tokens."
     ],
-    "answerIndexes": [
-      2
-    ],
+    "answerIndexes": [2],
     "hasCode": true,
     "topic": "Entra ID",
     "isPdf": true
@@ -159,9 +109,7 @@
       "Implement virtual network service endpoints for Azure Key Vault.",
       "Run the `az keyvault update --enable-soft-delete false` CLI."
     ],
-    "answerIndexes": [
-      1
-    ],
+    "answerIndexes": [1],
     "hasCode": false,
     "topic": "Key Vault",
     "isPdf": true
@@ -176,9 +124,7 @@
       "Enable Managed Service Identity (MSI).",
       "Create an Azure AD service principal."
     ],
-    "answerIndexes": [
-      2
-    ],
+    "answerIndexes": [2],
     "hasCode": true,
     "topic": "App Service",
     "isPdf": true
@@ -187,15 +133,8 @@
     "id": "887271a2a8cc09a1de016a033c9630eb08b876690aebc95bf629901ca7ed9121",
     "question": "You company has an on-premises deployment of MongoDB, and an Azure Cosmos DB account that makes use of the MongoDB API. You need to devise a strategy to migrate MongoDB to the Azure Cosmos DB account. You include the Data Management Gateway tool in your migration strategy.",
     "answer": "mongorestore is the correct tool for migrating MongoDB data to Azure Cosmos DB with MongoDB API. It can restore MongoDB data from backup files to the target database.",
-    "options": [
-      "No change required",
-      "mongorestore",
-      "Azure Storage Explorer",
-      "AzCopy"
-    ],
-    "answerIndexes": [
-      1
-    ],
+    "options": ["No change required", "mongorestore", "Azure Storage Explorer", "AzCopy"],
+    "answerIndexes": [1],
     "hasCode": false,
     "topic": "Cosmos DB",
     "isPdf": true
@@ -210,9 +149,7 @@
       "The Metric signal type.",
       "The Audit Log signal type."
     ],
-    "answerIndexes": [
-      2
-    ],
+    "answerIndexes": [2],
     "hasCode": true,
     "topic": "Monitor",
     "isPdf": true
@@ -227,9 +164,7 @@
       "Configure the Facets property of the SearchParameters class.",
       "Configure the Filter property of the SearchParameters class."
     ],
-    "answerIndexes": [
-      1
-    ],
+    "answerIndexes": [1],
     "hasCode": false,
     "topic": "Azure",
     "isPdf": true
@@ -244,9 +179,7 @@
       "the API Connections",
       "the Logic Apps Designer"
     ],
-    "answerIndexes": [
-      1
-    ],
+    "answerIndexes": [1],
     "hasCode": true,
     "topic": "Functions",
     "isPdf": true
@@ -255,13 +188,8 @@
     "id": "34e40a3d24108e972b79716bdc57635e07b486d3f2f3d8c343627a29de78451a",
     "question": "You are developing a solution for a public facing API. The API back end is hosted in an Azure App Service instance. You have implemented a RESTful service for the API back end. You must configure back-end authentication for the API Management service instance. Does the solution meet the goal?",
     "answer": "API Management allows securing access to the back-end service of an API using client certificates. Since the API back end is hosted in an Azure App Service instance (Azure resource), client certificate gateway credentials for the Azure resource is the correct approach.",
-    "options": [
-      "Yes",
-      "No"
-    ],
-    "answerIndexes": [
-      0
-    ],
+    "options": ["Yes", "No"],
+    "answerIndexes": [0],
     "hasCode": true,
     "topic": "API Management",
     "isPdf": true
@@ -276,9 +204,7 @@
       "Configure the Facets property of the SearchParameters class.",
       "Configure the Filter property of the SearchParameters class."
     ],
-    "answerIndexes": [
-      3
-    ],
+    "answerIndexes": [3],
     "hasCode": false,
     "topic": "Azure",
     "isPdf": true
@@ -293,9 +219,7 @@
       "the API Connections",
       "the Logic Apps Designer"
     ],
-    "answerIndexes": [
-      3
-    ],
+    "answerIndexes": [3],
     "hasCode": false,
     "topic": "Functions",
     "isPdf": true
@@ -304,13 +228,8 @@
     "id": "1298d9c4d08c5392f352bcee5777c2da72a311afb9bb0659d3f356442296ba43",
     "question": "You are configuring a web app that delivers streaming video to users. The application makes use of continuous integration and deployment. You need to ensure that the application is highly available and that the users' streaming experience is constant. You also want to configure the application to store data in a geographic location that is nearest to the user. Does the solution meet the goal?",
     "answer": "Azure CDN provides a global solution for rapidly delivering high-bandwidth content by caching content at strategically placed physical nodes across the world, ensuring content is delivered from locations nearest to users.",
-    "options": [
-      "Yes",
-      "No"
-    ],
-    "answerIndexes": [
-      0
-    ],
+    "options": ["Yes", "No"],
+    "answerIndexes": [0],
     "hasCode": false,
     "topic": "Azure",
     "isPdf": true
@@ -325,9 +244,7 @@
       "Switch to the Standard App Service tier plan.",
       "Switch to the Azure App Services consumption plan."
     ],
-    "answerIndexes": [
-      2
-    ],
+    "answerIndexes": [2],
     "hasCode": false,
     "topic": "App Service",
     "isPdf": true
@@ -342,9 +259,7 @@
       "Create separate Azure Event Grid topics and subscriptions for sign-in and sign-out events.",
       "Add a subject prefix to sign-out events. Create an Azure Event Grid subscription. Configure the subscription to use the subjectBeginsWith filter."
     ],
-    "answerIndexes": [
-      3
-    ],
+    "answerIndexes": [3],
     "hasCode": false,
     "topic": "Event Grid",
     "isPdf": true
@@ -353,13 +268,8 @@
     "id": "ca4b8f656f6ab4b4c70e27e4c5e1c59d3f9cafbc428c9e76aec3abde88c29f81",
     "question": "You develop and deploy an Azure App Service API app to a Windows-hosted deployment slot named Development. You create additional deployment slots named Testing and Production. You enable auto swap on the Production deployment slot. You need to ensure that scripts run and resources are available before a swap operation occurs. Does the solution meet the goal?",
     "answer": "The applicationInitialization configuration element in web.config allows you to specify custom initialization actions. The swap operation waits for this custom warm-up to finish before swapping with the target slot.",
-    "options": [
-      "Yes",
-      "No"
-    ],
-    "answerIndexes": [
-      0
-    ],
+    "options": ["Yes", "No"],
+    "answerIndexes": [0],
     "hasCode": true,
     "topic": "App Service",
     "isPdf": true
@@ -368,13 +278,8 @@
     "id": "2c047ccee09dd684062d7e9b249639bad921ebdde8d26d10b19162b67073586c",
     "question": "You develop a software as a service (SaaS) offering to manage photographs. Users upload photos to a web service which then stores the photos in Azure Storage Blob storage. The storage account type is General-purpose V2. When photos are uploaded, they must be processed to produce and save a mobile-friendly version of the image. The process to produce a mobile-friendly version of the image must start in less than one minute. You need to design the process that starts the photo processing. Does the solution meet the goal?",
     "answer": "While Blob storage events can trigger processing, you need to catch the triggered event and move the photo processing to an Azure Function triggered from the blob upload. The processing must start in less than one minute, and only StorageV2 (general purpose v2) and BlobStorage support event integration.",
-    "options": [
-      "Yes",
-      "No"
-    ],
-    "answerIndexes": [
-      1
-    ],
+    "options": ["Yes", "No"],
+    "answerIndexes": [1],
     "hasCode": false,
     "topic": "Blob Storage",
     "isPdf": true
@@ -383,13 +288,8 @@
     "id": "a628428ead0e5b00e1e0bd1e60ea89b0ecb5aff214b25d671910d601cfa1504d",
     "question": "You develop a software as a service (SaaS) offering to manage photographs. Users upload photos to a web service which then stores the photos in Azure Storage Blob storage. The storage account type is General-purpose V2. When photos are uploaded, they must be processed to produce and save a mobile-friendly version of the image. The process to produce a mobile-friendly version of the image must start in less than one minute. Does the solution meet the goal?",
     "answer": "Azure Storage events allow applications to react to blob upload events. Azure Functions can be triggered by these events and will start processing within the required timeframe. This is the correct approach for event-driven photo processing.",
-    "options": [
-      "Yes",
-      "No"
-    ],
-    "answerIndexes": [
-      0
-    ],
+    "options": ["Yes", "No"],
+    "answerIndexes": [0],
     "hasCode": false,
     "topic": "Functions",
     "isPdf": true
@@ -405,9 +305,7 @@
       "Use an App Service plan. Configure the Function App to use an Azure Blob Storage trigger.",
       "Use a Consumption plan. Configure the Function App to use an Azure Blob Storage input trigger."
     ],
-    "answerIndexes": [
-      1
-    ],
+    "answerIndexes": [1],
     "hasCode": true,
     "topic": "Functions",
     "isPdf": true
@@ -416,13 +314,8 @@
     "id": "0743835c111266f22a2d11a5eab574301c866e595ef9f5b94a54556678cf9e07",
     "question": "You develop an HTTP triggered Azure Function app to process Azure Storage blob data. The app is triggered using an output binding on the blob. The app continues to time out after four minutes. The app must process the blob data. You need to ensure the app does not time out and processes the blob data. Does the solution meet the goal?",
     "answer": "This is a best practice for long-running functions. By passing the payload to a queue for asynchronous processing, you can return an immediate response and avoid timeout issues while still ensuring the work gets done.",
-    "options": [
-      "Yes",
-      "No"
-    ],
-    "answerIndexes": [
-      0
-    ],
+    "options": ["Yes", "No"],
+    "answerIndexes": [0],
     "hasCode": false,
     "topic": "Functions",
     "isPdf": true
@@ -437,9 +330,7 @@
       "Process all Azure Storage Analytics logs for successful blob events.",
       "Use the Azure Monitor HTTP Data Collector API and scan the request body for successful blob events."
     ],
-    "answerIndexes": [
-      1
-    ],
+    "answerIndexes": [1],
     "hasCode": false,
     "topic": "Blob Storage",
     "isPdf": true
@@ -448,16 +339,8 @@
     "id": "dd76e702326a23d23a909c5139e15e8a6892de361e17a5f54f70a66bfe4efbe6",
     "question": "You are developing an Azure Durable Function to manage an online ordering process. The process must call an external API to gather product discount information. You need to implement the Azure Durable Function. Which Azure Durable Function types should you use? Each correct answer presents part of the solution.",
     "answer": "- **Orchestrator functions** coordinate the execution of multiple functions and manage the workflow - **Activity functions** perform the actual work, such as calling external APIs - The orchestrator calls activity functions to gather product discount information from external APIs",
-    "options": [
-      "Orchestrator",
-      "Entity",
-      "Client",
-      "Activity"
-    ],
-    "answerIndexes": [
-      0,
-      3
-    ],
+    "options": ["Orchestrator", "Entity", "Client", "Activity"],
+    "answerIndexes": [0, 3],
     "hasCode": false,
     "topic": "Functions",
     "isPdf": true
@@ -466,13 +349,8 @@
     "id": "82045493a301e2b306ce7556982e21d131f2956df29142ad9570723c3d871b65",
     "question": "You deploy an Azure Container Apps app and disable ingress on the container app. Users report that they are unable to access the container app. You investigate and observe that the app has scaled to 0 instances. You need to resolve the issue with the container app. Does the solution meet the goal?",
     "answer": "Enabling ingress allows external access to the container app. Creating an HTTP scale rule ensures the app scales based on incoming HTTP requests, preventing it from scaling to 0 when there are requests to process.",
-    "options": [
-      "Yes",
-      "No"
-    ],
-    "answerIndexes": [
-      0
-    ],
+    "options": ["Yes", "No"],
+    "answerIndexes": [0],
     "hasCode": false,
     "topic": "Containers",
     "isPdf": true
@@ -481,15 +359,8 @@
     "id": "536be7f06d18685266952d72c3b09d695b396628ae1477ffffa03d95d2bb26b6",
     "question": "You are building a website that uses Azure Blob storage for data storage. You configure Azure Blob storage lifecycle to move all blobs to the archive tier after 30 days. Customers have requested a service-level agreement (SLA) for viewing data older than 30 days. You need to document the minimum SLA for data recovery. Which SLA should you use?",
     "answer": "The archive access tier has the lowest storage cost. But it has higher data retrieval costs compared to the hot and cool tiers. Data in the archive tier can take several hours to retrieve depending on the priority of the rehydration. For small objects, a high priority rehydrate may retrieve the object from archive in under 1 hour.",
-    "options": [
-      "at least two days",
-      "between one and 15 hours",
-      "at least one day",
-      "between zero and 60 minutes"
-    ],
-    "answerIndexes": [
-      1
-    ],
+    "options": ["at least two days", "between one and 15 hours", "at least one day", "between zero and 60 minutes"],
+    "answerIndexes": [1],
     "hasCode": false,
     "topic": "Blob Storage",
     "isPdf": true
@@ -498,15 +369,8 @@
     "id": "827968f00d705ff54d596eb9817b409a750f0c3e96fbb5cc6ead55b295441b47",
     "question": "You develop Azure solutions. A .NET application needs to receive a message each time an Azure virtual machine finishes processing data. The messages must NOT persist after being processed by the receiving application. You need to implement the .NET object that will receive the messages. Which object should you use?",
     "answer": "A queue allows processing of a message by a single consumer. Need a CloudQueueClient to access the Azure VM. In contrast to queues, topics and subscriptions provide a one-to-many form of communication in a publish and subscribe pattern. It's useful for scaling to large numbers of recipients.",
-    "options": [
-      "QueueClient",
-      "SubscriptionClient",
-      "TopicClient",
-      "CloudQueueClient"
-    ],
-    "answerIndexes": [
-      3
-    ],
+    "options": ["QueueClient", "SubscriptionClient", "TopicClient", "CloudQueueClient"],
+    "answerIndexes": [3],
     "hasCode": true,
     "topic": "Message Queues",
     "isPdf": true
@@ -520,9 +384,7 @@
       "new Database(EndpointUri, PrimaryKey);",
       "new CosmosClient(EndpointUri, PrimaryKey);"
     ],
-    "answerIndexes": [
-      2
-    ],
+    "answerIndexes": [2],
     "hasCode": true,
     "topic": "Cosmos DB",
     "isPdf": true
@@ -531,15 +393,8 @@
     "id": "e4dac80d28b0d4f049f29b38febf4e0ad357f5fdbae617d88f498e8ab60bba42",
     "question": "You have an existing Azure storage account that stores large volumes of data across multiple containers. You need to copy all data from the existing storage account to a new storage account. The copy process must meet the following requirements: - Automate data movement - Minimize user input required to perform the operation - Ensure that the data movement process is recoverable What should you use?",
     "answer": "You can copy blobs, directories, and containers between storage accounts by using the AzCopy v10 command-line utility. The copy operation is synchronous so when the command returns, that indicates that all files have been copied.",
-    "options": [
-      "AzCopy",
-      "Azure Storage Explorer",
-      "Azure portal",
-      ".NET Storage Client Library"
-    ],
-    "answerIndexes": [
-      0
-    ],
+    "options": ["AzCopy", "Azure Storage Explorer", "Azure portal", ".NET Storage Client Library"],
+    "answerIndexes": [0],
     "hasCode": false,
     "topic": "Blob Storage",
     "isPdf": true
@@ -555,10 +410,7 @@
       "a concatenation of multiple property values with a random suffix appended",
       "a hash suffix appended to a property value"
     ],
-    "answerIndexes": [
-      3,
-      4
-    ],
+    "answerIndexes": [3, 4],
     "hasCode": true,
     "topic": "Cosmos DB",
     "isPdf": true
@@ -573,9 +425,7 @@
       "Cosmos DB Operator",
       "Cosmos DB Account Reader"
     ],
-    "answerIndexes": [
-      2
-    ],
+    "answerIndexes": [2],
     "hasCode": false,
     "topic": "Cosmos DB",
     "isPdf": true
@@ -590,10 +440,7 @@
       "Certificate Authentication",
       "OAuth Client Credential Grant"
     ],
-    "answerIndexes": [
-      2,
-      3
-    ],
+    "answerIndexes": [2, 3],
     "hasCode": true,
     "topic": "API Management",
     "isPdf": true
@@ -608,9 +455,7 @@
       "Create a system assigned Managed Identity in each App Service with permission to access Key Vault.",
       "Create an Azure AD Service Principal with Permissions to access Key Vault for each App Service and use a certificate from within the App Services to access Key Vault."
     ],
-    "answerIndexes": [
-      2
-    ],
+    "answerIndexes": [2],
     "hasCode": false,
     "topic": "Key Vault",
     "isPdf": true
@@ -619,15 +464,8 @@
     "id": "bef65500ca95dbacba35d2f1ae30935018b7c6fc3ca78bcb05b0bff33159c81e",
     "question": "Your company is developing an Azure API hosted in Azure. You need to implement authentication for the Azure API to access other Azure resources. You have the following requirements: - All API calls must be authenticated - Callers to the API must not send credentials to the API Which authentication mechanism should you use?",
     "answer": "Azure Active Directory Managed Service Identity (MSI) gives your code an automatically managed identity for authenticating to Azure services, so that you can keep credentials out of your code. Use the authentication-managed-identity policy to authenticate with a backend service using the managed identity.",
-    "options": [
-      "Basic",
-      "Anonymous",
-      "Managed identity",
-      "Client certificate"
-    ],
-    "answerIndexes": [
-      2
-    ],
+    "options": ["Basic", "Anonymous", "Managed identity", "Client certificate"],
+    "answerIndexes": [2],
     "hasCode": true,
     "topic": "API Management",
     "isPdf": true
@@ -643,11 +481,7 @@
       "Search for and select Azure Active Directory",
       "Create a new Azure AD tenant"
     ],
-    "answerIndexes": [
-      0,
-      1,
-      2
-    ],
+    "answerIndexes": [0, 1, 2],
     "hasCode": true,
     "topic": "Entra ID",
     "isPdf": true
@@ -663,10 +497,7 @@
       "In Azure AD, enable application proxy.",
       "In Azure AD conditional access, enable the baseline policy."
     ],
-    "answerIndexes": [
-      1,
-      2
-    ],
+    "answerIndexes": [1, 2],
     "hasCode": true,
     "topic": "Entra ID",
     "isPdf": true
@@ -674,16 +505,14 @@
   {
     "id": "c1e4c93785203184c8c362d2affa1cc87f87d7b42428e908cb2a2c0225db8962",
     "question": "A development team is creating a new REST API. The API will store data in Azure Blob storage. You plan to deploy the API to Azure App Service. Developers must access the Azure Blob storage account to develop the API for the next two months. The Azure Blob storage account must not be accessible by the developers after the two-month time period. You need to grant developers access to the Azure Blob storage account. What should you do?",
-    "answer": "",
+    "answer": "A Shared Access Signature (SAS) token lets you grant time-limited, scoped access to Azure Blob storage without sharing the account key. You set an expiry of two months, after which the SAS becomes invalid and access is automatically revoked — satisfying the requirement that the account must not be accessible after the two-month period. Option B (lifecycle management policy) controls data tiering and expiry, not access permissions. Option C (account access key) grants permanent access; revoking it requires regenerating the key, which affects all consumers. Option D (RBAC) does not expire automatically and would need manual role assignment removal after two months.",
     "options": [
       "Generate a shared access signature (SAS) for the Azure Blob storage account and provide the SAS to all developers.",
       "Create and apply a new lifecycle management policy to include a last accessed date value. Apply the policy to the Azure Blob storage account.",
       "Provide all developers with the access key for the Azure Blob storage account. Update the API to include the Coordinated Universal Time (UTC) timestamp for the request header.",
       "Grant all developers access to the Azure Blob storage account by assigning role-based access control (RBAC) roles."
     ],
-    "answerIndexes": [
-      0
-    ],
+    "answerIndexes": [0],
     "hasCode": false,
     "topic": "Shared Access Signatures",
     "isPdf": true
@@ -698,9 +527,7 @@
       "User Delegation SAS",
       "Service SAS with ad hoc SAS"
     ],
-    "answerIndexes": [
-      0
-    ],
+    "answerIndexes": [0],
     "hasCode": false,
     "topic": "Service Bus",
     "isPdf": true
@@ -715,9 +542,7 @@
       "AZUREKVCONNSTR\\_https://mykeyveult.vault.ezure.net/secrets/token/",
       "@Microsoft.KeyVault(SecretUri=https://mykeyvault.vault.azure.net/secrets/token/)"
     ],
-    "answerIndexes": [
-      3
-    ],
+    "answerIndexes": [3],
     "hasCode": false,
     "topic": "Key Vault",
     "isPdf": true
@@ -733,10 +558,7 @@
       "Add the secret value to an Azure Blob storage account. Generate a SAS token.",
       "Mount a secret volume containing the secret value in a secrets file."
     ],
-    "answerIndexes": [
-      0,
-      4
-    ],
+    "answerIndexes": [0, 4],
     "hasCode": true,
     "topic": "Containers",
     "isPdf": true
@@ -745,14 +567,8 @@
     "id": "0d34fc30b79f50c54d62a579a81104c7964c0331b0193ce3ecd3c821a93527cc",
     "question": "You are developing a user portal for a company. You need to create a report for the portal that lists information about employees who are subject matter experts for a specific topic. You must ensure that administrators have full control and consent over the data. Which technology should you use?",
     "answer": "Microsoft Graph Data Connect augments Microsoft Graph's transactional model with an intelligent way to access rich data at scale. The data covers how workers communicate, collaborate, and manage their time across all the applications and services in Microsoft 365.",
-    "options": [
-      "Microsoft Graph data connect",
-      "Microsoft Graph API",
-      "Microsoft Graph connectors"
-    ],
-    "answerIndexes": [
-      0
-    ],
+    "options": ["Microsoft Graph data connect", "Microsoft Graph API", "Microsoft Graph connectors"],
+    "answerIndexes": [0],
     "hasCode": false,
     "topic": "Graph",
     "isPdf": true
@@ -760,16 +576,14 @@
   {
     "id": "01cea3b26ad1b216b4b1832b341469034245f545eceb19a0c26c81197e0c97ed",
     "question": "You are developing a Java application to be deployed in Azure. The application stores sensitive data in Azure Cosmos DB. You need to configure Always Encrypted to encrypt the sensitive data inside the application. What should you do first?",
-    "answer": "",
+    "answer": "Azure Cosmos DB Always Encrypted uses a two-level key hierarchy: a Customer-Managed Key (CMK), also called the Key Encryption Key (KEK), which wraps a Data Encryption Key (DEK). The CMK must be created and stored in Azure Key Vault first, because the DEK is encrypted (wrapped) using the CMK. Without the CMK in Key Vault, the DEK cannot be created or protected. Option A (container encryption policy) is configured after the keys are established. Option C (DEK via SDK) is the second step — it requires the CMK to already exist in Key Vault. Option D (managed identity) is used by the application to access Key Vault at runtime, but the CMK must be in place before any encryption infrastructure can be set up.",
     "options": [
       "Create a new container to include an encryption policy with the JSON properties to be encrypted.",
       "Create a customer-managed key (CMK) and store the key in a new Azure Key Vault instance.",
       "Create a data encryption key (DEK) by using the Azure Cosmos DB SDK and store the key in Azure Cosmos DB.",
       "Create an Azure AD managed identity and assign the identity to a new Azure Key Vault instance."
     ],
-    "answerIndexes": [
-      1
-    ],
+    "answerIndexes": [1],
     "hasCode": false,
     "topic": "Cosmos DB",
     "isPdf": true
@@ -777,16 +591,14 @@
   {
     "id": "bc2a9dd462c9eba64a4c31187ca3eb0ad92646f6a64b3cefc2e382e54a13a04e",
     "question": "You develop and deploy an Azure App Service web app named App1. You create a new Azure Key Vault named Vault1. You import several API keys, passwords, certificates, and cryptographic keys into Vault1. You need to grant App1 access to Vault1 and automatically rotate credentials. Credentials must not be stored in code. What should you do?",
-    "answer": "",
+    "answer": "A managed identity (system-assigned or user-assigned) allows Azure App Service to authenticate to Azure Key Vault without any credentials stored in code. Azure AD manages the underlying service principal and automatically rotates its credentials — your application code never sees or stores them. You then grant the managed identity the appropriate Key Vault access policy or RBAC role (e.g., Key Vault Secrets User) to read secrets, keys, and certificates. Option A requires a custom RBAC role and App Service authentication, which doesn't eliminate credential management for Key Vault. Option B (TLS/SSL binding) secures inbound HTTP traffic and has no relation to Key Vault access. Option C (self-signed client certificate) requires storing the certificate somewhere and managing its lifecycle, violating the 'no credentials in code' requirement.",
     "options": [
       "Enable App Service authentication for App1. Assign a custom RBAC role to Vault1.",
       "Add a TLS/SSL binding to App1.",
       "Upload a self-signed client certificate to Vault1. Update App1 to use the client certificate.",
       "Assign a managed identity to App1."
     ],
-    "answerIndexes": [
-      3
-    ],
+    "answerIndexes": [3],
     "hasCode": true,
     "topic": "Managed Identities",
     "isPdf": true
@@ -801,9 +613,7 @@
       "Configure and apply a new outbound policy scoped to global.",
       "Configure and apply a new backend policy scoped to global."
     ],
-    "answerIndexes": [
-      2
-    ],
+    "answerIndexes": [2],
     "hasCode": false,
     "topic": "API Management",
     "isPdf": true
