@@ -504,34 +504,187 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.6.0 */}
             <div>
               <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.5.0</span>
+                <span className='font-semibold'>v1.6.0</span>
+                <span className='text-xs text-muted-foreground'>Feb 2026</span>
                 <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
                   Latest
                 </span>
               </div>
-              <div className='mt-1 text-muted-foreground'>
-                Fixed iOS font scaling • Next.js 15.5.9 • Arc TLS fix
-              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Cross-device sync backend via Upstash Redis with sync codes
+                </li>
+                <li>✦ Auto-sync progress to cloud on session completion</li>
+                <li>✦ PDF questions prioritised before non-PDF in sessions</li>
+                <li>✦ Unified Cloud Sync card with mobile-responsive layout</li>
+                <li>✦ Fixed stale submission states on session refresh</li>
+                <li>✦ Rewrote 5 blank question explanations for accuracy</li>
+              </ul>
             </div>
+
+            {/* v1.5.1 */}
             <div>
-              <div className='font-semibold'>v1.4.0</div>
-              <div className='mt-1 text-muted-foreground'>
-                Auto-hide header • 80% PDF priority • Sticky footer
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.5.1</span>
+                <span className='text-xs text-muted-foreground'>
+                  Jan 14, 2026
+                </span>
               </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>✦ Replaced hardcoded colors with semantic design tokens</li>
+                <li>✦ Success and warning button variants</li>
+                <li>✦ Fixed iOS font size overrides (rem → px)</li>
+                <li>✦ Removed non-exam &quot;awesomeness&quot; question</li>
+              </ul>
             </div>
+
+            {/* v1.5.0 */}
             <div>
-              <div className='font-semibold'>v1.3.0</div>
-              <div className='mt-1 text-muted-foreground'>
-                Hook refactoring • Removed Practice Mode • Mobile UX
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.5.0</span>
+                <span className='text-xs text-muted-foreground'>
+                  Jan 5, 2026
+                </span>
               </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Redesigned Settings page with modern minimal aesthetic
+                </li>
+                <li>✦ Added Changelog section</li>
+                <li>✦ Disabled iOS Dynamic Type font scaling</li>
+              </ul>
             </div>
+
+            {/* v1.4.1 */}
             <div>
-              <div className='font-semibold'>v1.2.0</div>
-              <div className='mt-1 text-muted-foreground'>
-                48 PDF questions • Session auto-refresh • Box 3 tuning
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.4.1</span>
+                <span className='text-xs text-muted-foreground'>
+                  Dec 26–28, 2025
+                </span>
               </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Fixed Arc browser TLS error loop (HSTS, cache headers)
+                </li>
+                <li>✦ Upgraded Next.js to 15.5.9 (security patches)</li>
+                <li>✦ Resolved conflicting Vercel/Next.js header config</li>
+              </ul>
+            </div>
+
+            {/* v1.4.0 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.4.0</span>
+                <span className='text-xs text-muted-foreground'>
+                  Dec 24, 2025
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Removed Practice Mode — single Leitner-only experience
+                </li>
+                <li>
+                  ✦ Decomposed monolithic hook into session, progress, and stats
+                </li>
+                <li>✦ 80/20 PDF-to-non-PDF question split per session</li>
+                <li>
+                  ✦ Auto-hide header on scroll, sticky footer, mobile grid
+                  layout
+                </li>
+              </ul>
+            </div>
+
+            {/* v1.3.1 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.3.1</span>
+                <span className='text-xs text-muted-foreground'>
+                  Dec 17–18, 2025
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Added &quot;End Quiz&quot; button after final question
+                </li>
+                <li>✦ Show answer feedback before session auto-complete</li>
+                <li>✦ Fixed session refresh bug and sequence randomisation</li>
+              </ul>
+            </div>
+
+            {/* v1.3.0 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.3.0</span>
+                <span className='text-xs text-muted-foreground'>
+                  Oct – Dec 16, 2025
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>✦ Extracted 142 questions from exam PDF documents</li>
+                <li>✦ Settings page for managing quiz progress</li>
+                <li>✦ Custom AZ-204 favicon and haptic feedback on mobile</li>
+                <li>
+                  ✦ Performance pass — React.memo, debug logger, shared hook
+                </li>
+                <li>✦ Improved randomisation and session auto-invalidation</li>
+                <li>✦ Cleaned broken questions and fixed answer data</li>
+              </ul>
+            </div>
+
+            {/* v1.2.0 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.2.0</span>
+                <span className='text-xs text-muted-foreground'>
+                  Aug 22 – Sep 9, 2025
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>✦ PWA implementation attempted and cleanly reverted</li>
+                <li>✦ Fixed critical localStorage iteration bug</li>
+                <li>✦ Complete state isolation between quiz modes</li>
+                <li>✦ Content audit — removed inappropriate questions</li>
+                <li>✦ Completion celebration with session results breakdown</li>
+                <li>✦ Dynamic browser tab titles and debug navigation</li>
+              </ul>
+            </div>
+
+            {/* v1.1.0 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.1.0</span>
+                <span className='text-xs text-muted-foreground'>
+                  Aug 19–21, 2025
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>✦ 3-box Leitner spaced repetition system</li>
+                <li>
+                  ✦ Quiz card redesign with dark mode and layered colour system
+                </li>
+                <li>✦ Dashboard with Leitner box distribution</li>
+                <li>✦ Filtered code-block and solution-goal questions</li>
+                <li>✦ Refactored codebase for engineering best practices</li>
+              </ul>
+            </div>
+
+            {/* v1.0.0 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.0.0</span>
+                <span className='text-xs text-muted-foreground'>
+                  Aug 18, 2025
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>✦ Next.js quiz app deployed on Vercel</li>
+                <li>✦ Questions seeded from AZ-204 topic markdown files</li>
+                <li>✦ Topic selector, quiz card, answer options</li>
+              </ul>
             </div>
           </div>
         </section>
