@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Flame, Target, Clock, BookOpen } from 'lucide-react';
+import { Flame, Clock, BookOpen } from 'lucide-react';
 import { leitnerSystem } from '@/lib/leitner';
 import type { LeitnerStats } from '@/lib/leitner';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
@@ -72,7 +72,7 @@ export function DailyBrief({ questions }: DailyBriefProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className='fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px]'
+            className='fixed inset-0 z-[60] bg-black/50 backdrop-blur-[2px]'
             onClick={handleDismiss}
           />
 
@@ -83,7 +83,7 @@ export function DailyBrief({ questions }: DailyBriefProps) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 300 }}
-            className='fixed inset-x-0 bottom-0 z-50 flex max-h-[88vh] flex-col rounded-t-2xl border-t border-border bg-card shadow-xl'
+            className='fixed inset-x-0 bottom-0 z-[61] flex max-h-[88vh] flex-col rounded-t-2xl border-t border-border bg-card shadow-xl'
           >
             {/* Drag handle */}
             <div
@@ -96,7 +96,7 @@ export function DailyBrief({ questions }: DailyBriefProps) {
             </div>
 
             {/* Scrollable content */}
-            <div className='flex-1 overflow-y-auto px-5 pb-10'>
+            <div className='min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-10'>
               {/* Greeting */}
               <div className='mb-5 flex items-start justify-between'>
                 <div>
@@ -115,7 +115,15 @@ export function DailyBrief({ questions }: DailyBriefProps) {
                 )}
               </div>
 
-              {/* 2×2 stat grid */}
+              {/* Heatmap — top */}
+              <div className='mb-5'>
+                <p className='mb-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+                  Activity
+                </p>
+                <ActivityHeatmap compact />
+              </div>
+
+              {/* 2-stat row */}
               <div className='mb-5 grid grid-cols-2 gap-3'>
                 <div className='rounded-xl border border-amber-200/60 bg-amber-50/60 p-3 dark:border-amber-500/20 dark:bg-amber-500/10'>
                   <div className='flex items-center gap-1.5 text-amber-600 dark:text-amber-400'>
@@ -124,26 +132,6 @@ export function DailyBrief({ questions }: DailyBriefProps) {
                   </div>
                   <p className='mt-2 text-2xl font-bold tabular-nums text-amber-700 dark:text-amber-300'>
                     {stats.dueToday}
-                  </p>
-                </div>
-
-                <div className='rounded-xl border border-violet-200/60 bg-violet-50/60 p-3 dark:border-violet-500/20 dark:bg-violet-500/10'>
-                  <div className='flex items-center gap-1.5 text-violet-600 dark:text-violet-400'>
-                    <Target className='h-3.5 w-3.5' />
-                    <span className='text-xs font-medium'>Accuracy</span>
-                  </div>
-                  <p className='mt-2 text-2xl font-bold tabular-nums text-violet-700 dark:text-violet-300'>
-                    {Math.round(stats.accuracyRate * 100)}%
-                  </p>
-                </div>
-
-                <div className='rounded-xl border border-emerald-200/60 bg-emerald-50/60 p-3 dark:border-emerald-500/20 dark:bg-emerald-500/10'>
-                  <div className='flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400'>
-                    <Target className='h-3.5 w-3.5' />
-                    <span className='text-xs font-medium'>Mastered</span>
-                  </div>
-                  <p className='mt-2 text-2xl font-bold tabular-nums text-emerald-700 dark:text-emerald-300'>
-                    {box3}
                   </p>
                 </div>
 
@@ -159,7 +147,7 @@ export function DailyBrief({ questions }: DailyBriefProps) {
               </div>
 
               {/* Box distribution */}
-              <div className='mb-5'>
+              <div>
                 <p className='mb-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
                   Leitner Boxes
                 </p>
@@ -191,14 +179,6 @@ export function DailyBrief({ questions }: DailyBriefProps) {
                     );
                   })}
                 </div>
-              </div>
-
-              {/* Heatmap */}
-              <div>
-                <p className='mb-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
-                  Activity
-                </p>
-                <ActivityHeatmap compact />
               </div>
             </div>
           </motion.div>
