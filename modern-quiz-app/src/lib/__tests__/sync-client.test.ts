@@ -286,4 +286,88 @@ describe('sync (Smart Merge)', () => {
       })
     );
   });
+
+  it('merges study-streak when local lacks bestStreak and lastStudyDate', async () => {
+    localStorageMock.setItem(
+      'study-streak',
+      JSON.stringify({
+        currentStreak: 2,
+      })
+    );
+
+    const remoteData = {
+      quizProgress: {},
+      answeredQuestions: {},
+      leitnerProgress: {},
+      settings: {},
+      activity: {
+        'study-streak': {
+          currentStreak: 9,
+          bestStreak: 12,
+          lastStudyDate: '2025-01-20',
+        },
+      },
+      lastSync: '2025-01-20T00:00:00Z',
+    };
+
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: remoteData }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, lastSync: '2025-01-21T00:00:00Z' }),
+      });
+
+    await sync('AZ-STREAK-MISSING');
+
+    const streakCalls = (
+      localStorageMock.setItem as jest.Mock
+    ).mock.calls.filter((c: string[]) => c[0] === 'study-streak');
+
+    const merged = JSON.parse(streakCalls[streakCalls.length - 1]![1]);
+    expect(merged.currentStreak).toBe(2);
+    expect(merged.bestStreak).toBe(12);
+    expect(merged.lastStudyDate).toBe('2025-01-20');
+  });
+
+  it('keeps remote study-streak when local does not have one', async () => {
+    const remoteData = {
+      quizProgress: {},
+      answeredQuestions: {},
+      leitnerProgress: {},
+      settings: {},
+      activity: {
+        'study-streak': {
+          currentStreak: 6,
+          bestStreak: 8,
+          lastStudyDate: '2025-01-18',
+        },
+      },
+      lastSync: '2025-01-18T00:00:00Z',
+    };
+
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: remoteData }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, lastSync: '2025-01-19T00:00:00Z' }),
+      });
+
+    await sync('AZ-STREAK-REMOTE');
+
+    const streakCalls = (
+      localStorageMock.setItem as jest.Mock
+    ).mock.calls.filter((c: string[]) => c[0] === 'study-streak');
+
+    expect(streakCalls.length).toBeGreaterThan(0);
+    const merged = JSON.parse(streakCalls[streakCalls.length - 1]![1]);
+    expect(merged.currentStreak).toBe(6);
+    expect(merged.bestStreak).toBe(8);
+    expect(merged.lastStudyDate).toBe('2025-01-18');
+  });
 });
