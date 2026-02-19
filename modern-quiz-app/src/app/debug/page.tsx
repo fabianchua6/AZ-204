@@ -603,15 +603,39 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.10.4 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.10.4</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 19, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Fixed sync collisions for shared Leitner keys so remote and
+                  local data now merge instead of silently dropping one side
+                </li>
+                <li>
+                  ✦ Added key-aware merge rules for leitner-progress, daily
+                  attempts, submission states, current session, and quiz index
+                </li>
+                <li>
+                  ✦ Added sync regression tests to keep "questions left" counts
+                  and progress state consistent across devices
+                </li>
+              </ul>
+            </div>
+
             {/* v1.10.3 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.10.3</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 19, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>
