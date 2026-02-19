@@ -603,15 +603,39 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.10.2 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.10.2</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 19, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Added sync-client edge-case tests for streak merge fallback
+                  behavior when local or remote streak data is partial
+                </li>
+                <li>
+                  ✦ Added debug-page safety tests for Clear Cache and guarded
+                  Reset Everything flows
+                </li>
+                <li>
+                  ✦ Verified full suite at 144 passing tests and clean
+                  TypeScript build after QA expansion
+                </li>
+              </ul>
+            </div>
+
             {/* v1.10.1 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.10.1</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 19, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>
