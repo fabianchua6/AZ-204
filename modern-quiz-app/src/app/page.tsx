@@ -17,6 +17,8 @@ import { DashboardStats } from '@/components/leitner/dashboard-stats';
 import { useQuizData } from '@/hooks/use-quiz-data';
 import { useQuizStateWithLeitner } from '@/hooks/use-quiz-state-leitner';
 import { useScrollDirection } from '@/hooks/use-scroll-direction';
+import { useSync } from '@/hooks/use-sync';
+import { useEffect } from 'react';
 
 // Utility imports
 import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/lib/constants';
@@ -29,12 +31,23 @@ export default function Home() {
   const leitnerState = useQuizStateWithLeitner(
     questions,
     null, // selectedTopic is always null for Leitner mode
-    () => { } // No-op for topic setter
+    () => {} // No-op for topic setter
   );
 
   const currentQuestionIndex = leitnerState.currentQuestionIndex;
   const filteredQuestions = leitnerState.filteredQuestions;
   const answers = leitnerState.answers;
+
+  // Auto-sync integration
+  const { syncNow } = useSync();
+
+  // Trigger sync when session completes
+  useEffect(() => {
+    if (leitnerState.isSessionComplete) {
+      console.log('🎯 Session complete - triggering auto-sync');
+      syncNow();
+    }
+  }, [leitnerState.isSessionComplete, syncNow]);
 
   if (loading) {
     return (
@@ -69,8 +82,8 @@ export default function Home() {
           <AnimatePresence mode='wait'>
             {/* Session Complete State - Show results when all questions done */}
             {leitnerState.isSessionComplete &&
-              leitnerState.sessionResults &&
-              leitnerState.stats ? (
+            leitnerState.sessionResults &&
+            leitnerState.stats ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -127,7 +140,7 @@ export default function Home() {
                   // Pass additional props for contextual controls
                   topics={topics}
                   selectedTopic={null}
-                  onTopicChange={() => { }}
+                  onTopicChange={() => {}}
                   stats={leitnerState.stats}
                   questionProgress={leitnerState.getQuestionProgress(
                     currentQuestion.id

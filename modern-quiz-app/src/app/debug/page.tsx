@@ -21,8 +21,8 @@ import {
 import Link from 'next/link';
 import { generateSyncCode, isValidSyncCode } from '@/lib/generate-sync-code';
 import {
-  pushData,
   pullData,
+  sync,
   getStoredSyncCode,
   getLastSyncTime,
 } from '@/lib/sync-client';
@@ -341,7 +341,8 @@ export default function DebugPage() {
                 setSyncing(true);
                 try {
                   const code = syncCode || generateSyncCode();
-                  await pushData(code);
+                  // Use sync() instead of pushData() to merge remote changes instead of overwriting
+                  await sync(code);
                   setSyncCode(code);
                   setLastSync(new Date().toISOString());
                   showMessage('success', `Backed up to ${code}`);
@@ -361,7 +362,7 @@ export default function DebugPage() {
                     ? 'Backing up...'
                     : syncCode
                       ? 'Update Backup'
-                      : 'Backup to Cloud'}
+                      : 'Sync / Backup'}
                 </div>
                 <div className='text-xs text-muted-foreground'>
                   {syncCode
