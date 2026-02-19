@@ -195,7 +195,7 @@ export function ActivityHeatmap({ compact = false }: ActivityHeatmapProps) {
   if (compact) return grid;
 
   return (
-    <div className='rounded-xl border border-border bg-card p-4 shadow-sm'>
+    <div className='mx-auto w-full rounded-xl border border-border bg-card p-4 shadow-sm sm:max-w-md'>
       <div className='mb-4 flex items-center justify-between'>
         <div>
           <h3 className='text-sm font-semibold text-foreground'>
