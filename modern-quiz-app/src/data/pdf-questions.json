@@ -471,9 +471,9 @@
     "isPdf": true
   },
   {
-    "id": "91b8da47207e86330a21417bc7da941b5842700d5236a652753b02e9d0f0224c",
+    "id": "40f9e29c300acfbc09de3b1c90033dee93d74b87f92d49c482a8ccfd7bd41189",
     "question": "You develop a web application. You need to register the application with an active Azure Active Directory (Azure AD) tenant. Which three actions should you perform in sequence?",
-    "answer": "1. Sign in to the Azure portal using either a work or school account or a personal Microsoft account. 2. If your account gives you access to more than one tenant, select your account in the upper right corner. Set your portal session to the Azure AD tenant that you want. 3. Search for and select Azure Active Directory. Under Manage, select App registrations. 4. Select New registration. (Step 1) 5. In Register an application, enter a meaningful application name to display to users. 6. Specify who can use the application. Select the Azure AD instance. (Step 2) 7. Under Redirect URI (optional), select the type of app you're building: Web or Public client (mobile & desktop). Then enter the redirect URI, or reply URL, for your application. (Step 3) 8. When finished, select Register.",
+    "answer": "Register a new application using the Azure portal 1. Sign in to the Azure portal using either a work or school account or a personal Microsoft account. 2. If your account gives you access to more than one tenant, select your account in the upper right corner. Set your portal session to the Azure AD tenant that you want. 3. Search for and select Azure Active Directory. Under Manage, select App registrations. 4. Select New registration. (Step 1) 5. In Register an application, enter a meaningful application name to display to users. 6. Specify who can use the application. Select the Azure AD instance. (Step 2) 7. Under Redirect URI (optional), select the type of app you're building: Web or Public client (mobile & desktop). Then enter the redirect URI, or reply URL, for your application. (Step 3) 8. When finished, select Register.",
     "options": [
       "Select New registration",
       "Specify who can use the application",
@@ -487,9 +487,9 @@
     "isPdf": true
   },
   {
-    "id": "d205101ef2b233a979a3d98e86e7ab106ad05fb76c2391c2f60008411eb58071",
+    "id": "5a7b68f714d3203bc0007c0dd6d324ed2cad9bc9fd76b5e4e6a95f1e00b73e67",
     "question": "You have a new Azure subscription. You are developing an internal website for employees to view sensitive data. The website uses Azure Active Directory (Azure AD) for authentication. You need to implement multifactor authentication for the website. Which two actions should you perform? Each correct answer presents part of the solution.",
-    "answer": "C: Multi-Factor Authentication comes as part of the following offerings: - Azure Active Directory Premium licenses - Full featured use of Azure Multi-Factor Authentication Service (Cloud) or Azure Multi-Factor Authentication Server (On-premises). - Multi-Factor Authentication for Office 365 - Azure Active Directory Global Administrators",
+    "answer": "B: MFA Enabled by conditional access policy. It is the most flexible means to enable two-step verification for your users. Enabling using conditional access policy only works for Azure MFA in the cloud and is a premium feature of Azure AD. C: Multi-Factor Authentication comes as part of the following offerings: - Azure Active Directory Premium licenses - Full featured use of Azure Multi-Factor Authentication Service (Cloud) or Azure Multi-Factor Authentication Server (On-premises). - Multi-Factor Authentication for Office 365 - Azure Active Directory Global Administrators",
     "options": [
       "Configure the website to use Azure AD B2C.",
       "In Azure AD, create a new conditional access policy.",
@@ -503,9 +503,9 @@
     "isPdf": true
   },
   {
-    "id": "c1e4c93785203184c8c362d2affa1cc87f87d7b42428e908cb2a2c0225db8962",
+    "id": "afff236ddba7671b7298e20db070a5a864d1d00dd316bda304a4dd312fc9c49f",
     "question": "A development team is creating a new REST API. The API will store data in Azure Blob storage. You plan to deploy the API to Azure App Service. Developers must access the Azure Blob storage account to develop the API for the next two months. The Azure Blob storage account must not be accessible by the developers after the two-month time period. You need to grant developers access to the Azure Blob storage account. What should you do?",
-    "answer": "A Shared Access Signature (SAS) token lets you grant time-limited, scoped access to Azure Blob storage without sharing the account key. You set an expiry of two months, after which the SAS becomes invalid and access is automatically revoked — satisfying the requirement that the account must not be accessible after the two-month period. Option B (lifecycle management policy) controls data tiering and expiry, not access permissions. Option C (account access key) grants permanent access; revoking it requires regenerating the key, which affects all consumers. Option D (RBAC) does not expire automatically and would need manual role assignment removal after two months.",
+    "answer": "A shared access signature (SAS) provides secure delegated access to resources in your storage account without compromising the security of your data. With a SAS, you have granular control over how a client can access your data.",
     "options": [
       "Generate a shared access signature (SAS) for the Azure Blob storage account and provide the SAS to all developers.",
       "Create and apply a new lifecycle management policy to include a last accessed date value. Apply the policy to the Azure Blob storage account.",
@@ -513,14 +513,14 @@
       "Grant all developers access to the Azure Blob storage account by assigning role-based access control (RBAC) roles."
     ],
     "answerIndexes": [0],
-    "hasCode": false,
+    "hasCode": true,
     "topic": "Shared Access Signatures",
     "isPdf": true
   },
   {
-    "id": "bf3340160bdd592b17e24c2240e3655f55ea67926b1d41edcc9bc43661ed6878",
+    "id": "bf04e0f9503d0c80df0fa28d567102e35bddef183476ca838a58b97795932a48",
     "question": "You manage a data processing application that receives requests from an Azure Storage queue. You need to manage access to the queue. You have the following requirements: - Provide other applications access to the Azure queue. - Ensure that you can revoke access to the queue without having to regenerate the storage account keys. - Specify access at the queue level and not at the storage account level. Which type of shared access signature (SAS) should you use?",
-    "answer": "Stored access policies give you the option to revoke permissions for a service SAS without having to regenerate the storage account keys.",
+    "answer": "A service SAS is secured with the storage account key. A service SAS delegates access to a resource in only one of the Azure Storage services: Blob storage, Queue storage, Table storage, or Azure Files. Stored access policies give you the option to revoke permissions for a service SAS without having to regenerate the storage account keys.",
     "options": [
       "Service SAS with a stored access policy",
       "Account SAS",
@@ -533,9 +533,9 @@
     "isPdf": true
   },
   {
-    "id": "b71d6c6583bec7eb65fd62712d71e554ed74de658f5d9ff93d0fc0b95bb1ba01",
+    "id": "23d3520d768d83456f08d77a451ea557dec117e285bd71fb353e9e2560588938",
     "question": "You are developing an Azure Function that calls external APIs by providing an access token for the API. The access token is stored in a secret named token in an Azure Key Vault named mykeyvault. You need to ensure the Azure Function can access to the token. Which value should you store in the Azure Function App configuration?",
-    "answer": "Syntax: @Microsoft.KeyVault(SecretUri={copied identifier for the username secret})",
+    "answer": "Add Key Vault secrets reference in the Function App configuration. Syntax: @Microsoft.KeyVault(SecretUri={copied identifier for the username secret})",
     "options": [
       "KeyVault:mykeyvault;Secret:token",
       "App:Settings:Secret:mykeyvault:token",
@@ -548,9 +548,9 @@
     "isPdf": true
   },
   {
-    "id": "d6ad900e901f15d8fdff854704282d4ad005509fbe109b5dcc10e729c0360647",
+    "id": "c296fad619f6c840b6975f6633772f157ba42df800ef1cd9bc700f80d680a127",
     "question": "You develop a Python application for image rendering that uses GPU resources to optimize rendering processes. You deploy the application to an Azure Container Instances (ACI) Linux container. The application requires a secret value to be passed when the container is started. The value must only be accessed from within the container. You need to pass the secret value. What are two possible ways to achieve this goal? Each correct answer presents a complete solution.",
-    "answer": "E: Use a secret volume to supply sensitive information to the containers in a container group. The secret volume stores your secrets in files within the volume, accessible by the containers in the container group. By storing secrets in a secret volume, you can avoid adding sensitive data like SSH keys or database credentials to your application code.",
+    "answer": "A: Secure environment variables - Another method (another than a secret volume) for providing sensitive information to containers (including Windows containers) is through the use of secure environment variables. E: Use a secret volume to supply sensitive information to the containers in a container group. The secret volume stores your secrets in files within the volume, accessible by the containers in the container group. By storing secrets in a secret volume, you can avoid adding sensitive data like SSH keys or database credentials to your application code.",
     "options": [
       "Create an environment variable Set the secureValue property to the secret value.",
       "Add the secret value to the container image. Use a managed identity.",
@@ -564,9 +564,9 @@
     "isPdf": true
   },
   {
-    "id": "0d34fc30b79f50c54d62a579a81104c7964c0331b0193ce3ecd3c821a93527cc",
+    "id": "d1dfcacc590f8f65c1f4ecc279d21d3d749058927fb3541ea265e4978a68981e",
     "question": "You are developing a user portal for a company. You need to create a report for the portal that lists information about employees who are subject matter experts for a specific topic. You must ensure that administrators have full control and consent over the data. Which technology should you use?",
-    "answer": "Microsoft Graph Data Connect augments Microsoft Graph's transactional model with an intelligent way to access rich data at scale. The data covers how workers communicate, collaborate, and manage their time across all the applications and services in Microsoft 365.",
+    "answer": "Data Connect grants a more granular control and consent model: you can manage data, see who is accessing it, and request specific properties of an entity. This enhances the Microsoft Graph model, which grants or denies applications access to entire entities. Microsoft Graph Data Connect augments Microsoft Graph's transactional model with an intelligent way to access rich data at scale. The data covers how workers communicate, collaborate, and manage their time across all the applications and services in Microsoft 365.",
     "options": ["Microsoft Graph data connect", "Microsoft Graph API", "Microsoft Graph connectors"],
     "answerIndexes": [0],
     "hasCode": false,
@@ -574,9 +574,9 @@
     "isPdf": true
   },
   {
-    "id": "01cea3b26ad1b216b4b1832b341469034245f545eceb19a0c26c81197e0c97ed",
+    "id": "91db864182dc07ea103c4c3acbbb696901d4422febf2621ddee9061e2e769391",
     "question": "You are developing a Java application to be deployed in Azure. The application stores sensitive data in Azure Cosmos DB. You need to configure Always Encrypted to encrypt the sensitive data inside the application. What should you do first?",
-    "answer": "Azure Cosmos DB Always Encrypted uses a two-level key hierarchy: a Customer-Managed Key (CMK), also called the Key Encryption Key (KEK), which wraps a Data Encryption Key (DEK). The CMK must be created and stored in Azure Key Vault first, because the DEK is encrypted (wrapped) using the CMK. Without the CMK in Key Vault, the DEK cannot be created or protected. Option A (container encryption policy) is configured after the keys are established. Option C (DEK via SDK) is the second step — it requires the CMK to already exist in Key Vault. Option D (managed identity) is used by the application to access Key Vault at runtime, but the CMK must be in place before any encryption infrastructure can be set up.",
+    "answer": "For Always Encrypted, you first need to create a customer-managed key (CMK) and store it in Azure Key Vault. This key is used to encrypt the data encryption keys (DEKs).",
     "options": [
       "Create a new container to include an encryption policy with the JSON properties to be encrypted.",
       "Create a customer-managed key (CMK) and store the key in a new Azure Key Vault instance.",
@@ -589,9 +589,9 @@
     "isPdf": true
   },
   {
-    "id": "bc2a9dd462c9eba64a4c31187ca3eb0ad92646f6a64b3cefc2e382e54a13a04e",
+    "id": "7927631218ad6e869dec49bdb0ff5750e8b1392e3801b31dc5c7e7faf414f4ec",
     "question": "You develop and deploy an Azure App Service web app named App1. You create a new Azure Key Vault named Vault1. You import several API keys, passwords, certificates, and cryptographic keys into Vault1. You need to grant App1 access to Vault1 and automatically rotate credentials. Credentials must not be stored in code. What should you do?",
-    "answer": "A managed identity (system-assigned or user-assigned) allows Azure App Service to authenticate to Azure Key Vault without any credentials stored in code. Azure AD manages the underlying service principal and automatically rotates its credentials — your application code never sees or stores them. You then grant the managed identity the appropriate Key Vault access policy or RBAC role (e.g., Key Vault Secrets User) to read secrets, keys, and certificates. Option A requires a custom RBAC role and App Service authentication, which doesn't eliminate credential management for Key Vault. Option B (TLS/SSL binding) secures inbound HTTP traffic and has no relation to Key Vault access. Option C (self-signed client certificate) requires storing the certificate somewhere and managing its lifecycle, violating the 'no credentials in code' requirement.",
+    "answer": "Managed identities for Azure resources provide Azure services with an automatically managed identity in Azure AD. This identity can be used to authenticate to any service that supports Azure AD authentication, including Key Vault, without having to store credentials in code.",
     "options": [
       "Enable App Service authentication for App1. Assign a custom RBAC role to Vault1.",
       "Add a TLS/SSL binding to App1.",
@@ -604,9 +604,9 @@
     "isPdf": true
   },
   {
-    "id": "68351d3860a02abbe95ffff0d55525ba35df4b939c48a7c99c48717c702e6203",
+    "id": "e47c827b39248dbebac2991a29ff1f6c03c042c3cb73b1fcddd37bf6570daaf0",
     "question": "You are developing several Azure API Management (APIM) hosted APIs. You must transform the APIs to hide private backend information and obscure the technology stack used to implement the backend processing. You need to protect all APIs. What should you do?",
-    "answer": "``` ```",
+    "answer": "Outbound policies process the response before sending it back to the caller. To hide backend information and technology stack details globally across all APIs, you need to configure an outbound policy at the global scope. ``` ```",
     "options": [
       "Configure and apply a new inbound policy scoped to a product.",
       "Configure and apply a new outbound policy scoped to the operation.",

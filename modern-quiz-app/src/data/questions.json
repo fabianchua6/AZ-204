@@ -1505,7 +1505,7 @@
   {
     "id": "fbf4d8afae8b2ad1552f811e8dbf8d9e1ab4d7fa617078397ee953741fcb8624",
     "question": "You want to secure a public domain in Azure App Service without needing wildcard certificates or private DNS, and you want the certificate to be auto-renewed. Which option should you choose?",
-    "answer": "Azure App Service's Free Managed Certificate provides a free TLS/SSL certificate for custom domains. It is automatically renewed every 6 months by Azure, works with standard (non-wildcard) public domains, and does not require private DNS or Azure DNS configuration. The App Service Certificate (B) must be purchased through Azure and managed separately. Uploading a Private Certificate (C) or Public Certificate (D) requires you to handle procurement and manual renewal yourself. The Free Managed Certificate is therefore the only option that satisfies auto-renewal without needing wildcard certificates or private DNS.",
+    "answer": "",
     "options": [
       "Free Managed Certificate",
       "App Service Certificate",
@@ -5819,7 +5819,7 @@
   {
     "id": "10a2c8adc50b608bc1fe68390aab7c5e2d878d4e9ec512e18435c9492c1d6d2a",
     "question": "Which of the following queues supports automatic dead-lettering?",
-    "answer": "Azure Service Bus Queues support automatic dead-letter queuing natively. Messages that exceed the configured maximum delivery count, expire past their Time-To-Live (TTL), or are explicitly dead-lettered by the receiver are automatically moved to a dead-letter sub-queue (/$DeadLetterQueue). Azure Storage Queues (B) do not have a built-in dead-letter mechanism — you must implement message poison handling manually in your application code. Therefore, only Service Bus Queues provide automatic dead-lettering out of the box.",
+    "answer": "",
     "options": [
       "Service Bus Queues",
       "Storage Queues",
