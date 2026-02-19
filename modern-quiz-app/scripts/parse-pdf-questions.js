@@ -130,7 +130,9 @@ function parseQuestions(markdownContent) {
       // Start collecting explanation
       if (line.startsWith('**Explanation:**')) {
         collectingAnswer = true;
-        currentText = '';
+        // Capture inline explanation text on the same line (e.g. "**Explanation:** Some text here")
+        const inlineText = line.replace('**Explanation:**', '').trim();
+        currentText = inlineText || '';
         continue;
       }
 
