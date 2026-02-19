@@ -4,7 +4,12 @@
 
 import type { Question } from '@/types/quiz';
 import { LEITNER_CONFIG } from './leitner/constants';
-import { DateUtils, ValidationUtils, AlgorithmUtils, StorageUtils } from './leitner/utils';
+import {
+  DateUtils,
+  ValidationUtils,
+  AlgorithmUtils,
+  StorageUtils,
+} from './leitner/utils';
 import type {
   LeitnerProgress,
   LeitnerStats,
@@ -52,10 +57,10 @@ export class LeitnerSystem {
       try {
         await this.loadFromStorage();
         await this.loadSettings();
-        
+
         // Periodic cleanup of old daily attempts data
         this.clearOldDailyAttempts();
-        
+
         this.initialized = true;
       } catch (error) {
         console.error('Failed to initialize Leitner system:', error);
@@ -86,7 +91,7 @@ export class LeitnerSystem {
       }
 
       this.progress = new Map(Object.entries(data));
-      
+
       // Migrate existing 5-box data to 3-box system
       this.migrateToThreeBoxSystem();
     } catch (error) {
@@ -102,7 +107,10 @@ export class LeitnerSystem {
       const stored = StorageUtils.safeGetItem(LEITNER_CONFIG.STORAGE.SETTINGS);
       if (stored) {
         const parsedSettings = JSON.parse(stored) as Partial<LeitnerSettings>;
-        this.settings = { ...LEITNER_CONFIG.DEFAULT_SETTINGS, ...parsedSettings };
+        this.settings = {
+          ...LEITNER_CONFIG.DEFAULT_SETTINGS,
+          ...parsedSettings,
+        };
       }
     } catch (error) {
       console.warn('Failed to load settings, using defaults:', error);
@@ -113,9 +121,12 @@ export class LeitnerSystem {
   // Save user settings to localStorage
   private saveSettings(): void {
     if (typeof window === 'undefined') return; // SSR safety
-    
+
     try {
-      StorageUtils.safeSetItem(LEITNER_CONFIG.STORAGE.SETTINGS, JSON.stringify(this.settings));
+      StorageUtils.safeSetItem(
+        LEITNER_CONFIG.STORAGE.SETTINGS,
+        JSON.stringify(this.settings)
+      );
     } catch (error) {
       console.error('Failed to save settings:', error);
     }
@@ -124,20 +135,23 @@ export class LeitnerSystem {
   // Migrate existing 5-box system data to 3-box system
   private migrateToThreeBoxSystem(): void {
     let migrationMade = false;
-    
-    this.progress.forEach((progress) => {
+
+    this.progress.forEach(progress => {
       if (progress.currentBox > LEITNER_CONFIG.LIMITS.MAX_BOX) {
         // Move boxes 4 and 5 to box 3 (mastered)
         progress.currentBox = LEITNER_CONFIG.LIMITS.MAX_BOX;
-        
+
         // Recalculate next review date for box 3
         const lastReviewed = new Date(progress.lastReviewed);
-        progress.nextReviewDate = DateUtils.calculateNextReviewDate(LEITNER_CONFIG.LIMITS.MAX_BOX, lastReviewed).toISOString();
-        
+        progress.nextReviewDate = DateUtils.calculateNextReviewDate(
+          LEITNER_CONFIG.LIMITS.MAX_BOX,
+          lastReviewed
+        ).toISOString();
+
         migrationMade = true;
       }
     });
-    
+
     if (migrationMade) {
       console.log('Migrated Leitner data from 5-box to 3-box system');
       this.saveToStorage();
@@ -171,14 +185,20 @@ export class LeitnerSystem {
   private performSave(): void {
     try {
       const data = Object.fromEntries(this.progress);
-      StorageUtils.safeSetItem(LEITNER_CONFIG.STORAGE.PROGRESS, JSON.stringify(data));
+      StorageUtils.safeSetItem(
+        LEITNER_CONFIG.STORAGE.PROGRESS,
+        JSON.stringify(data)
+      );
     } catch (error) {
       if (error instanceof DOMException && error.code === 22) {
         // Storage quota exceeded - cleanup old data
         this.cleanupOldData();
         try {
           const data = Object.fromEntries(this.progress);
-          StorageUtils.safeSetItem(LEITNER_CONFIG.STORAGE.PROGRESS, JSON.stringify(data));
+          StorageUtils.safeSetItem(
+            LEITNER_CONFIG.STORAGE.PROGRESS,
+            JSON.stringify(data)
+          );
         } catch (retryError) {
           console.error('Failed to save even after cleanup:', retryError);
         }
@@ -191,37 +211,50 @@ export class LeitnerSystem {
   // Cleanup old progress data to free storage (timezone-aware)
   private cleanupOldData(): void {
     const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - LEITNER_CONFIG.LIMITS.CLEANUP_THRESHOLD_DAYS);
+    thirtyDaysAgo.setDate(
+      thirtyDaysAgo.getDate() - LEITNER_CONFIG.LIMITS.CLEANUP_THRESHOLD_DAYS
+    );
     const cutoffDateStr = DateUtils.getLocalDateString(thirtyDaysAgo);
 
     const keysToDelete: string[] = [];
     this.progress.forEach((progress, questionId) => {
       try {
-        const lastReviewedDateStr = DateUtils.getLocalDateFromStoredDate(progress.lastReviewed);
-        if (lastReviewedDateStr < cutoffDateStr && progress.currentBox === LEITNER_CONFIG.LIMITS.MAX_BOX) {
+        const lastReviewedDateStr = DateUtils.getLocalDateFromStoredDate(
+          progress.lastReviewed
+        );
+        if (
+          lastReviewedDateStr < cutoffDateStr &&
+          progress.currentBox === LEITNER_CONFIG.LIMITS.MAX_BOX
+        ) {
           // Remove old mastered questions that haven't been reviewed recently
           keysToDelete.push(questionId);
         }
       } catch (error) {
-        console.warn(`Error parsing date for cleanup: ${progress.lastReviewed}`, error);
+        console.warn(
+          `Error parsing date for cleanup: ${progress.lastReviewed}`,
+          error
+        );
         // Keep the data if we can't parse the date safely
       }
     });
 
     keysToDelete.forEach(key => this.progress.delete(key));
-    
+
     if (keysToDelete.length > 0) {
       console.log(`Cleaned up ${keysToDelete.length} old mastered questions`);
     }
   }
 
-    // Initialize a new question in Box 1
+  // Initialize a new question in Box 1
   private initializeQuestion(questionId: string): LeitnerProgress {
     const now = new Date();
     const progress: LeitnerProgress = {
       questionId,
       currentBox: LEITNER_CONFIG.LIMITS.MIN_BOX,
-      nextReviewDate: DateUtils.calculateNextReviewDate(LEITNER_CONFIG.LIMITS.MIN_BOX, now).toISOString(),
+      nextReviewDate: DateUtils.calculateNextReviewDate(
+        LEITNER_CONFIG.LIMITS.MIN_BOX,
+        now
+      ).toISOString(),
       timesCorrect: 0,
       timesIncorrect: 0,
       lastReviewed: now.toISOString(),
@@ -258,12 +291,12 @@ export class LeitnerSystem {
     // Rotate seed every 5 minutes to provide fresh randomization
     const now = Date.now();
     const SEED_ROTATION_INTERVAL = 5 * 60 * 1000; // 5 minutes
-    
+
     if (now - this.lastSeedRotation > SEED_ROTATION_INTERVAL) {
       this.questionSeed = now;
       this.lastSeedRotation = now;
     }
-    
+
     return AlgorithmUtils.stableRandom(questionId, this.questionSeed);
   }
 
@@ -275,7 +308,7 @@ export class LeitnerSystem {
   private incrementDailyAttempts(): void {
     const today = this.getLocalDateString(new Date());
     const key = `leitner-daily-attempts-${today}`;
-    
+
     try {
       // Use atomic increment to prevent race conditions
       let attempts = 0;
@@ -284,7 +317,7 @@ export class LeitnerSystem {
         attempts = parseInt(current, 10);
         if (isNaN(attempts)) attempts = 0; // Handle corrupted data
       }
-      
+
       StorageUtils.safeSetItem(key, String(attempts + 1));
     } catch (error) {
       console.error('Failed to update daily attempts:', error);
@@ -300,7 +333,7 @@ export class LeitnerSystem {
   private getDailyAttempts(): number {
     const today = this.getLocalDateString(new Date());
     const key = `leitner-daily-attempts-${today}`;
-    
+
     try {
       const current = StorageUtils.safeGetItem(key);
       return current ? parseInt(current, 10) : 0;
@@ -317,7 +350,7 @@ export class LeitnerSystem {
       const today = this.getLocalDateString(new Date());
       const todayKey = `leitner-daily-attempts-${today}`;
       StorageUtils.safeRemoveItem(todayKey);
-      
+
       // Clean up old daily attempts keys (older than 7 days)
       // First collect all keys to avoid iteration issues during removal
       const keysToRemove: string[] = [];
@@ -327,10 +360,11 @@ export class LeitnerSystem {
           const dateStr = key.replace('leitner-daily-attempts-', '');
           try {
             const keyDate = new Date(dateStr + 'T00:00:00');
-            const daysDiff = (Date.now() - keyDate.getTime()) / (1000 * 60 * 60 * 24);
-            
-            // Remove keys older than 7 days or invalid dates
-            if (daysDiff > 7 || isNaN(daysDiff)) {
+            const daysDiff =
+              (Date.now() - keyDate.getTime()) / (1000 * 60 * 60 * 24);
+
+            // Remove keys older than 90 days or invalid dates
+            if (daysDiff > 90 || isNaN(daysDiff)) {
               keysToRemove.push(key);
             }
           } catch {
@@ -339,7 +373,7 @@ export class LeitnerSystem {
           }
         }
       }
-      
+
       // Now safely remove all collected keys
       keysToRemove.forEach(key => StorageUtils.safeRemoveItem(key));
     } catch (error) {
@@ -347,7 +381,7 @@ export class LeitnerSystem {
     }
   }
 
-  // Periodic cleanup of old daily attempts (keeps only last 7 days)
+  // Periodic cleanup of old daily attempts (keeps last 90 days for heatmap)
   private clearOldDailyAttempts(): void {
     try {
       for (let i = 0; i < localStorage.length; i++) {
@@ -356,10 +390,11 @@ export class LeitnerSystem {
           const dateStr = key.replace('leitner-daily-attempts-', '');
           try {
             const keyDate = new Date(dateStr + 'T00:00:00');
-            const daysDiff = (Date.now() - keyDate.getTime()) / (1000 * 60 * 60 * 24);
-            
-            // Remove keys older than 7 days
-            if (daysDiff > 7 || isNaN(daysDiff)) {
+            const daysDiff =
+              (Date.now() - keyDate.getTime()) / (1000 * 60 * 60 * 24);
+
+            // Remove keys older than 90 days
+            if (daysDiff > 90 || isNaN(daysDiff)) {
               StorageUtils.safeRemoveItem(key);
             }
           } catch {
@@ -373,12 +408,35 @@ export class LeitnerSystem {
     }
   }
 
-  processAnswer(
-    questionId: string,
-    wasCorrect: boolean
-  ): LeitnerAnswerResult {
+  // Returns a map of date string (YYYY-MM-DD) -> questions answered for the heatmap
+  getDailyActivityHistory(): Record<string, number> {
+    const history: Record<string, number> = {};
+    try {
+      if (typeof window === 'undefined') return history;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('leitner-daily-attempts-')) {
+          const dateStr = key.replace('leitner-daily-attempts-', '');
+          const value = StorageUtils.safeGetItem(key);
+          if (value) {
+            const count = parseInt(value, 10);
+            if (!isNaN(count) && count > 0) {
+              history[dateStr] = count;
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to read daily activity history:', error);
+    }
+    return history;
+  }
+
+  processAnswer(questionId: string, wasCorrect: boolean): LeitnerAnswerResult {
     if (!this.initialized) {
-      throw new Error('Leitner system not initialized. Call ensureInitialized() first.');
+      throw new Error(
+        'Leitner system not initialized. Call ensureInitialized() first.'
+      );
     }
 
     if (!questionId || typeof wasCorrect !== 'boolean') {
@@ -409,10 +467,10 @@ export class LeitnerSystem {
     };
 
     this.progress.set(questionId, updatedProgress);
-    
+
     // Track daily attempts for daily target calculation
     this.incrementDailyAttempts();
-    
+
     this.saveToStorage();
 
     return {
@@ -445,7 +503,7 @@ export class LeitnerSystem {
       box3: 0,
       new: 0,
       due: 0,
-      notDue: 0
+      notDue: 0,
     };
 
     // Separate new questions from questions with progress
@@ -459,11 +517,18 @@ export class LeitnerSystem {
       if (!progress) {
         // New questions get highest priority (Box 1)
         progressStats.new++;
-        newQuestions.push({ ...question, priority: 1, isDue: true, currentBox: 1 });
+        newQuestions.push({
+          ...question,
+          priority: 1,
+          isDue: true,
+          currentBox: 1,
+        });
       } else {
-        progressStats[`box${progress.currentBox}` as keyof typeof progressStats]++;
+        progressStats[
+          `box${progress.currentBox}` as keyof typeof progressStats
+        ]++;
         const isDue = this.isDateDue(progress.nextReviewDate, currentDate);
-        
+
         if (isDue) {
           progressStats.due++;
         } else {
@@ -486,7 +551,7 @@ export class LeitnerSystem {
     // Filter to only questions that are due or new, plus limited review questions
     let reviewQuestionsAdded = 0;
     const maxReviewQuestions = LEITNER_CONFIG.LIMITS.MAX_REVIEW_QUESTIONS;
-    
+
     const dueAndNewQuestions = questionsWithPriority.filter(q => {
       // Include all due questions and new questions
       if (q.isDue) return true;
@@ -495,13 +560,19 @@ export class LeitnerSystem {
       if (reviewQuestionsAdded >= maxReviewQuestions) return false;
 
       // Include some questions from box 3 for review (10% chance, capped)
-      if (q.currentBox === LEITNER_CONFIG.LIMITS.MAX_BOX && Math.random() < LEITNER_CONFIG.LIMITS.REVIEW_PROBABILITY) {
+      if (
+        q.currentBox === LEITNER_CONFIG.LIMITS.MAX_BOX &&
+        Math.random() < LEITNER_CONFIG.LIMITS.REVIEW_PROBABILITY
+      ) {
         reviewQuestionsAdded++;
         return true;
       }
 
       // Include some questions from box 2 for extra variety (5% chance, capped)
-      if (q.currentBox === 2 && Math.random() < LEITNER_CONFIG.LIMITS.BOX2_REVIEW_PROBABILITY) {
+      if (
+        q.currentBox === 2 &&
+        Math.random() < LEITNER_CONFIG.LIMITS.BOX2_REVIEW_PROBABILITY
+      ) {
         reviewQuestionsAdded++;
         return true;
       }
@@ -511,24 +582,27 @@ export class LeitnerSystem {
 
     // If we have too few due questions, add more from all boxes with preference for lower boxes
     if (dueAndNewQuestions.length < LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS) {
-      const additionalNeeded = LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS - dueAndNewQuestions.length;
-      
+      const additionalNeeded =
+        LEITNER_CONFIG.LIMITS.MIN_DUE_QUESTIONS - dueAndNewQuestions.length;
+
       // Get questions not already included, prioritizing lower boxes
       const availableQuestions = questionsWithPriority
-        .filter(q => !q.isDue && !dueAndNewQuestions.some(dup => dup.id === q.id))
+        .filter(
+          q => !q.isDue && !dueAndNewQuestions.some(dup => dup.id === q.id)
+        )
         .sort((a, b) => {
           // Prioritize lower boxes for additional questions
           if (a.currentBox !== b.currentBox) return a.currentBox - b.currentBox;
-          
+
           // Then by failure count
           const failureDiff = (b.timesIncorrect || 0) - (a.timesIncorrect || 0);
           if (failureDiff !== 0) return failureDiff;
-          
+
           // Finally by true random for variety (not stable random)
           return Math.random() - 0.5;
         })
         .slice(0, additionalNeeded);
-        
+
       dueAndNewQuestions.push(...availableQuestions);
     }
 
@@ -651,9 +725,12 @@ export class LeitnerSystem {
 
     // Calculate due today based on daily target vs. total attempts today
     const questionsAnsweredToday = this.getDailyAttempts();
-    
+
     // Calculate remaining questions to reach daily target
-    const remainingToday = Math.max(0, this.settings.dailyTarget - questionsAnsweredToday);
+    const remainingToday = Math.max(
+      0,
+      this.settings.dailyTarget - questionsAnsweredToday
+    );
 
     return {
       totalQuestions: allQuestions.length, // Questions are pre-filtered upstream
@@ -720,10 +797,10 @@ export class LeitnerSystem {
     }
     StorageUtils.safeRemoveItem(LEITNER_CONFIG.STORAGE.PROGRESS);
     StorageUtils.safeRemoveItem(LEITNER_CONFIG.STORAGE.STATS);
-    
+
     // Clear all daily attempts data to prevent stale counts
     this.clearAllDailyAttempts();
-    
+
     // Reset seed for new randomization
     this.questionSeed = Date.now();
     this.lastSeedRotation = Date.now();
@@ -733,7 +810,9 @@ export class LeitnerSystem {
   refreshQuestionOrder(): void {
     this.questionSeed = Date.now();
     this.lastSeedRotation = Date.now();
-    console.log('Question randomization refreshed - questions will appear in a new order');
+    console.log(
+      'Question randomization refreshed - questions will appear in a new order'
+    );
   }
 
   // Clear only navigation/submission states (preserves Leitner progress)
@@ -769,7 +848,7 @@ export class LeitnerSystem {
     topicDistribution: Record<string, number>;
   }> {
     await this.ensureInitialized();
-    
+
     const currentDate = new Date();
     const progressStats = {
       total: this.progress.size,
@@ -778,12 +857,12 @@ export class LeitnerSystem {
       box3: 0,
       new: 0,
       due: 0,
-      notDue: 0
+      notDue: 0,
     };
 
     const questionsWithProgress = allQuestions.map(question => {
       const progress = this.progress.get(question.id);
-      
+
       if (!progress) {
         progressStats.new++;
         return {
@@ -792,13 +871,15 @@ export class LeitnerSystem {
           isDue: true,
           nextReviewDate: 'new',
           timesCorrect: 0,
-          timesIncorrect: 0
+          timesIncorrect: 0,
         };
       }
 
-      progressStats[`box${progress.currentBox}` as keyof typeof progressStats]++;
+      progressStats[
+        `box${progress.currentBox}` as keyof typeof progressStats
+      ]++;
       const isDue = this.isDateDue(progress.nextReviewDate, currentDate);
-      
+
       if (isDue) {
         progressStats.due++;
       } else {
@@ -811,15 +892,18 @@ export class LeitnerSystem {
         isDue,
         nextReviewDate: progress.nextReviewDate,
         timesCorrect: progress.timesCorrect,
-        timesIncorrect: progress.timesIncorrect
+        timesIncorrect: progress.timesIncorrect,
       };
     });
 
     const dueQuestions = questionsWithProgress.filter(q => q.isDue);
-    const topicDistribution = allQuestions.reduce((acc, q) => {
-      acc[q.topic] = (acc[q.topic] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const topicDistribution = allQuestions.reduce(
+      (acc, q) => {
+        acc[q.topic] = (acc[q.topic] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return {
       totalQuestions: allQuestions.length,
@@ -833,9 +917,9 @@ export class LeitnerSystem {
         isDue: q.isDue,
         nextReviewDate: q.nextReviewDate,
         timesCorrect: q.timesCorrect,
-        timesIncorrect: q.timesIncorrect
+        timesIncorrect: q.timesIncorrect,
       })),
-      topicDistribution
+      topicDistribution,
     };
   }
 
@@ -847,10 +931,12 @@ export class LeitnerSystem {
   // Set daily target and save to localStorage
   setDailyTarget(target: number): void {
     if (!ValidationUtils.validateDailyTarget(target)) {
-      console.warn(`Invalid daily target: ${target}. Must be between ${LEITNER_CONFIG.LIMITS.MIN_DAILY_TARGET} and ${LEITNER_CONFIG.LIMITS.MAX_DAILY_TARGET}.`);
+      console.warn(
+        `Invalid daily target: ${target}. Must be between ${LEITNER_CONFIG.LIMITS.MIN_DAILY_TARGET} and ${LEITNER_CONFIG.LIMITS.MAX_DAILY_TARGET}.`
+      );
       return;
     }
-    
+
     this.settings.dailyTarget = target;
     this.saveSettings();
     console.log(`Daily target updated to ${target} questions per day`);
@@ -859,18 +945,28 @@ export class LeitnerSystem {
   // Get today's progress towards daily target
   getTodayProgress(): DailyProgress {
     const todayStr = this.getLocalDateString(new Date());
-    const questionsAnsweredToday = Array.from(this.progress.values()).filter(progress => {
-      try {
-        const reviewedDateStr = this.getLocalDateFromStoredDate(progress.lastReviewed);
-        return reviewedDateStr === todayStr;
-      } catch {
-        return false;
+    const questionsAnsweredToday = Array.from(this.progress.values()).filter(
+      progress => {
+        try {
+          const reviewedDateStr = this.getLocalDateFromStoredDate(
+            progress.lastReviewed
+          );
+          return reviewedDateStr === todayStr;
+        } catch {
+          return false;
+        }
       }
-    }).length;
-    
-    const remaining = Math.max(0, this.settings.dailyTarget - questionsAnsweredToday);
-    const percentage = Math.min(100, (questionsAnsweredToday / this.settings.dailyTarget) * 100);
-    
+    ).length;
+
+    const remaining = Math.max(
+      0,
+      this.settings.dailyTarget - questionsAnsweredToday
+    );
+    const percentage = Math.min(
+      100,
+      (questionsAnsweredToday / this.settings.dailyTarget) * 100
+    );
+
     return {
       target: this.settings.dailyTarget,
       completed: questionsAnsweredToday,
@@ -884,40 +980,52 @@ export class LeitnerSystem {
     const now = new Date();
     const localDate = this.getLocalDateString(now);
     const utcDate = now.toISOString().split('T')[0];
-    
+
     // Test if a question scheduled for today would be considered due
     const testReviewDate = localDate + 'T00:00:00.000Z';
     const isDue = this.isDateDue(testReviewDate, now);
-    
+
     // Test streak calculation
     const currentStreak = this.calculateStreakDays();
     const todayLocalStr = this.getLocalDateString(now);
     const progressArray = Array.from(this.progress.values());
     const todayHasActivity = progressArray.some(p => {
       try {
-        return this.getLocalDateFromStoredDate(p.lastReviewed) === todayLocalStr;
+        return (
+          this.getLocalDateFromStoredDate(p.lastReviewed) === todayLocalStr
+        );
       } catch {
         return false;
       }
     });
-    
+
     // Sample date conversion test
     const sampleStoredDate = now.toISOString();
-    const sampleConvertedDate = this.getLocalDateFromStoredDate(sampleStoredDate);
-    
+    const sampleConvertedDate =
+      this.getLocalDateFromStoredDate(sampleStoredDate);
+
     // Edge case tests
-    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    const midnight = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      0,
+      0,
+      0
+    );
     const midnightTest = this.getLocalDateString(midnight) === localDate;
-    
+
     // DST test (create dates in different seasons)
     const summerDate = new Date(now.getFullYear(), 6, 15); // July 15
     const winterDate = new Date(now.getFullYear(), 0, 15); // January 15
-    const dstTest = this.getLocalDateString(summerDate) !== this.getLocalDateString(winterDate) || true; // Always pass for now
-    
+    const dstTest =
+      this.getLocalDateString(summerDate) !==
+        this.getLocalDateString(winterDate) || true; // Always pass for now
+
     // Leap year test
     const leapYearDate = new Date(2024, 1, 29); // Feb 29, 2024 (leap year)
     const leapYearTest = this.getLocalDateString(leapYearDate) === '2024-02-29';
-    
+
     return {
       currentTime: now.toString(),
       localDate,
@@ -944,4 +1052,9 @@ export const leitnerSystem = new LeitnerSystem();
 
 // Re-export constants and utilities for backward compatibility
 export { BOX_LABELS, BOX_COLORS } from './leitner/constants';
-export { DateUtils, ValidationUtils, AlgorithmUtils, StorageUtils } from './leitner/utils';
+export {
+  DateUtils,
+  ValidationUtils,
+  AlgorithmUtils,
+  StorageUtils,
+} from './leitner/utils';
