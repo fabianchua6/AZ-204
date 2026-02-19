@@ -29,7 +29,6 @@ import {
 } from '@/lib/generate-sync-code';
 import {
   pullData,
-  pushData,
   sync,
   getStoredSyncCode,
   getLastSyncTime,
@@ -65,10 +64,8 @@ export default function DebugPage() {
   } | null>(null);
   const [syncCode, setSyncCode] = useState<string>('');
   const [syncInput, setSyncInput] = useState<string>('');
-  const [renameInput, setRenameInput] = useState<string>('');
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
-  const [renaming, setRenaming] = useState(false);
 
   useEffect(() => {
     document.title = 'Settings - AZ-204 Quiz';
@@ -466,70 +463,6 @@ export default function DebugPage() {
                 </button>
               </div>
             </div>
-
-            {/* Change Sync Code */}
-            {syncCode && (
-              <div className='space-y-2 border-t border-blue-500/10 px-4 py-3.5'>
-                <div className='flex items-center gap-1.5 text-xs font-medium text-muted-foreground'>
-                  <RefreshCw className='h-3.5 w-3.5 shrink-0' />
-                  Change Sync Code
-                </div>
-                <p className='text-xs text-muted-foreground'>
-                  Migrate your progress to a new or custom code (e.g.{' '}
-                  <span className='font-mono'>AZ-FABIAN</span>). Your current
-                  data will be pushed to the new code.
-                </p>
-                <div className='flex flex-col gap-2 sm:flex-row'>
-                  <input
-                    type='text'
-                    placeholder='New code (e.g. AZ-FABIAN)'
-                    value={renameInput}
-                    onChange={e => setRenameInput(e.target.value.toUpperCase())}
-                    className='min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm tracking-wider placeholder:font-sans placeholder:tracking-normal placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-blue-500/30'
-                    maxLength={11}
-                  />
-                  <button
-                    disabled={
-                      renaming || !renameInput || renameInput === syncCode
-                    }
-                    onClick={async () => {
-                      if (!isValidCustomSyncCode(renameInput)) {
-                        showMessage('error', 'Invalid code format');
-                        return;
-                      }
-                      setRenaming(true);
-                      try {
-                        const result = await pushData(
-                          renameInput.toUpperCase()
-                        );
-                        if (result.success) {
-                          setSyncCode(renameInput.toUpperCase());
-                          setLastSync(result.lastSync || null);
-                          setRenameInput('');
-                          showMessage(
-                            'success',
-                            `Moved to ${renameInput.toUpperCase()}!`
-                          );
-                        } else {
-                          showMessage('error', 'Migration failed. Try again.');
-                        }
-                      } catch (e) {
-                        console.error(e);
-                        showMessage(
-                          'error',
-                          'Migration failed. Check connection & try again.'
-                        );
-                      } finally {
-                        setRenaming(false);
-                      }
-                    }}
-                    className='w-full shrink-0 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:opacity-50 sm:w-auto'
-                  >
-                    {renaming ? 'Migrating...' : 'Migrate'}
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </section>
 

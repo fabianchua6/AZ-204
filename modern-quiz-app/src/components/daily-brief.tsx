@@ -76,112 +76,114 @@ export function DailyBrief({ questions }: DailyBriefProps) {
             onClick={handleDismiss}
           />
 
-          {/* Bottom sheet */}
-          <motion.div
-            key='sheet'
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 32, stiffness: 300 }}
-            className='fixed inset-x-0 bottom-0 z-[61] flex max-h-[88vh] flex-col rounded-t-2xl border-t border-border bg-card shadow-xl sm:inset-x-auto sm:bottom-10 sm:left-1/2 sm:max-h-[80vh] sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:rounded-2xl sm:border'
-          >
-            {/* Drag handle */}
-            <div
-              className='flex shrink-0 cursor-pointer justify-center pb-2 pt-3'
-              onClick={handleDismiss}
-              role='button'
-              aria-label='Close daily brief'
+          {/* Bottom sheet — static positioner keeps centering; motion div animates slide */}
+          <div className='fixed inset-x-0 bottom-0 z-[61] flex justify-center sm:bottom-10 sm:px-4'>
+            <motion.div
+              key='sheet'
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 32, stiffness: 300 }}
+              className='flex max-h-[88vh] w-full flex-col rounded-t-2xl border-t border-border bg-card shadow-xl sm:max-h-[80vh] sm:max-w-lg sm:rounded-2xl sm:border'
             >
-              <div className='h-1 w-10 rounded-full bg-muted-foreground/25' />
-            </div>
+              {/* Drag handle */}
+              <div
+                className='flex shrink-0 cursor-pointer justify-center pb-2 pt-3'
+                onClick={handleDismiss}
+                role='button'
+                aria-label='Close daily brief'
+              >
+                <div className='h-1 w-10 rounded-full bg-muted-foreground/25' />
+              </div>
 
-            {/* Scrollable content */}
-            <div className='min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-10'>
-              {/* Greeting */}
-              <div className='mb-5 flex items-start justify-between'>
+              {/* Scrollable content */}
+              <div className='min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-10'>
+                {/* Greeting */}
+                <div className='mb-5 flex items-start justify-between'>
+                  <div>
+                    <h2 className='text-xl font-semibold text-foreground'>
+                      {getGreeting()}
+                    </h2>
+                    <p className='mt-0.5 text-sm text-muted-foreground'>
+                      Here&apos;s your study brief
+                    </p>
+                  </div>
+                  {stats.streakDays > 0 && (
+                    <span className='flex shrink-0 items-center gap-1 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-600 dark:bg-orange-500/15 dark:text-orange-400'>
+                      <Flame className='h-3.5 w-3.5' />
+                      {stats.streakDays}d
+                    </span>
+                  )}
+                </div>
+
+                {/* Heatmap — top */}
+                <div className='mb-5'>
+                  <p className='mb-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+                    Activity
+                  </p>
+                  <ActivityHeatmap compact />
+                </div>
+
+                {/* 2-stat row */}
+                <div className='mb-5 grid grid-cols-2 gap-3'>
+                  <div className='rounded-xl border border-amber-200/60 bg-amber-50/60 p-3 dark:border-amber-500/20 dark:bg-amber-500/10'>
+                    <div className='flex items-center gap-1.5 text-amber-600 dark:text-amber-400'>
+                      <Clock className='h-3.5 w-3.5' />
+                      <span className='text-xs font-medium'>Due Today</span>
+                    </div>
+                    <p className='mt-2 text-2xl font-bold tabular-nums text-amber-700 dark:text-amber-300'>
+                      {stats.dueToday}
+                    </p>
+                  </div>
+
+                  <div className='rounded-xl border border-blue-200/60 bg-blue-50/60 p-3 dark:border-blue-500/20 dark:bg-blue-500/10'>
+                    <div className='flex items-center gap-1.5 text-blue-600 dark:text-blue-400'>
+                      <BookOpen className='h-3.5 w-3.5' />
+                      <span className='text-xs font-medium'>Started</span>
+                    </div>
+                    <p className='mt-2 text-2xl font-bold tabular-nums text-blue-700 dark:text-blue-300'>
+                      {stats.questionsStarted}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Box distribution */}
                 <div>
-                  <h2 className='text-xl font-semibold text-foreground'>
-                    {getGreeting()}
-                  </h2>
-                  <p className='mt-0.5 text-sm text-muted-foreground'>
-                    Here&apos;s your study brief
+                  <p className='mb-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+                    Leitner Boxes
                   </p>
-                </div>
-                {stats.streakDays > 0 && (
-                  <span className='flex shrink-0 items-center gap-1 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-600 dark:bg-orange-500/15 dark:text-orange-400'>
-                    <Flame className='h-3.5 w-3.5' />
-                    {stats.streakDays}d
-                  </span>
-                )}
-              </div>
-
-              {/* Heatmap — top */}
-              <div className='mb-5'>
-                <p className='mb-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
-                  Activity
-                </p>
-                <ActivityHeatmap compact />
-              </div>
-
-              {/* 2-stat row */}
-              <div className='mb-5 grid grid-cols-2 gap-3'>
-                <div className='rounded-xl border border-amber-200/60 bg-amber-50/60 p-3 dark:border-amber-500/20 dark:bg-amber-500/10'>
-                  <div className='flex items-center gap-1.5 text-amber-600 dark:text-amber-400'>
-                    <Clock className='h-3.5 w-3.5' />
-                    <span className='text-xs font-medium'>Due Today</span>
-                  </div>
-                  <p className='mt-2 text-2xl font-bold tabular-nums text-amber-700 dark:text-amber-300'>
-                    {stats.dueToday}
-                  </p>
-                </div>
-
-                <div className='rounded-xl border border-blue-200/60 bg-blue-50/60 p-3 dark:border-blue-500/20 dark:bg-blue-500/10'>
-                  <div className='flex items-center gap-1.5 text-blue-600 dark:text-blue-400'>
-                    <BookOpen className='h-3.5 w-3.5' />
-                    <span className='text-xs font-medium'>Started</span>
-                  </div>
-                  <p className='mt-2 text-2xl font-bold tabular-nums text-blue-700 dark:text-blue-300'>
-                    {stats.questionsStarted}
-                  </p>
-                </div>
-              </div>
-
-              {/* Box distribution */}
-              <div>
-                <p className='mb-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
-                  Leitner Boxes
-                </p>
-                <div className='space-y-2'>
-                  {([1, 2, 3] as const).map(box => {
-                    const count = stats.boxDistribution[box] || 0;
-                    const pct = Math.round((count / boxTotal) * 100);
-                    const barColor =
-                      box === 1
-                        ? 'bg-red-400 dark:bg-red-500'
-                        : box === 2
-                          ? 'bg-amber-400 dark:bg-amber-500'
-                          : 'bg-emerald-400 dark:bg-emerald-500';
-                    return (
-                      <div key={box} className='flex items-center gap-3'>
-                        <span className='w-3 shrink-0 text-center text-xs font-medium text-muted-foreground'>
-                          {box}
-                        </span>
-                        <div className='h-1.5 flex-1 overflow-hidden rounded-full bg-muted/60'>
-                          <div
-                            className={`h-full rounded-full transition-all ${barColor}`}
-                            style={{ width: `${pct}%` }}
-                          />
+                  <div className='space-y-2'>
+                    {([1, 2, 3] as const).map(box => {
+                      const count = stats.boxDistribution[box] || 0;
+                      const pct = Math.round((count / boxTotal) * 100);
+                      const barColor =
+                        box === 1
+                          ? 'bg-red-400 dark:bg-red-500'
+                          : box === 2
+                            ? 'bg-amber-400 dark:bg-amber-500'
+                            : 'bg-emerald-400 dark:bg-emerald-500';
+                      return (
+                        <div key={box} className='flex items-center gap-3'>
+                          <span className='w-3 shrink-0 text-center text-xs font-medium text-muted-foreground'>
+                            {box}
+                          </span>
+                          <div className='h-1.5 flex-1 overflow-hidden rounded-full bg-muted/60'>
+                            <div
+                              className={`h-full rounded-full transition-all ${barColor}`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <span className='w-8 shrink-0 text-right text-xs tabular-nums text-muted-foreground'>
+                            {count}
+                          </span>
                         </div>
-                        <span className='w-8 shrink-0 text-right text-xs tabular-nums text-muted-foreground'>
-                          {count}
-                        </span>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
