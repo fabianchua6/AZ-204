@@ -57,49 +57,39 @@ export function DashboardStats({ questions, section }: DashboardStatsProps) {
       const stats = await questionService.getAppStatistics(questions);
       setAppStats(stats);
       setInitialized(true);
-
-      // Load study streak data
-      const streak = loadFromLocalStorage('study-streak', {
-        currentStreak: 0,
-        lastStudyDate: null,
-        bestStreak: 0,
-      });
-      setStudyStreak(streak);
     };
 
     init();
   }, [questions]);
 
-  // Update study streak if user has answered questions today
+  // Derive streak from Leitner system's robust calculation (based on actual
+  // lastReviewed dates across all progress) and persist to study-streak key
+  // so it syncs across devices.
   useEffect(() => {
     if (!initialized || !appStats) return;
 
-    if (appStats.questionsStarted > 0) {
-      const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+    // streakDays is computed by AlgorithmUtils.calculateStreakDays which walks
+    // backwards through the last 30 days checking actual question review dates
+    const leitnerStreak = appStats.streakDays;
 
-      if (studyStreak.lastStudyDate !== today) {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    const stored = loadFromLocalStorage<StudyStreak>('study-streak', {
+      currentStreak: 0,
+      lastStudyDate: null,
+      bestStreak: 0,
+    });
 
-        let newStreak = 1;
-        if (studyStreak.lastStudyDate === yesterdayStr) {
-          newStreak = studyStreak.currentStreak + 1;
-        }
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+    const newBestStreak = Math.max(leitnerStreak, stored.bestStreak);
 
-        const newBestStreak = Math.max(newStreak, studyStreak.bestStreak);
+    const updatedStreak: StudyStreak = {
+      currentStreak: leitnerStreak,
+      lastStudyDate: today,
+      bestStreak: newBestStreak,
+    };
 
-        const updatedStreak = {
-          currentStreak: newStreak,
-          lastStudyDate: today,
-          bestStreak: newBestStreak,
-        };
-
-        setStudyStreak(updatedStreak);
-        saveToLocalStorage('study-streak', updatedStreak);
-      }
-    }
-  }, [initialized, appStats, studyStreak]);
+    setStudyStreak(updatedStreak);
+    saveToLocalStorage('study-streak', updatedStreak);
+  }, [initialized, appStats]);
 
   if (!initialized || !appStats) {
     return (

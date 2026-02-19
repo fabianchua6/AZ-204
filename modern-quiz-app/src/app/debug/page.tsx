@@ -603,15 +603,35 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.9.1 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.9.1</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 19, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Fixed streak display on Learning Dashboard — now uses
+                  Leitner system&apos;s robust streak calculation instead of
+                  naive day-counter that only updated on dashboard visits
+                </li>
+                <li>
+                  ✦ Best Streak now correctly persists and syncs across sessions
+                </li>
+              </ul>
+            </div>
+
             {/* v1.9.0 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.9.0</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 19, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>
