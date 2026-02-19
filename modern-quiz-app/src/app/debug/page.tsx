@@ -544,15 +544,34 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.8.0 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.8.0</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 19, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Daily Brief — slide-up sheet with stats and heatmap on first
+                  daily visit
+                </li>
+                <li>✦ Activity heatmap now fully responsive on mobile</li>
+                <li>✦ Removed heatmap legend; expanded to 15 weeks</li>
+                <li>✦ Heatmap moved above stats cards on Dashboard</li>
+              </ul>
+            </div>
+
             {/* v1.7.0 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.7.0</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 19, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>

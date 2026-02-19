@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // Component imports
 import { Header } from '@/components/header';
+import { DailyBrief } from '@/components/daily-brief';
 import { LeitnerQuizCard } from '@/components/leitner-quiz-card';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { SessionResults } from '@/components/leitner/session-results';
@@ -75,6 +76,7 @@ export default function Home() {
   return (
     <div className='via-background-secondary to-background-tertiary min-h-screen bg-gradient-to-br from-background'>
       <Header isVisible={isHeaderVisible} />
+      <DailyBrief questions={questions} />
 
       <main className='container mx-auto px-2 py-2'>
         <div className='mx-auto max-w-4xl'>
