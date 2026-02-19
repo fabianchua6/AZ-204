@@ -783,6 +783,17 @@ export class LeitnerSystem {
 
   // Robust timezone-aware streak calculation based on recent activity
   private calculateStreakDays(): number {
+    // Primary source: durable daily activity history (used by heatmap).
+    // This preserves multi-day streak continuity even when question-level
+    // lastReviewed timestamps are overwritten by newer attempts.
+    const activityHistory = this.getDailyActivityHistory();
+    if (Object.keys(activityHistory).length > 0) {
+      return AlgorithmUtils.calculateStreakDaysFromDailyHistory(
+        activityHistory
+      );
+    }
+
+    // Fallback: legacy behavior from progress records.
     const progressArray = Array.from(this.progress.values());
     return AlgorithmUtils.calculateStreakDays(progressArray);
   }

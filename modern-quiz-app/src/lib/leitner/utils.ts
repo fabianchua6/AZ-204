@@ -42,35 +42,53 @@ export class DateUtils {
    */
   static calculateNextReviewDate(box: number, fromDate: Date): Date {
     try {
-      const interval = LEITNER_CONFIG.INTERVALS[box as keyof typeof LEITNER_CONFIG.INTERVALS];
-      
+      const interval =
+        LEITNER_CONFIG.INTERVALS[box as keyof typeof LEITNER_CONFIG.INTERVALS];
+
       if (!interval || interval < 1) {
         console.warn(`Invalid interval for box ${box}, defaulting to 1 day`);
         return new Date(fromDate.getTime() + 24 * 60 * 60 * 1000);
       }
-      
+
       // Create a new date at midnight local time to avoid timezone issues
-      const localFromDate = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
-      
+      const localFromDate = new Date(
+        fromDate.getFullYear(),
+        fromDate.getMonth(),
+        fromDate.getDate()
+      );
+
       // Validate the constructed date
       if (isNaN(localFromDate.getTime())) {
         console.warn(`Invalid fromDate: ${fromDate}, using current date`);
         const now = new Date();
-        const fallbackDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        return new Date(fallbackDate.getTime() + interval * 24 * 60 * 60 * 1000);
+        const fallbackDate = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+        );
+        return new Date(
+          fallbackDate.getTime() + interval * 24 * 60 * 60 * 1000
+        );
       }
-      
-      const nextDate = new Date(localFromDate.getTime() + interval * 24 * 60 * 60 * 1000);
-      
+
+      const nextDate = new Date(
+        localFromDate.getTime() + interval * 24 * 60 * 60 * 1000
+      );
+
       // Validate the result
       if (isNaN(nextDate.getTime())) {
-        console.warn(`Invalid calculated nextDate for box ${box}, using fallback`);
+        console.warn(
+          `Invalid calculated nextDate for box ${box}, using fallback`
+        );
         return new Date(fromDate.getTime() + interval * 24 * 60 * 60 * 1000);
       }
-      
+
       return nextDate;
     } catch (error) {
-      console.error(`Error calculating next review date for box ${box}:`, error);
+      console.error(
+        `Error calculating next review date for box ${box}:`,
+        error
+      );
       // Fallback to simple calculation
       return new Date(fromDate.getTime() + 24 * 60 * 60 * 1000);
     }
@@ -83,10 +101,10 @@ export class DateUtils {
     try {
       // Extract date part from stored review date and convert to local timezone
       const reviewDateLocal = this.getLocalDateFromStoredDate(reviewDateStr);
-      
+
       // Get current date in local timezone (Singapore time)
       const currentDateLocal = this.getLocalDateString(currentDate);
-      
+
       // Compare date strings - due if review date is today or earlier
       return reviewDateLocal <= currentDateLocal;
     } catch (error) {
@@ -106,7 +124,9 @@ export class ValidationUtils {
   static validateStoredData(data: unknown): boolean {
     if (!data || typeof data !== 'object') return false;
 
-    for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+    for (const [key, value] of Object.entries(
+      data as Record<string, unknown>
+    )) {
       if (typeof key !== 'string' || !this.validateProgress(value)) {
         return false;
       }
@@ -154,7 +174,7 @@ export class AlgorithmUtils {
   static stableRandom(questionId: string, seed: number): number {
     // Improved hash function that creates better variation between seeds
     let hash = seed; // Start with the seed value
-    
+
     // Mix the seed with each character of the question ID
     for (let i = 0; i < questionId.length; i++) {
       const char = questionId.charCodeAt(i);
@@ -162,12 +182,12 @@ export class AlgorithmUtils {
       hash = ((hash << 13) ^ hash) & 0xffffffff; // Additional mixing
       hash = ((hash * 0x85ebca6b) ^ (hash >>> 16)) & 0xffffffff; // Multiply by prime and XOR
     }
-    
+
     // Final mixing step to improve distribution
     hash ^= hash >>> 16;
     hash *= 0x9e3779b9; // Golden ratio constant
     hash ^= hash >>> 16;
-    
+
     // Ensure positive and normalize to 0-1
     return (hash & 0x7fffffff) / 0x7fffffff;
   }
@@ -176,8 +196,13 @@ export class AlgorithmUtils {
    * Calculate question movement between boxes
    */
   static moveQuestion(currentBox: number, wasCorrect: boolean): number {
-    if (currentBox < LEITNER_CONFIG.LIMITS.MIN_BOX || currentBox > LEITNER_CONFIG.LIMITS.MAX_BOX) {
-      console.warn(`Invalid current box: ${currentBox}, defaulting to ${LEITNER_CONFIG.LIMITS.MIN_BOX}`);
+    if (
+      currentBox < LEITNER_CONFIG.LIMITS.MIN_BOX ||
+      currentBox > LEITNER_CONFIG.LIMITS.MAX_BOX
+    ) {
+      console.warn(
+        `Invalid current box: ${currentBox}, defaulting to ${LEITNER_CONFIG.LIMITS.MIN_BOX}`
+      );
       return LEITNER_CONFIG.LIMITS.MIN_BOX;
     }
 
@@ -194,7 +219,7 @@ export class AlgorithmUtils {
   static calculateStreakDays(progressArray: LeitnerProgress[]): number {
     const today = new Date();
     let streak = 0;
-    
+
     if (progressArray.length === 0) {
       return 0; // No progress data means no streak
     }
@@ -208,10 +233,15 @@ export class AlgorithmUtils {
       // Check if any question was reviewed on this date
       const hasActivity = progressArray.some(progress => {
         try {
-          const reviewedDateStr = DateUtils.getLocalDateFromStoredDate(progress.lastReviewed);
+          const reviewedDateStr = DateUtils.getLocalDateFromStoredDate(
+            progress.lastReviewed
+          );
           return reviewedDateStr === targetDateStr;
         } catch (error) {
-          console.warn(`Error parsing lastReviewed date for streak: ${progress.lastReviewed}`, error);
+          console.warn(
+            `Error parsing lastReviewed date for streak: ${progress.lastReviewed}`,
+            error
+          );
           return false;
         }
       });
@@ -220,6 +250,43 @@ export class AlgorithmUtils {
         streak++;
       } else if (i > 0) {
         // Break streak if no activity (but don't count today if it's just starting)
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  /**
+   * Calculate streak days from daily activity history (YYYY-MM-DD -> count).
+   * Streak can start from today OR yesterday (if today has no activity yet).
+   */
+  static calculateStreakDaysFromDailyHistory(
+    activityHistory: Record<string, number>,
+    referenceDate: Date = new Date()
+  ): number {
+    const hasAnyActivity = Object.values(activityHistory).some(
+      count => count > 0
+    );
+    if (!hasAnyActivity) {
+      return 0;
+    }
+
+    const todayStr = DateUtils.getLocalDateString(referenceDate);
+    const hasActivityToday = (activityHistory[todayStr] || 0) > 0;
+
+    // If no activity today yet, allow streak to start from yesterday.
+    const startOffset = hasActivityToday ? 0 : 1;
+
+    let streak = 0;
+    for (let offset = startOffset; offset < startOffset + 30; offset++) {
+      const checkDate = new Date(referenceDate);
+      checkDate.setDate(checkDate.getDate() - offset);
+      const dateStr = DateUtils.getLocalDateString(checkDate);
+
+      if ((activityHistory[dateStr] || 0) > 0) {
+        streak++;
+      } else {
         break;
       }
     }
@@ -237,7 +304,7 @@ export class StorageUtils {
    */
   static safeGetItem(key: string): string | null {
     if (typeof window === 'undefined') return null; // SSR safety
-    
+
     try {
       return localStorage.getItem(key);
     } catch (error) {
@@ -248,7 +315,7 @@ export class StorageUtils {
 
   static safeSetItem(key: string, value: string): boolean {
     if (typeof window === 'undefined') return false; // SSR safety
-    
+
     try {
       localStorage.setItem(key, value);
       return true;
@@ -260,7 +327,7 @@ export class StorageUtils {
 
   static safeRemoveItem(key: string): boolean {
     if (typeof window === 'undefined') return false; // SSR safety
-    
+
     try {
       localStorage.removeItem(key);
       return true;
