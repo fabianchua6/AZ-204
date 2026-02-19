@@ -85,7 +85,7 @@ describe('pushData', () => {
     await pushData('AZ-ABC123');
 
     expect(global.fetch).toHaveBeenCalledWith(
-      '/api/sync?code=AZ-ABC123',
+      '/api/sync/AZ-ABC123',
       expect.objectContaining({ method: 'POST' })
     );
   });
@@ -100,7 +100,7 @@ describe('pullData (Restore)', () => {
 
     await pullData('AZ-ABC123');
 
-    expect(global.fetch).toHaveBeenCalledWith('/api/sync?code=AZ-ABC123');
+    expect(global.fetch).toHaveBeenCalledWith('/api/sync/AZ-ABC123');
   });
 });
 
@@ -142,7 +142,7 @@ describe('sync (Smart Merge)', () => {
     expect(result.success).toBe(true);
 
     // Verify Pull was called
-    expect(global.fetch).toHaveBeenNthCalledWith(1, '/api/sync?code=AZ-MERGE');
+    expect(global.fetch).toHaveBeenNthCalledWith(1, '/api/sync/AZ-MERGE');
 
     // Verify Data was Merged and Applied Locally
     // Should have Q1 AND Q2
@@ -158,7 +158,7 @@ describe('sync (Smart Merge)', () => {
     // Verify Push was called with Merged Data
     expect(global.fetch).toHaveBeenNthCalledWith(
       2,
-      '/api/sync?code=AZ-MERGE',
+      '/api/sync/AZ-MERGE',
       expect.objectContaining({
         method: 'POST',
         body: expect.stringContaining('q1'), // should check for both
@@ -188,7 +188,7 @@ describe('sync (Smart Merge)', () => {
     // Should just push local data
     expect(global.fetch).toHaveBeenNthCalledWith(
       2,
-      '/api/sync?code=AZ-NEW',
+      '/api/sync/AZ-NEW',
       expect.objectContaining({
         body: expect.stringContaining('q1'),
       })

@@ -707,7 +707,7 @@ describe('API Contract', () => {
     await pushData(code);
 
     expect(global.fetch).toHaveBeenCalledWith(
-      '/api/sync?code=AZ-ABC234',
+      '/api/sync/AZ-ABC234',
       expect.objectContaining({ method: 'POST' })
     );
   });
@@ -721,7 +721,7 @@ describe('API Contract', () => {
     const code = 'AZ-XYZ789';
     await pullData(code);
 
-    expect(global.fetch).toHaveBeenCalledWith('/api/sync?code=AZ-XYZ789');
+    expect(global.fetch).toHaveBeenCalledWith('/api/sync/AZ-XYZ789');
   });
 
   it('push sends Content-Type: application/json', async () => {

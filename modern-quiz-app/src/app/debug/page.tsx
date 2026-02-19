@@ -23,7 +23,10 @@ import {
   Monitor,
 } from 'lucide-react';
 import Link from 'next/link';
-import { generateSyncCode, isValidSyncCode } from '@/lib/generate-sync-code';
+import {
+  generateSyncCode,
+  isValidCustomSyncCode,
+} from '@/lib/generate-sync-code';
 import {
   pullData,
   pushData,
@@ -432,7 +435,7 @@ export default function DebugPage() {
                 <button
                   disabled={syncing || !syncInput}
                   onClick={async () => {
-                    if (!isValidSyncCode(syncInput)) {
+                    if (!isValidCustomSyncCode(syncInput)) {
                       showMessage('error', 'Invalid code format');
                       return;
                     }
@@ -490,7 +493,7 @@ export default function DebugPage() {
                       renaming || !renameInput || renameInput === syncCode
                     }
                     onClick={async () => {
-                      if (!isValidSyncCode(renameInput)) {
+                      if (!isValidCustomSyncCode(renameInput)) {
                         showMessage('error', 'Invalid code format');
                         return;
                       }
@@ -611,14 +614,39 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.8.2 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.8.2</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 19, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Smart sync merge — syncing now pulls remote first and unions
+                  both devices&apos; answers before pushing
+                </li>
+                <li>
+                  ✦ Sync pull no longer throws on server errors — returns a
+                  clean error instead
+                </li>
+                <li>
+                  ✦ Server now accepts custom sync codes (e.g.{' '}
+                  <span className='font-mono'>AZ-FABIAN</span>) end-to-end
+                </li>
+                <li>✦ Daily Brief sheet constrained to a card on desktop</li>
+              </ul>
+            </div>
+
             {/* v1.8.1 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.8.1</span>
                 <span className='text-xs text-muted-foreground'>Feb 2026</span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
-                </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>
                 <li>

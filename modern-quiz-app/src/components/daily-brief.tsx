@@ -83,7 +83,7 @@ export function DailyBrief({ questions }: DailyBriefProps) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 300 }}
-            className='fixed inset-x-0 bottom-0 z-[61] flex max-h-[88vh] flex-col rounded-t-2xl border-t border-border bg-card shadow-xl'
+            className='fixed inset-x-0 bottom-0 z-[61] flex max-h-[88vh] flex-col rounded-t-2xl border-t border-border bg-card shadow-xl sm:inset-x-auto sm:bottom-10 sm:left-1/2 sm:max-h-[80vh] sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:rounded-2xl sm:border'
           >
             {/* Drag handle */}
             <div

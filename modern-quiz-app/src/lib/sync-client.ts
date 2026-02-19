@@ -156,7 +156,7 @@ export async function pullData(syncCode: string): Promise<SyncResponse> {
   const response = await fetch(`/api/sync/${syncCode}`);
 
   if (!response.ok) {
-    throw new Error(`Pull failed: ${response.statusText}`);
+    return { success: false, error: response.statusText };
   }
 
   const result: SyncResponse = await response.json();
@@ -173,9 +173,89 @@ export async function pullData(syncCode: string): Promise<SyncResponse> {
 }
 
 /**
- * Sync local data to the cloud (push local progress, preserving remote data
- * for keys that don't exist locally). Safe to call repeatedly.
+ * Sync local progress to the cloud with a smart pull-then-push merge.
+ * - Pulls remote data first.
+ * - Merges with local data (union arrays for answers, local wins for progress).
+ * - Applies the merged result locally, then pushes it to the cloud.
+ * Safe to call repeatedly.
  */
 export async function sync(syncCode: string): Promise<SyncResponse> {
-  return pushData(syncCode);
+  // Step 1: Pull remote data (non-throwing)
+  let remoteData: SyncData | null = null;
+  try {
+    const pullResponse = await fetch(`/api/sync/${syncCode}`);
+    if (pullResponse.ok) {
+      const pullResult: SyncResponse = await pullResponse.json();
+      if (pullResult.success && pullResult.data) {
+        remoteData = pullResult.data;
+      }
+    }
+  } catch {
+    // Pull failed — proceed with local-only push
+  }
+
+  // Step 2: Collect current local data
+  const localData = collectLocalData();
+
+  // Step 3: Merge remote into local
+  if (remoteData) {
+    // Union-merge answeredQuestions arrays per topic (both devices' answers kept)
+    if (remoteData.answeredQuestions) {
+      for (const [topic, remoteAnswers] of Object.entries(
+        remoteData.answeredQuestions
+      )) {
+        if (Array.isArray(remoteAnswers)) {
+          const localAnswers = Array.isArray(localData.answeredQuestions[topic])
+            ? (localData.answeredQuestions[topic] as string[])
+            : [];
+          localData.answeredQuestions[topic] = Array.from(
+            new Set([...localAnswers, ...(remoteAnswers as string[])])
+          );
+        } else if (!(topic in localData.answeredQuestions)) {
+          localData.answeredQuestions[topic] = remoteAnswers;
+        }
+      }
+    }
+
+    // Remote fills in any missing quizProgress keys (local wins for existing)
+    if (remoteData.quizProgress) {
+      for (const [key, value] of Object.entries(remoteData.quizProgress)) {
+        if (!(key in localData.quizProgress)) {
+          localData.quizProgress[key] = value;
+        }
+      }
+    }
+
+    // Remote fills in any missing leitnerProgress keys (local wins)
+    if (remoteData.leitnerProgress) {
+      for (const [key, value] of Object.entries(remoteData.leitnerProgress)) {
+        if (!(key in localData.leitnerProgress)) {
+          localData.leitnerProgress[key] = value;
+        }
+      }
+    }
+
+    // Apply merged data to localStorage
+    applyData(localData);
+  }
+
+  // Step 4: Push merged (or local-only) data
+  const pushResponse = await fetch(`/api/sync/${syncCode}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(localData),
+  });
+
+  if (!pushResponse.ok) {
+    throw new Error(`Push failed: ${pushResponse.statusText}`);
+  }
+
+  const result: SyncResponse = await pushResponse.json();
+
+  if (result.success && result.lastSync) {
+    localStorage.setItem(LAST_SYNC_KEY, result.lastSync);
+    storeSyncCode(syncCode);
+  }
+
+  return result;
 }

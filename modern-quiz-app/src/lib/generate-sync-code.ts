@@ -5,10 +5,10 @@
 
 const CHARSET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
-/** Regex for validating generated sync codes (unambiguous charset) */
+/** Regex for validating generated sync codes (strict: unambiguous charset, exactly 6 chars) */
 export const SYNC_CODE_REGEX = /^AZ-[A-HJ-KM-NP-Z2-9]{6}$/;
 
-/** Regex for validating user-defined custom sync codes (any alphanumeric, 3–8 chars) */
+/** Regex for validating user-defined custom sync codes (any alphanumeric, 3–8 chars after AZ-) */
 export const CUSTOM_SYNC_CODE_REGEX = /^AZ-[A-Z0-9]{3,8}$/;
 
 /** TTL for sync data in Redis (90 days) */
@@ -33,11 +33,19 @@ export function generateSyncCode(): string {
 }
 
 /**
- * Validate that a sync code matches either the generated format
- * (unambiguous charset, exactly 6 chars) or a user-defined custom
- * format (any alphanumeric, 3–8 chars).
+ * Validate a generated sync code (strict: unambiguous charset, exactly 6 chars).
+ * Use this for server-side validation and code-generation checks.
  */
 export function isValidSyncCode(code: string): boolean {
-  const upper = code.toUpperCase();
-  return SYNC_CODE_REGEX.test(upper) || CUSTOM_SYNC_CODE_REGEX.test(upper);
+  return SYNC_CODE_REGEX.test(code.toUpperCase());
+}
+
+/**
+ * Validate a user-entered sync code.
+ * Accepts both generated codes (strict charset) and user-defined custom codes
+ * such as AZ-FABIAN (any alphanumeric, 3–8 chars after AZ-).
+ * Use this for UI restore/rename inputs.
+ */
+export function isValidCustomSyncCode(code: string): boolean {
+  return CUSTOM_SYNC_CODE_REGEX.test(code.toUpperCase());
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
 import {
-  isValidSyncCode,
+  isValidCustomSyncCode,
   SYNC_TTL_SECONDS,
   type SyncData,
 } from '@/lib/generate-sync-code';
@@ -25,7 +25,7 @@ export async function GET(
   const { code } = await params;
   const syncCode = code.toUpperCase();
 
-  if (!isValidSyncCode(syncCode)) {
+  if (!isValidCustomSyncCode(syncCode)) {
     return NextResponse.json(
       { success: false, error: 'Invalid sync code format' },
       { status: 400 }
@@ -74,7 +74,7 @@ export async function POST(
   const { code } = await params;
   const syncCode = code.toUpperCase();
 
-  if (!isValidSyncCode(syncCode)) {
+  if (!isValidCustomSyncCode(syncCode)) {
     return NextResponse.json(
       { success: false, error: 'Invalid sync code format' },
       { status: 400 }
