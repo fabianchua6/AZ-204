@@ -796,7 +796,6 @@ export class LeitnerSystem {
       this.saveTimeout = null;
     }
     StorageUtils.safeRemoveItem(LEITNER_CONFIG.STORAGE.PROGRESS);
-    StorageUtils.safeRemoveItem(LEITNER_CONFIG.STORAGE.STATS);
 
     // Clear all daily attempts data to prevent stale counts
     this.clearAllDailyAttempts();

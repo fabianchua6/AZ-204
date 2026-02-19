@@ -153,8 +153,6 @@ export default function DebugPage() {
   const handleRefreshSession = () => {
     try {
       localStorage.removeItem('leitner-current-session');
-      localStorage.removeItem('quiz-practice-state');
-      localStorage.removeItem('quiz-leitner-state');
       localStorage.removeItem('leitner-submission-states');
       localStorage.removeItem('leitner-quiz-index');
       showMessage('success', 'Session refreshed! Reloading…');
@@ -605,15 +603,52 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.9.0 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.9.0</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 19, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Deep data layer cleanup — removed 8 dead/orphaned
+                  localStorage keys and their sync baggage
+                </li>
+                <li>
+                  ✦ One-time storage migration runs on first load to prune
+                  legacy keys (quiz_progress_*, quiz_answered_global,
+                  quiz-practice-state, etc.)
+                </li>
+                <li>
+                  ✦ Sync collector rewritten with explicit allowlist — no longer
+                  ships dead data to Redis via greedy prefix sweep
+                </li>
+                <li>
+                  ✦ Retired answeredQuestions sync bucket — Leitner system is
+                  the sole source of truth
+                </li>
+                <li>
+                  ✦ Study streak date format standardized to YYYY-MM-DD (ISO) —
+                  migration auto-converts old format
+                </li>
+                <li>
+                  ✦ Deleted orphaned use-smart-learning hook and legacy
+                  leitner-stats storage key
+                </li>
+              </ul>
+            </div>
+
             {/* v1.8.3 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.8.3</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 19, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>

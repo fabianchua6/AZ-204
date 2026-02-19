@@ -75,12 +75,12 @@ export function DashboardStats({ questions, section }: DashboardStatsProps) {
     if (!initialized || !appStats) return;
 
     if (appStats.questionsStarted > 0) {
-      const today = new Date().toDateString();
+      const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
 
       if (studyStreak.lastStudyDate !== today) {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toDateString();
+        const yesterdayStr = yesterday.toLocaleDateString('en-CA'); // YYYY-MM-DD
 
         let newStreak = 1;
         if (studyStreak.lastStudyDate === yesterdayStr) {

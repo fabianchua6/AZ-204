@@ -13,7 +13,6 @@ export const LEITNER_CONFIG = {
   // Storage keys
   STORAGE: {
     PROGRESS: 'leitner-progress',
-    STATS: 'leitner-stats', // Legacy key (unused but kept for compatibility)
     SETTINGS: 'leitner-settings',
   } as const,
 
@@ -26,7 +25,7 @@ export const LEITNER_CONFIG = {
     CLEANUP_THRESHOLD_DAYS: 30,
     MIN_DUE_QUESTIONS: 20,
     MAX_NEW_QUESTIONS_PER_SESSION: 20,
-    REVIEW_PROBABILITY: 0.10, // 10% chance to include box 3 questions for review
+    REVIEW_PROBABILITY: 0.1, // 10% chance to include box 3 questions for review
     BOX2_REVIEW_PROBABILITY: 0.05, // 5% chance to include box 2 questions for review
     MAX_REVIEW_QUESTIONS: 3, // Cap on random review questions per session
   } as const,
@@ -46,7 +45,7 @@ export const LEITNER_CONFIG = {
 // Box labels for UI display (3-box system)
 export const BOX_LABELS = {
   1: 'Learning',
-  2: 'Practicing', 
+  2: 'Practicing',
   3: 'Mastered',
 } as const;
 
@@ -60,7 +59,7 @@ export const BOX_COLORS = {
     bgTransparent: 'hsl(var(--box1-bg-transparent))', // Transparent variant
     // Tailwind utility classes (preferred)
     bgClass: 'leitner-box-bg-1',
-    fgClass: 'leitner-box-text-1', 
+    fgClass: 'leitner-box-text-1',
     surfaceClass: 'leitner-box-surface-1', // bg + text combined
     surfaceTransparentClass: 'leitner-box-surface-transparent-1', // transparent variant
     dotClass: 'leitner-box-dot-1',
@@ -99,5 +98,5 @@ export const BOX_COLORS = {
 
 // Type helpers for better type safety
 export type BoxNumber = keyof typeof LEITNER_CONFIG.INTERVALS;
-export type BoxLabel = typeof BOX_LABELS[BoxNumber];
-export type BoxColor = typeof BOX_COLORS[BoxNumber];
+export type BoxLabel = (typeof BOX_LABELS)[BoxNumber];
+export type BoxColor = (typeof BOX_COLORS)[BoxNumber];

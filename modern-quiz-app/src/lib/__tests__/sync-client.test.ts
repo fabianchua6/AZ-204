@@ -59,14 +59,55 @@ describe('storeSyncCode / getStoredSyncCode', () => {
 });
 
 describe('collectLocalData', () => {
-  // ... existing tests verify data collection ...
-  it('collects quiz progress keys', () => {
+  it('collects leitner keys into leitnerProgress', () => {
+    localStorageMock.setItem(
+      'leitner-progress',
+      JSON.stringify({ q1: { currentBox: 2 } })
+    );
+    const data = collectLocalData();
+    expect(data.leitnerProgress).toHaveProperty('leitner-progress');
+  });
+
+  it('does NOT collect dead quiz_progress_* keys', () => {
     localStorageMock.setItem(
       'quiz_progress_topic1',
       JSON.stringify({ index: 5 })
     );
     const data = collectLocalData();
-    expect(data.quizProgress).toHaveProperty('quiz_progress_topic1');
+    expect(data.quizProgress).toEqual({});
+  });
+
+  it('does NOT collect quiz_answered_global', () => {
+    localStorageMock.setItem(
+      'quiz_answered_global',
+      JSON.stringify({ topic1: ['q1'] })
+    );
+    const data = collectLocalData();
+    expect(data.answeredQuestions).toEqual({});
+  });
+
+  it('collects theme as a plain string setting', () => {
+    localStorageMock.setItem('theme', 'dark');
+    const data = collectLocalData();
+    expect(data.settings['theme']).toBe('dark');
+  });
+
+  it('collects activity keys (study-streak, daily-brief-last-shown)', () => {
+    localStorageMock.setItem(
+      'study-streak',
+      JSON.stringify({
+        currentStreak: 3,
+        bestStreak: 5,
+        lastStudyDate: '2025-01-15',
+      })
+    );
+    localStorageMock.setItem(
+      'daily-brief-last-shown',
+      JSON.stringify('2025-01-15')
+    );
+    const data = collectLocalData();
+    expect(data.activity).toHaveProperty('study-streak');
+    expect(data.activity).toHaveProperty('daily-brief-last-shown');
   });
 });
 
@@ -105,23 +146,23 @@ describe('pullData (Restore)', () => {
 });
 
 describe('sync (Smart Merge)', () => {
-  it('merges local and remote data correctly', async () => {
-    // Setup Local Data: Answered Q1
-    localStorageMock.setItem(
-      'quiz_answered_global',
-      JSON.stringify({ topic1: ['q1'] })
-    );
+  it('merges local and remote leitner data correctly', async () => {
+    // Setup Local Data: has leitner-progress with q1
     localStorageMock.setItem(
       'leitner-progress',
-      JSON.stringify({ box1: ['q1'] })
+      JSON.stringify({ q1: { currentBox: 2 } })
     );
 
-    // Setup Remote Data: Answered Q2
+    // Setup Remote Data: has extra leitner key that local doesn't have
     const remoteData = {
       quizProgress: {},
-      answeredQuestions: { topic1: ['q2'] },
-      leitnerProgress: { 'leitner-progress': { box1: ['q2'] } },
+      answeredQuestions: {},
+      leitnerProgress: {
+        'leitner-progress': { q2: { currentBox: 1 } },
+        'leitner-daily-attempts-2025-01-01': 10,
+      },
       settings: {},
+      activity: {},
       lastSync: '2025-01-01T00:00:00Z',
     };
 
@@ -144,15 +185,16 @@ describe('sync (Smart Merge)', () => {
     // Verify Pull was called
     expect(global.fetch).toHaveBeenNthCalledWith(1, '/api/sync/AZ-MERGE');
 
-    // Verify Data was Merged and Applied Locally
-    // Should have Q1 AND Q2
+    // Local leitner-progress wins (already exists locally)
     expect(localStorageMock.setItem).toHaveBeenCalledWith(
-      'quiz_answered_global',
+      'leitner-progress',
       expect.stringContaining('q1')
     );
+
+    // Remote-only key (leitner-daily-attempts) gets merged in
     expect(localStorageMock.setItem).toHaveBeenCalledWith(
-      'quiz_answered_global',
-      expect.stringContaining('q2')
+      'leitner-daily-attempts-2025-01-01',
+      expect.any(String)
     );
 
     // Verify Push was called with Merged Data
@@ -161,15 +203,65 @@ describe('sync (Smart Merge)', () => {
       '/api/sync/AZ-MERGE',
       expect.objectContaining({
         method: 'POST',
-        body: expect.stringContaining('q1'), // should check for both
+        body: expect.stringContaining('q1'),
       })
     );
   });
 
+  it('merges study-streak with higher wins strategy', async () => {
+    // Local: streak of 3
+    localStorageMock.setItem(
+      'study-streak',
+      JSON.stringify({
+        currentStreak: 3,
+        bestStreak: 5,
+        lastStudyDate: '2025-01-15',
+      })
+    );
+
+    // Remote: streak of 7 with better best
+    const remoteData = {
+      quizProgress: {},
+      answeredQuestions: {},
+      leitnerProgress: {},
+      settings: {},
+      activity: {
+        'study-streak': {
+          currentStreak: 7,
+          bestStreak: 10,
+          lastStudyDate: '2025-01-14',
+        },
+      },
+      lastSync: '2025-01-14T00:00:00Z',
+    };
+
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: remoteData }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, lastSync: '2025-01-15T00:00:00Z' }),
+      });
+
+    await sync('AZ-STREAK');
+
+    // Find the LAST study-streak setItem call (after merge, not the seed)
+    const streakCalls = (
+      localStorageMock.setItem as jest.Mock
+    ).mock.calls.filter((c: string[]) => c[0] === 'study-streak');
+    expect(streakCalls.length).toBeGreaterThanOrEqual(1);
+    const merged = JSON.parse(streakCalls[streakCalls.length - 1]![1]);
+    expect(merged.currentStreak).toBe(7); // higher wins
+    expect(merged.bestStreak).toBe(10); // higher wins
+    expect(merged.lastStudyDate).toBe('2025-01-15'); // more recent wins
+  });
+
   it('handles sync when no remote data exists', async () => {
     localStorageMock.setItem(
-      'quiz_answered_global',
-      JSON.stringify({ topic1: ['q1'] })
+      'leitner-progress',
+      JSON.stringify({ q1: { currentBox: 2 } })
     );
 
     // Remote returns null data

@@ -55,42 +55,8 @@ beforeEach(() => {
 });
 
 // ── Helpers ────────────────────────────────────────────────────────
-/** Seed localStorage with a realistic set of quiz data */
+/** Seed localStorage with a realistic set of live quiz data */
 function seedRealisticProgress() {
-  // Quiz progress for two topics
-  localStorageMock.setItem(
-    'quiz_progress_azure-functions',
-    JSON.stringify({
-      index: 12,
-      questionOrder: ['q1', 'q2', 'q3'],
-      timestamp: Date.now(),
-    })
-  );
-  localStorageMock.setItem(
-    'quiz_progress_blob-storage',
-    JSON.stringify({
-      index: 5,
-      questionOrder: ['q10', 'q11'],
-      timestamp: Date.now(),
-    })
-  );
-
-  // Practice mode state
-  localStorageMock.setItem(
-    'quiz-practice-state',
-    JSON.stringify({ active: true, topic: 'azure-functions', questionIndex: 3 })
-  );
-
-  // Answered questions
-  localStorageMock.setItem(
-    'quiz_answered_global',
-    JSON.stringify({
-      'azure-functions': ['q1', 'q2', 'q3'],
-      'blob-storage': ['q10'],
-      _all: ['q1', 'q2', 'q3', 'q10'],
-    })
-  );
-
   // Leitner progress
   const leitnerData: Record<string, unknown> = {
     q1: {
@@ -122,11 +88,28 @@ function seedRealisticProgress() {
     },
   };
   localStorageMock.setItem('leitner-progress', JSON.stringify(leitnerData));
-  localStorageMock.setItem('leitner-daily-target', JSON.stringify(20));
   localStorageMock.setItem('leitner-daily-attempts-2026-02-18', '15');
+  localStorageMock.setItem(
+    'leitner-settings',
+    JSON.stringify({ dailyTarget: 60 })
+  );
+  localStorageMock.setItem(
+    'leitner-current-session',
+    JSON.stringify({ topic: 'mixed', questionIds: ['q1', 'q2'] })
+  );
 
   // Theme setting (plain string, not JSON)
   localStorageMock.setItem('theme', 'dark');
+
+  // Activity data
+  localStorageMock.setItem(
+    'study-streak',
+    JSON.stringify({
+      currentStreak: 3,
+      bestStreak: 5,
+      lastStudyDate: '2026-02-18',
+    })
+  );
 }
 
 /** Create a mock fetch that simulates a successful push + pull round-trip */
@@ -169,40 +152,35 @@ function mockFetchRoundTrip() {
 // 1. Progress Collection (localStorage → SyncData)
 // ═══════════════════════════════════════════════════════════════════
 describe('Progress Collection', () => {
-  it('collects all quiz progress keys into quizProgress', () => {
-    seedRealisticProgress();
-    const data = collectLocalData();
-
-    expect(data.quizProgress).toHaveProperty('quiz_progress_azure-functions');
-    expect(data.quizProgress).toHaveProperty('quiz_progress_blob-storage');
-    expect(data.quizProgress).toHaveProperty('quiz-practice-state');
-    expect(
-      (data.quizProgress['quiz_progress_azure-functions'] as { index: number })
-        .index
-    ).toBe(12);
-  });
-
-  it('collects answered questions with all topic keys', () => {
-    seedRealisticProgress();
-    const data = collectLocalData();
-
-    expect(data.answeredQuestions).toHaveProperty('azure-functions');
-    expect(data.answeredQuestions).toHaveProperty('blob-storage');
-    expect(data.answeredQuestions).toHaveProperty('_all');
-    expect(
-      (data.answeredQuestions as Record<string, string[]>)['azure-functions']
-    ).toEqual(['q1', 'q2', 'q3']);
-  });
-
-  it('collects all leitner-prefixed keys', () => {
+  it('collects all leitner-prefixed keys into leitnerProgress', () => {
     seedRealisticProgress();
     const data = collectLocalData();
 
     expect(data.leitnerProgress).toHaveProperty('leitner-progress');
-    expect(data.leitnerProgress).toHaveProperty('leitner-daily-target');
+    expect(data.leitnerProgress).toHaveProperty('leitner-settings');
+    expect(data.leitnerProgress).toHaveProperty('leitner-current-session');
     expect(data.leitnerProgress).toHaveProperty(
       'leitner-daily-attempts-2026-02-18'
     );
+  });
+
+  it('no longer collects dead quiz_progress_* keys', () => {
+    // These dead keys should be ignored by the collector
+    localStorageMock.setItem(
+      'quiz_progress_azure-functions',
+      JSON.stringify({ index: 12 })
+    );
+    const data = collectLocalData();
+    expect(data.quizProgress).toEqual({});
+  });
+
+  it('no longer collects quiz_answered_global', () => {
+    localStorageMock.setItem(
+      'quiz_answered_global',
+      JSON.stringify({ topic1: ['q1'] })
+    );
+    const data = collectLocalData();
+    expect(data.answeredQuestions).toEqual({});
   });
 
   it('preserves full Leitner box assignments per question', () => {
@@ -233,10 +211,9 @@ describe('Progress Collection', () => {
 
     const data = collectLocalData();
     const allKeys = [
-      ...Object.keys(data.quizProgress),
-      ...Object.keys(data.answeredQuestions),
       ...Object.keys(data.leitnerProgress),
       ...Object.keys(data.settings),
+      ...Object.keys(data.activity),
     ];
     expect(allKeys).not.toContain('quiz_sync_code');
     expect(allKeys).not.toContain('quiz_last_sync');
@@ -249,20 +226,31 @@ describe('Progress Collection', () => {
     expect(data.answeredQuestions).toEqual({});
     expect(data.leitnerProgress).toEqual({});
     expect(data.settings).toEqual({});
+    expect(data.activity).toEqual({});
   });
 
   it('skips malformed JSON values gracefully', () => {
-    localStorageMock.setItem('quiz_progress_bad', '{not valid json}');
+    localStorageMock.setItem('leitner-progress', '{not valid json}');
     localStorageMock.setItem(
-      'quiz_progress_good',
-      JSON.stringify({ index: 1 })
+      'leitner-settings',
+      JSON.stringify({ dailyTarget: 60 })
     );
 
     const data = collectLocalData();
 
     // The bad one should be skipped, the good one collected
-    expect(data.quizProgress).not.toHaveProperty('quiz_progress_bad');
-    expect(data.quizProgress).toHaveProperty('quiz_progress_good');
+    expect(data.leitnerProgress).not.toHaveProperty('leitner-progress');
+    expect(data.leitnerProgress).toHaveProperty('leitner-settings');
+  });
+
+  it('collects activity data (study-streak)', () => {
+    seedRealisticProgress();
+    const data = collectLocalData();
+
+    expect(data.activity).toHaveProperty('study-streak');
+    const streak = data.activity['study-streak'] as Record<string, unknown>;
+    expect(streak.currentStreak).toBe(3);
+    expect(streak.bestStreak).toBe(5);
   });
 });
 
@@ -270,7 +258,7 @@ describe('Progress Collection', () => {
 // 2. Full Sync Round-Trip (push → pull on fresh device)
 // ═══════════════════════════════════════════════════════════════════
 describe('Sync Round-Trip', () => {
-  it('push → pull restores all quiz progress to a blank localStorage', async () => {
+  it('push → pull restores all leitner progress to a blank localStorage', async () => {
     // Device A: seed data and push
     seedRealisticProgress();
     const { lastSync } = mockFetchRoundTrip();
@@ -281,10 +269,13 @@ describe('Sync Round-Trip', () => {
     // Verify push sent all categories
     const pushCall = (global.fetch as jest.Mock).mock.calls[0];
     const sentBody = JSON.parse(pushCall[1].body);
-    expect(Object.keys(sentBody.quizProgress).length).toBeGreaterThanOrEqual(3);
-    expect(sentBody.answeredQuestions).toHaveProperty('_all');
     expect(sentBody.leitnerProgress).toHaveProperty('leitner-progress');
+    expect(sentBody.leitnerProgress).toHaveProperty('leitner-settings');
     expect(sentBody.settings).toHaveProperty('theme', 'dark');
+    expect(sentBody.activity).toHaveProperty('study-streak');
+    // Dead buckets should be empty
+    expect(sentBody.quizProgress).toEqual({});
+    expect(sentBody.answeredQuestions).toEqual({});
 
     // Device B: clear localStorage and pull
     localStorageMock.clear();
@@ -307,18 +298,18 @@ describe('Sync Round-Trip', () => {
 
     // Verify data was restored
     expect(localStorageMock.setItem).toHaveBeenCalledWith(
-      'quiz_progress_azure-functions',
-      expect.any(String)
-    );
-    expect(localStorageMock.setItem).toHaveBeenCalledWith(
-      'quiz_answered_global',
-      expect.any(String)
-    );
-    expect(localStorageMock.setItem).toHaveBeenCalledWith(
       'leitner-progress',
       expect.any(String)
     );
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      'leitner-settings',
+      expect.any(String)
+    );
     expect(localStorageMock.setItem).toHaveBeenCalledWith('theme', 'dark');
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      'study-streak',
+      expect.any(String)
+    );
   });
 
   it('Leitner box assignments survive a round-trip', async () => {
@@ -362,7 +353,7 @@ describe('Sync Round-Trip', () => {
     expect(restored['q2'].timesIncorrect).toBe(2);
   });
 
-  it('preserves answered question lists across devices', async () => {
+  it('preserves study streak across devices', async () => {
     seedRealisticProgress();
     const { lastSync } = mockFetchRoundTrip();
     const syncCode = generateSyncCode();
@@ -386,14 +377,14 @@ describe('Sync Round-Trip', () => {
 
     await pullData(syncCode);
 
-    const answeredCall = (
-      localStorageMock.setItem as jest.Mock
-    ).mock.calls.find((c: string[]) => c[0] === 'quiz_answered_global');
-    expect(answeredCall).toBeDefined();
-    const restored = JSON.parse(answeredCall![1]);
-    expect(restored['azure-functions']).toEqual(['q1', 'q2', 'q3']);
-    expect(restored['blob-storage']).toEqual(['q10']);
-    expect(restored['_all']).toEqual(['q1', 'q2', 'q3', 'q10']);
+    const streakCall = (localStorageMock.setItem as jest.Mock).mock.calls.find(
+      (c: string[]) => c[0] === 'study-streak'
+    );
+    expect(streakCall).toBeDefined();
+    const restored = JSON.parse(streakCall![1]);
+    expect(restored.currentStreak).toBe(3);
+    expect(restored.bestStreak).toBe(5);
+    expect(restored.lastStudyDate).toBe('2026-02-18');
   });
 
   it('stores sync code and last sync time after push', async () => {
@@ -425,6 +416,7 @@ describe('Sync Round-Trip', () => {
           answeredQuestions: {},
           leitnerProgress: {},
           settings: {},
+          activity: {},
           lastSync,
         },
         lastSync,
@@ -466,13 +458,15 @@ describe('Edge Cases', () => {
     );
     expect(sentBody.quizProgress).toEqual({});
     expect(sentBody.answeredQuestions).toEqual({});
+    expect(sentBody.leitnerProgress).toEqual({});
+    expect(sentBody.activity).toEqual({});
   });
 
   it('pull with null data does not overwrite existing localStorage', async () => {
     // Pre-populate localStorage
     localStorageMock.setItem(
-      'quiz_progress_topic1',
-      JSON.stringify({ index: 5 })
+      'leitner-progress',
+      JSON.stringify({ q1: { currentBox: 2 } })
     );
 
     // Clear mock call history so we only see calls from pullData
@@ -486,10 +480,10 @@ describe('Edge Cases', () => {
     const syncCode = generateSyncCode();
     await pullData(syncCode);
 
-    // pullData with null data should not write any quiz progress keys
+    // pullData with null data should not write any leitner keys
     const setItemCalls = (localStorageMock.setItem as jest.Mock).mock.calls;
     const progressOverwrite = setItemCalls.find(
-      (c: string[]) => c[0] === 'quiz_progress_topic1'
+      (c: string[]) => c[0] === 'leitner-progress'
     );
     expect(progressOverwrite).toBeUndefined();
   });
@@ -525,24 +519,8 @@ describe('Edge Cases', () => {
     await expect(pushData(syncCode)).rejects.toThrow('Push failed');
   });
 
-  it('handles large payloads (many topics, many questions)', async () => {
-    // Seed a large amount of data
-    for (let i = 0; i < 50; i++) {
-      localStorageMock.setItem(
-        `quiz_progress_topic-${i}`,
-        JSON.stringify({
-          index: i,
-          questionOrder: Array.from({ length: 100 }, (_, j) => `q${j}`),
-        })
-      );
-    }
-
-    const answered: Record<string, string[]> = {};
-    for (let i = 0; i < 50; i++) {
-      answered[`topic-${i}`] = Array.from({ length: 100 }, (_, j) => `q${j}`);
-    }
-    localStorageMock.setItem('quiz_answered_global', JSON.stringify(answered));
-
+  it('handles large payloads (many leitner questions, many daily attempts)', async () => {
+    // Seed a large leitner progress set
     const leitner: Record<string, unknown> = {};
     for (let i = 0; i < 500; i++) {
       leitner[`q${i}`] = {
@@ -557,15 +535,24 @@ describe('Edge Cases', () => {
     }
     localStorageMock.setItem('leitner-progress', JSON.stringify(leitner));
 
+    // Seed many daily attempt keys
+    for (let i = 0; i < 30; i++) {
+      const date = `2026-01-${String(i + 1).padStart(2, '0')}`;
+      localStorageMock.setItem(`leitner-daily-attempts-${date}`, String(i * 5));
+    }
+
     const data = collectLocalData();
 
-    expect(Object.keys(data.quizProgress)).toHaveLength(50);
-    expect(Object.keys(data.answeredQuestions)).toHaveLength(50);
     const lp = data.leitnerProgress['leitner-progress'] as Record<
       string,
       unknown
     >;
     expect(Object.keys(lp)).toHaveLength(500);
+    // Should have 30 daily attempt keys + leitner-progress = 31 total leitner keys
+    expect(Object.keys(data.leitnerProgress).length).toBeGreaterThanOrEqual(31);
+    // Dead buckets should be empty
+    expect(data.quizProgress).toEqual({});
+    expect(data.answeredQuestions).toEqual({});
   });
 });
 
@@ -617,11 +604,16 @@ describe('Data Integrity', () => {
     seedRealisticProgress();
     const data = collectLocalData();
 
-    // Must have all four top-level keys
+    // Must have all top-level keys (legacy buckets are empty but present)
     expect(data).toHaveProperty('quizProgress');
     expect(data).toHaveProperty('answeredQuestions');
     expect(data).toHaveProperty('leitnerProgress');
     expect(data).toHaveProperty('settings');
+    expect(data).toHaveProperty('activity');
+
+    // Legacy buckets are always empty
+    expect(data.quizProgress).toEqual({});
+    expect(data.answeredQuestions).toEqual({});
 
     // All values must be serializable (no functions, no undefined)
     const json = JSON.stringify(data);
@@ -641,12 +633,15 @@ describe('Data Integrity', () => {
     expect(lp['q2'].lastReviewed).toBe('2026-02-18T10:05:00.000Z');
   });
 
-  it('daily target number survives as-is', () => {
+  it('leitner settings survive as-is', () => {
     seedRealisticProgress();
     const data = collectLocalData();
 
-    const target = data.leitnerProgress['leitner-daily-target'];
-    expect(target).toBe(20);
+    const settings = data.leitnerProgress['leitner-settings'] as Record<
+      string,
+      unknown
+    >;
+    expect(settings.dailyTarget).toBe(60);
   });
 
   it('daily attempts string survives round-trip', () => {
@@ -685,8 +680,9 @@ describe('Data Integrity', () => {
     expect(() => JSON.parse(sentBody)).not.toThrow();
 
     const parsed = JSON.parse(sentBody);
-    expect(parsed.quizProgress).toBeDefined();
     expect(parsed.leitnerProgress).toBeDefined();
+    expect(parsed.settings).toBeDefined();
+    expect(parsed.activity).toBeDefined();
   });
 });
 

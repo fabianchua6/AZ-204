@@ -44,7 +44,8 @@ export function getLastSyncTime(): string | null {
 }
 
 /**
- * Collect all quiz-related data from localStorage
+ * Collect all quiz-related data from localStorage using an explicit allowlist.
+ * Only syncs keys that are actively used by the app.
  */
 export function collectLocalData(): SyncData {
   /** Keys that hold user activity data (streaks, daily brief state) */
@@ -69,17 +70,16 @@ export function collectLocalData(): SyncData {
       const value = localStorage.getItem(key);
       if (!value) continue;
 
-      if (key.startsWith('quiz_progress_') || key.startsWith('quiz-')) {
-        data.quizProgress[key] = JSON.parse(value);
-      } else if (key === 'quiz_answered_global') {
-        data.answeredQuestions = JSON.parse(value);
-      } else if (key.startsWith('leitner')) {
+      if (key.startsWith('leitner-')) {
+        // All live leitner keys: progress, settings, sessions, daily attempts
         data.leitnerProgress[key] = JSON.parse(value);
       } else if (key === 'theme') {
         data.settings[key] = value; // theme is a plain string, not JSON
       } else if (ACTIVITY_KEYS.includes(key)) {
         data.activity[key] = JSON.parse(value);
       }
+      // Dead keys (quiz_progress_*, quiz-*, quiz_answered_global, leitner-stats)
+      // are intentionally NOT collected — they are cleaned up by storage-migration.ts
     } catch {
       // Skip unparseable values
     }
@@ -89,27 +89,12 @@ export function collectLocalData(): SyncData {
 }
 
 /**
- * Write synced data into localStorage
+ * Write synced data into localStorage.
+ * Only applies live buckets (leitner, settings, activity).
+ * Legacy buckets (quizProgress, answeredQuestions) are ignored on apply
+ * but still accepted from Redis for backward compatibility.
  */
 function applyData(data: SyncData): void {
-  // Quiz progress
-  if (data.quizProgress) {
-    for (const [key, value] of Object.entries(data.quizProgress)) {
-      localStorage.setItem(key, JSON.stringify(value));
-    }
-  }
-
-  // Answered questions
-  if (
-    data.answeredQuestions &&
-    Object.keys(data.answeredQuestions).length > 0
-  ) {
-    localStorage.setItem(
-      'quiz_answered_global',
-      JSON.stringify(data.answeredQuestions)
-    );
-  }
-
   // Leitner progress
   if (data.leitnerProgress) {
     for (const [key, value] of Object.entries(data.leitnerProgress)) {
@@ -210,35 +195,8 @@ export async function sync(syncCode: string): Promise<SyncResponse> {
   // Step 2: Collect current local data
   const localData = collectLocalData();
 
-  // Step 3: Merge remote into local
+  // Step 3: Merge remote into local (only live buckets)
   if (remoteData) {
-    // Union-merge answeredQuestions arrays per topic (both devices' answers kept)
-    if (remoteData.answeredQuestions) {
-      for (const [topic, remoteAnswers] of Object.entries(
-        remoteData.answeredQuestions
-      )) {
-        if (Array.isArray(remoteAnswers)) {
-          const localAnswers = Array.isArray(localData.answeredQuestions[topic])
-            ? (localData.answeredQuestions[topic] as string[])
-            : [];
-          localData.answeredQuestions[topic] = Array.from(
-            new Set([...localAnswers, ...(remoteAnswers as string[])])
-          );
-        } else if (!(topic in localData.answeredQuestions)) {
-          localData.answeredQuestions[topic] = remoteAnswers;
-        }
-      }
-    }
-
-    // Remote fills in any missing quizProgress keys (local wins for existing)
-    if (remoteData.quizProgress) {
-      for (const [key, value] of Object.entries(remoteData.quizProgress)) {
-        if (!(key in localData.quizProgress)) {
-          localData.quizProgress[key] = value;
-        }
-      }
-    }
-
     // Remote fills in any missing leitnerProgress keys (local wins)
     if (remoteData.leitnerProgress) {
       for (const [key, value] of Object.entries(remoteData.leitnerProgress)) {
@@ -269,8 +227,8 @@ export async function sync(syncCode: string): Promise<SyncResponse> {
             lastStudyDate:
               (local.lastStudyDate as string) &&
               (remote.lastStudyDate as string)
-                ? new Date(local.lastStudyDate as string) >=
-                  new Date(remote.lastStudyDate as string)
+                ? (local.lastStudyDate as string) >=
+                  (remote.lastStudyDate as string)
                   ? local.lastStudyDate
                   : remote.lastStudyDate
                 : (local.lastStudyDate as string) ||
