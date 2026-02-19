@@ -96,6 +96,7 @@ export async function POST(
       answeredQuestions: body.answeredQuestions || {},
       leitnerProgress: body.leitnerProgress || {},
       settings: body.settings || {},
+      activity: body.activity || {},
       lastSync: new Date().toISOString(),
     };
 

@@ -20,6 +20,8 @@ export interface SyncData {
   answeredQuestions: Record<string, unknown>;
   leitnerProgress: Record<string, unknown>;
   settings: Record<string, unknown>;
+  /** User activity data: study-streak, daily-brief-last-shown */
+  activity: Record<string, unknown>;
   lastSync?: string;
 }
 

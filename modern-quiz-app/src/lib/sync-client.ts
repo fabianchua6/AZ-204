@@ -47,11 +47,15 @@ export function getLastSyncTime(): string | null {
  * Collect all quiz-related data from localStorage
  */
 export function collectLocalData(): SyncData {
+  /** Keys that hold user activity data (streaks, daily brief state) */
+  const ACTIVITY_KEYS = ['study-streak', 'daily-brief-last-shown'];
+
   const data: SyncData = {
     quizProgress: {},
     answeredQuestions: {},
     leitnerProgress: {},
     settings: {},
+    activity: {},
   };
 
   for (let i = 0; i < localStorage.length; i++) {
@@ -73,6 +77,8 @@ export function collectLocalData(): SyncData {
         data.leitnerProgress[key] = JSON.parse(value);
       } else if (key === 'theme') {
         data.settings[key] = value; // theme is a plain string, not JSON
+      } else if (ACTIVITY_KEYS.includes(key)) {
+        data.activity[key] = JSON.parse(value);
       }
     } catch {
       // Skip unparseable values
@@ -119,6 +125,13 @@ function applyData(data: SyncData): void {
       } else {
         localStorage.setItem(key, JSON.stringify(value));
       }
+    }
+  }
+
+  // Activity data (streaks, daily brief state)
+  if (data.activity) {
+    for (const [key, value] of Object.entries(data.activity)) {
+      localStorage.setItem(key, JSON.stringify(value));
     }
   }
 }
@@ -231,6 +244,40 @@ export async function sync(syncCode: string): Promise<SyncResponse> {
       for (const [key, value] of Object.entries(remoteData.leitnerProgress)) {
         if (!(key in localData.leitnerProgress)) {
           localData.leitnerProgress[key] = value;
+        }
+      }
+    }
+
+    // Merge activity data (streaks: pick the higher values; other keys: local wins)
+    if (remoteData.activity) {
+      if (!localData.activity) localData.activity = {};
+      for (const [key, value] of Object.entries(remoteData.activity)) {
+        if (key === 'study-streak' && key in localData.activity) {
+          // Smart merge: keep the higher streak values
+          const local = localData.activity[key] as Record<string, unknown>;
+          const remote = value as Record<string, unknown>;
+          localData.activity[key] = {
+            currentStreak: Math.max(
+              (local.currentStreak as number) || 0,
+              (remote.currentStreak as number) || 0
+            ),
+            bestStreak: Math.max(
+              (local.bestStreak as number) || 0,
+              (remote.bestStreak as number) || 0
+            ),
+            // Keep the more recent lastStudyDate
+            lastStudyDate:
+              (local.lastStudyDate as string) &&
+              (remote.lastStudyDate as string)
+                ? new Date(local.lastStudyDate as string) >=
+                  new Date(remote.lastStudyDate as string)
+                  ? local.lastStudyDate
+                  : remote.lastStudyDate
+                : (local.lastStudyDate as string) ||
+                  (remote.lastStudyDate as string),
+          };
+        } else if (!(key in localData.activity)) {
+          localData.activity[key] = value;
         }
       }
     }
