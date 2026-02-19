@@ -26,6 +26,7 @@ import Link from 'next/link';
 import { generateSyncCode, isValidSyncCode } from '@/lib/generate-sync-code';
 import {
   pullData,
+  pushData,
   sync,
   getStoredSyncCode,
   getLastSyncTime,
@@ -61,8 +62,10 @@ export default function DebugPage() {
   } | null>(null);
   const [syncCode, setSyncCode] = useState<string>('');
   const [syncInput, setSyncInput] = useState<string>('');
+  const [renameInput, setRenameInput] = useState<string>('');
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [renaming, setRenaming] = useState(false);
 
   useEffect(() => {
     document.title = 'Settings - AZ-204 Quiz';
@@ -424,7 +427,7 @@ export default function DebugPage() {
                   value={syncInput}
                   onChange={e => setSyncInput(e.target.value.toUpperCase())}
                   className='min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm tracking-wider placeholder:font-sans placeholder:tracking-normal placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-blue-500/30'
-                  maxLength={9}
+                  maxLength={11}
                 />
                 <button
                   disabled={syncing || !syncInput}
@@ -460,6 +463,70 @@ export default function DebugPage() {
                 </button>
               </div>
             </div>
+
+            {/* Change Sync Code */}
+            {syncCode && (
+              <div className='space-y-2 border-t border-blue-500/10 px-4 py-3.5'>
+                <div className='flex items-center gap-1.5 text-xs font-medium text-muted-foreground'>
+                  <RefreshCw className='h-3.5 w-3.5 shrink-0' />
+                  Change Sync Code
+                </div>
+                <p className='text-xs text-muted-foreground'>
+                  Migrate your progress to a new or custom code (e.g.{' '}
+                  <span className='font-mono'>AZ-FABIAN</span>). Your current
+                  data will be pushed to the new code.
+                </p>
+                <div className='flex flex-col gap-2 sm:flex-row'>
+                  <input
+                    type='text'
+                    placeholder='New code (e.g. AZ-FABIAN)'
+                    value={renameInput}
+                    onChange={e => setRenameInput(e.target.value.toUpperCase())}
+                    className='min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm tracking-wider placeholder:font-sans placeholder:tracking-normal placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-blue-500/30'
+                    maxLength={11}
+                  />
+                  <button
+                    disabled={
+                      renaming || !renameInput || renameInput === syncCode
+                    }
+                    onClick={async () => {
+                      if (!isValidSyncCode(renameInput)) {
+                        showMessage('error', 'Invalid code format');
+                        return;
+                      }
+                      setRenaming(true);
+                      try {
+                        const result = await pushData(
+                          renameInput.toUpperCase()
+                        );
+                        if (result.success) {
+                          setSyncCode(renameInput.toUpperCase());
+                          setLastSync(result.lastSync || null);
+                          setRenameInput('');
+                          showMessage(
+                            'success',
+                            `Moved to ${renameInput.toUpperCase()}!`
+                          );
+                        } else {
+                          showMessage('error', 'Migration failed. Try again.');
+                        }
+                      } catch (e) {
+                        console.error(e);
+                        showMessage(
+                          'error',
+                          'Migration failed. Check connection & try again.'
+                        );
+                      } finally {
+                        setRenaming(false);
+                      }
+                    }}
+                    className='w-full shrink-0 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:opacity-50 sm:w-auto'
+                  >
+                    {renaming ? 'Migrating...' : 'Migrate'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 
@@ -544,15 +611,39 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.8.1 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.8.1</span>
+                <span className='text-xs text-muted-foreground'>Feb 2026</span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Fixed sync backup — &ldquo;Update Backup&rdquo; was silently
+                  failing due to missing export
+                </li>
+                <li>
+                  ✦ Custom sync codes — codes like{' '}
+                  <span className='font-mono'>AZ-FABIAN</span> now accepted (3–8
+                  alphanumeric chars after{' '}
+                  <span className='font-mono'>AZ-</span>)
+                </li>
+                <li>
+                  ✦ Change Sync Code — migrate all progress to a new or custom
+                  code within Settings
+                </li>
+              </ul>
+            </div>
+
             {/* v1.8.0 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.8.0</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 19, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>
