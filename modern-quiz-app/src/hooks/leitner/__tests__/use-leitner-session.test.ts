@@ -2,7 +2,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useLeitnerSession } from '../use-leitner-session';
 import { leitnerSystem } from '@/lib/leitner';
 import { questionService } from '@/lib/question-service';
-import { loadFromLocalStorage } from '@/lib/utils';
+import { loadFromLocalStorage, saveToLocalStorage } from '@/lib/utils';
 import type { Question } from '@/types/quiz';
 
 // Mocks
@@ -100,6 +100,135 @@ describe('useLeitnerSession', () => {
     expect(leitnerSystem.getDueQuestions).not.toHaveBeenCalled();
   });
 
+  it('generates a new session when saved session is expired', async () => {
+    const savedSession = {
+      questionIds: ['q0', 'q1'],
+      createdAt: Date.now() - 5 * 60 * 60 * 1000,
+      totalQuestions: 5,
+    };
+
+    (loadFromLocalStorage as jest.Mock).mockImplementation(
+      (key, defaultValue) => {
+        if (key === 'leitner-current-session') return savedSession;
+        return defaultValue;
+      }
+    );
+
+    const { result } = renderHook(() =>
+      useLeitnerSession({
+        questions: mockQuestions,
+        onSessionReset: mockOnSessionReset,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoadingSession).toBe(false);
+    });
+
+    expect(leitnerSystem.getDueQuestions).toHaveBeenCalledTimes(1);
+    expect(result.current.filteredQuestions).toHaveLength(mockQuestions.length);
+  });
+
+  it('generates a new session when saved session total questions drift by more than 10%', async () => {
+    const savedSession = {
+      questionIds: ['q0', 'q1'],
+      createdAt: Date.now(),
+      totalQuestions: 3,
+    };
+
+    (loadFromLocalStorage as jest.Mock).mockImplementation(
+      (key, defaultValue) => {
+        if (key === 'leitner-current-session') return savedSession;
+        return defaultValue;
+      }
+    );
+
+    const { result } = renderHook(() =>
+      useLeitnerSession({
+        questions: mockQuestions,
+        onSessionReset: mockOnSessionReset,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoadingSession).toBe(false);
+    });
+
+    expect(leitnerSystem.getDueQuestions).toHaveBeenCalledTimes(1);
+    expect(result.current.filteredQuestions).toHaveLength(mockQuestions.length);
+  });
+
+  it('generates a fresh session when restored questions are already all answered', async () => {
+    const savedSession = {
+      questionIds: ['q0', 'q1'],
+      createdAt: Date.now(),
+      totalQuestions: 5,
+    };
+
+    (loadFromLocalStorage as jest.Mock).mockImplementation(
+      (key, defaultValue) => {
+        if (key === 'leitner-current-session') return savedSession;
+        if (key === 'leitner-submission-states') {
+          return {
+            q0: { isSubmitted: true },
+            q1: { isSubmitted: true },
+          };
+        }
+        return defaultValue;
+      }
+    );
+
+    const { result } = renderHook(() =>
+      useLeitnerSession({
+        questions: mockQuestions,
+        onSessionReset: mockOnSessionReset,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoadingSession).toBe(false);
+    });
+
+    expect(saveToLocalStorage).toHaveBeenCalledWith(
+      'leitner-current-session',
+      null
+    );
+    expect(saveToLocalStorage).toHaveBeenCalledWith(
+      'leitner-submission-states',
+      {}
+    );
+    expect(leitnerSystem.getDueQuestions).toHaveBeenCalledTimes(1);
+  });
+
+  it('generates a new session when restore recovers less than 50% of saved question ids', async () => {
+    const savedSession = {
+      questionIds: ['missing-1', 'missing-2', 'q0', 'missing-3'],
+      createdAt: Date.now(),
+      totalQuestions: 5,
+    };
+
+    (loadFromLocalStorage as jest.Mock).mockImplementation(
+      (key, defaultValue) => {
+        if (key === 'leitner-current-session') return savedSession;
+        return defaultValue;
+      }
+    );
+
+    const { result } = renderHook(() =>
+      useLeitnerSession({
+        questions: mockQuestions,
+        onSessionReset: mockOnSessionReset,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoadingSession).toBe(false);
+    });
+
+    expect(leitnerSystem.getDueQuestions).toHaveBeenCalledTimes(1);
+    expect(result.current.filteredQuestions).toHaveLength(mockQuestions.length);
+  });
+
   it('ends session and calculates results correctly', async () => {
     const { result } = renderHook(() =>
       useLeitnerSession({
@@ -131,5 +260,40 @@ describe('useLeitnerSession', () => {
         total: 5,
       })
     );
+  });
+
+  it('keeps generation blocked during end-session timeout window', async () => {
+    jest.useFakeTimers();
+
+    const { result } = renderHook(() =>
+      useLeitnerSession({
+        questions: mockQuestions,
+        onSessionReset: mockOnSessionReset,
+      })
+    );
+
+    await waitFor(() => expect(result.current.isLoadingSession).toBe(false));
+    expect(leitnerSystem.getDueQuestions).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      result.current.endCurrentSession({
+        q0: { isSubmitted: true, isCorrect: true },
+      });
+    });
+
+    expect(saveToLocalStorage).toHaveBeenCalledWith(
+      'leitner-current-session',
+      null
+    );
+    expect(result.current.isSessionComplete).toBe(true);
+
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+      await Promise.resolve();
+    });
+
+    expect(leitnerSystem.getDueQuestions).toHaveBeenCalledTimes(1);
+
+    jest.useRealTimers();
   });
 });

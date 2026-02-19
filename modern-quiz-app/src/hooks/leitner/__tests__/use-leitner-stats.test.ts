@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useLeitnerStats } from '../use-leitner-stats';
 import { questionService } from '@/lib/question-service';
 import type { Question } from '@/types/quiz';
@@ -97,5 +97,85 @@ describe('useLeitnerStats', () => {
       // It should trigger another calculation
       expect(questionService.getAppStatistics).toHaveBeenCalled();
     });
+  });
+
+  it('debounces stats calculation by 100ms', async () => {
+    jest.useFakeTimers();
+
+    renderHook(() => useLeitnerStats(mockQuestions, {}));
+
+    expect(questionService.getAppStatistics).not.toHaveBeenCalled();
+
+    await act(async () => {
+      jest.advanceTimersByTime(99);
+    });
+    expect(questionService.getAppStatistics).not.toHaveBeenCalled();
+
+    await act(async () => {
+      jest.advanceTimersByTime(1);
+      await Promise.resolve();
+    });
+
+    expect(questionService.getAppStatistics).toHaveBeenCalledTimes(1);
+
+    jest.useRealTimers();
+  });
+
+  it('cancels stale timer when dependencies change before 100ms', async () => {
+    jest.useFakeTimers();
+
+    const { rerender } = renderHook(
+      ({ subs }) => useLeitnerStats(mockQuestions, subs),
+      { initialProps: { subs: {} } }
+    );
+
+    await act(async () => {
+      jest.advanceTimersByTime(50);
+      rerender({ subs: mockSubmissionStates });
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(99);
+      await Promise.resolve();
+    });
+
+    expect(questionService.getAppStatistics).toHaveBeenCalledTimes(0);
+
+    await act(async () => {
+      jest.advanceTimersByTime(1);
+      await Promise.resolve();
+    });
+
+    expect(questionService.getAppStatistics).toHaveBeenCalledTimes(1);
+
+    jest.useRealTimers();
+  });
+
+  it('keeps default stats when stats calculation fails', async () => {
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+
+    (questionService.getAppStatistics as jest.Mock).mockRejectedValueOnce(
+      new Error('boom')
+    );
+
+    const { result } = renderHook(() => useLeitnerStats(mockQuestions, {}));
+
+    await waitFor(() => {
+      expect(questionService.getAppStatistics).toHaveBeenCalledWith(
+        mockQuestions
+      );
+    });
+
+    expect(result.current.totalQuestions).toBe(0);
+    expect(result.current.leitner.totalQuestions).toBe(0);
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Failed to update stats:',
+      expect.any(Error)
+    );
+
+    consoleSpy.mockRestore();
   });
 });
