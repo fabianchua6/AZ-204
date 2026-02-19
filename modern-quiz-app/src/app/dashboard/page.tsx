@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/header';
 import { DashboardStats } from '@/components/dashboard-stats';
+import { ActivityHeatmap } from '@/components/activity-heatmap';
 import { useQuizData } from '@/hooks/use-quiz-data';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/lib/constants';
@@ -65,6 +66,19 @@ export default function DashboardPage() {
             </div>
 
             <DashboardStats questions={questions} />
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: 0.1,
+                duration: 0.4,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className='mt-6'
+            >
+              <ActivityHeatmap />
+            </motion.div>
           </motion.div>
         </div>
       </main>
