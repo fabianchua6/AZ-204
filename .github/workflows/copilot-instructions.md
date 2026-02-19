@@ -31,6 +31,14 @@ Follow these rules when you write code:
 - Implement accessibility features on elements. For example, a tag should have a tabindex=“0”, aria-label, on:click, and on:keydown, and similar attributes.
 - Use consts instead of functions, for example, “const toggle = () =>”. Also, define a type if possible.
 
+Changelog Maintenance
+- After every set of changes to `modern-quiz-app`, always update the in-app changelog in `src/app/debug/page.tsx`.
+- Add a new version entry at the top of the Changelog section (above the previous latest).
+- Remove the `Latest` badge from the previous top entry and add it to the new one.
+- Use the version format `vMAJOR.MINOR.PATCH` and include the real date (or month) of the change.
+- Each bullet should start with `✦` and be a concise, user-facing description of what changed.
+- Increment MINOR for new features, PATCH for fixes or polish, MAJOR for breaking redesigns.
+
 Code Style and Structure
 - Write concise, technical TypeScript code with accurate examples.
 - Use functional and declarative programming patterns; avoid classes.

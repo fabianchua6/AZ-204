@@ -544,14 +544,32 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.7.0 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.7.0</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 19, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>✦ GitHub-style daily activity heatmap on Dashboard</li>
+                <li>✦ Extended daily activity history retention to 90 days</li>
+                <li>
+                  ✦ Moved theme toggle to Settings — Light / Dark / System
+                  picker
+                </li>
+              </ul>
+            </div>
+
             {/* v1.6.0 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.6.0</span>
                 <span className='text-xs text-muted-foreground'>Feb 2026</span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
-                </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>
                 <li>
