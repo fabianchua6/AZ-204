@@ -12,7 +12,7 @@ import { DailyBrief } from '@/components/daily-brief';
 import { LeitnerQuizCard } from '@/components/leitner-quiz-card';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { SessionResults } from '@/components/leitner/session-results';
-import { DashboardStats } from '@/components/leitner/dashboard-stats';
+import { DashboardStats } from '@/components/dashboard-stats';
 
 // Hook imports
 import { useQuizData } from '@/hooks/use-quiz-data';
@@ -173,7 +173,10 @@ export default function Home() {
                   </div>
 
                   {leitnerState.stats && (
-                    <DashboardStats stats={leitnerState.stats} />
+                    <DashboardStats
+                      stats={leitnerState.stats}
+                      section='compact'
+                    />
                   )}
                 </div>
               </motion.div>

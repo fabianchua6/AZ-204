@@ -5,18 +5,12 @@ import type { Question } from '@/types/quiz';
 import { isPdfQuestion } from '@/types/quiz';
 import { leitnerSystem } from '@/lib/leitner';
 import { questionService } from '@/lib/question-service';
-import { saveToLocalStorage, loadFromLocalStorage } from '@/lib/utils';
+import {
+  saveToLocalStorage,
+  loadFromLocalStorage,
+  shuffleArray,
+} from '@/lib/utils';
 import { debug } from '@/lib/logger';
-
-// Helper for shuffling
-function shuffleArray<T>(arr: T[]): T[] {
-  const copy = [...arr];
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
-}
 
 interface SessionResults {
   correct: number;

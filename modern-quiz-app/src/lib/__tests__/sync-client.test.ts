@@ -253,7 +253,7 @@ describe('sync (Smart Merge)', () => {
     ).mock.calls.filter((c: string[]) => c[0] === 'study-streak');
     expect(streakCalls.length).toBeGreaterThanOrEqual(1);
     const merged = JSON.parse(streakCalls[streakCalls.length - 1]![1]);
-    expect(merged.currentStreak).toBe(7); // higher wins
+    expect(merged.currentStreak).toBe(3); // local preserved via spread (currentStreak is recomputed at read time)
     expect(merged.bestStreak).toBe(10); // higher wins
     expect(merged.lastStudyDate).toBe('2025-01-15'); // more recent wins
   });

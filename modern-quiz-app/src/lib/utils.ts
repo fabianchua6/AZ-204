@@ -14,15 +14,6 @@ export function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
-export function getRandomQuestions<T>(array: T[], count: number): T[] {
-  const shuffled = shuffleArray(array);
-  return shuffled.slice(0, count);
-}
-
-export function calculateAccuracy(correct: number, total: number): number {
-  return total > 0 ? Math.round((correct / total) * 100) : 0;
-}
-
 export function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;

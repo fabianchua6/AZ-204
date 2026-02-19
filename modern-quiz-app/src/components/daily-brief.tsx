@@ -7,14 +7,13 @@ import { leitnerSystem } from '@/lib/leitner';
 import type { LeitnerStats } from '@/lib/leitner';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
 import { loadFromLocalStorage, saveToLocalStorage } from '@/lib/utils';
+import { questionService } from '@/lib/question-service';
+import { DateUtils } from '@/lib/leitner/utils';
 import type { Question } from '@/types/quiz';
 
-function toLocalDateStr(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
+/** Delegate to canonical DateUtils to keep one YYYY-MM-DD implementation */
+const toLocalDateStr = (date: Date): string =>
+  DateUtils.getLocalDateString(date);
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -43,7 +42,8 @@ export function DailyBrief({ questions }: DailyBriefProps) {
     if (lastShown === today) return;
 
     leitnerSystem.ensureInitialized().then(() => {
-      const s = leitnerSystem.getStats(questions);
+      const filtered = questionService.filterQuestions(questions);
+      const s = leitnerSystem.getStats(filtered);
       setStats(s);
       setOpen(true);
     });

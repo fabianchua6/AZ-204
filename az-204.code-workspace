@@ -12,7 +12,8 @@
   "settings": {
     "chat.tools.terminal.autoApprove": {
       "npx jest": true,
-      "npx tsc": true
+      "npx tsc": true,
+      "npx vitest": true
     }
   }
 }

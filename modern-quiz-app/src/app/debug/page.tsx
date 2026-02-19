@@ -603,15 +603,57 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.10.0 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.10.0</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 19, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Unified two divergent DashboardStats components into one
+                  with a compact/full section mode
+                </li>
+                <li>
+                  ✦ Extracted shared LeitnerBoxBar component — replaces
+                  copy-pasted box distribution UI in 3 places
+                </li>
+                <li>
+                  ✦ Routed useLeitnerStats through QuestionService cache for
+                  consistent filtered stats everywhere
+                </li>
+                <li>✦ Fixed Daily Brief showing unfiltered question counts</li>
+                <li>
+                  ✦ Fixed streak sync resurrecting dead streaks across devices —
+                  only bestStreak and lastStudyDate are merged now
+                </li>
+                <li>
+                  ✦ Deduplicated date formatting (4 variants → canonical
+                  DateUtils), shuffleArray (2 copies → 1), and EnhancedQuizStats
+                  type (2 definitions → 1 export)
+                </li>
+                <li>
+                  ✦ Fixed useSync stale closure causing effect re-registration
+                  on every sync cycle
+                </li>
+                <li>
+                  ✦ Removed 8 dead files (~600+ lines) and 2 dead utility
+                  functions
+                </li>
+              </ul>
+            </div>
+
             {/* v1.9.1 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.9.1</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 19, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>

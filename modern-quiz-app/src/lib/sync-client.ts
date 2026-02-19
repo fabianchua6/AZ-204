@@ -211,14 +211,13 @@ export async function sync(syncCode: string): Promise<SyncResponse> {
       if (!localData.activity) localData.activity = {};
       for (const [key, value] of Object.entries(remoteData.activity)) {
         if (key === 'study-streak' && key in localData.activity) {
-          // Smart merge: keep the higher streak values
+          // Only merge bestStreak (high-water mark) and lastStudyDate.
+          // currentStreak is always recomputed from Leitner review dates
+          // at read time — syncing it would resurrect dead streaks.
           const local = localData.activity[key] as Record<string, unknown>;
           const remote = value as Record<string, unknown>;
           localData.activity[key] = {
-            currentStreak: Math.max(
-              (local.currentStreak as number) || 0,
-              (remote.currentStreak as number) || 0
-            ),
+            ...local,
             bestStreak: Math.max(
               (local.bestStreak as number) || 0,
               (remote.bestStreak as number) || 0

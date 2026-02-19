@@ -9,18 +9,24 @@ import { Calendar, Flame, Target, Clock } from 'lucide-react';
 
 // UI component imports
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LeitnerBoxBar } from '@/components/leitner/leitner-box-bar';
 
 // Service and utility imports
 import { questionService } from '@/lib/question-service';
 import { saveToLocalStorage, loadFromLocalStorage } from '@/lib/utils';
+import { DateUtils } from '@/lib/leitner/utils';
 
 // Type imports
 import type { Question } from '@/types/quiz';
+import type { LeitnerStats } from '@/lib/leitner';
 
 interface DashboardStatsProps {
-  questions: Question[];
-  /** 'stats' renders only the cards, 'leitner' only the box bar, default renders both */
-  section?: 'stats' | 'leitner';
+  /** For async fetch mode (dashboard page) — provide questions to compute stats */
+  questions?: Question[];
+  /** For pre-computed mode (main page fallback) — provide stats directly */
+  stats?: { leitner: LeitnerStats };
+  /** 'stats' = cards only, 'leitner' = box bar only, 'compact' = simple 3-stat + box grid, default = both */
+  section?: 'stats' | 'leitner' | 'compact';
 }
 
 interface StudyStreak {
@@ -42,7 +48,11 @@ interface AppStats {
   completionAccuracy: number;
 }
 
-export function DashboardStats({ questions, section }: DashboardStatsProps) {
+export function DashboardStats({
+  questions,
+  stats: precomputedStats,
+  section,
+}: DashboardStatsProps) {
   const [initialized, setInitialized] = useState(false);
   const [appStats, setAppStats] = useState<AppStats | null>(null);
   const [studyStreak, setStudyStreak] = useState<StudyStreak>({
@@ -51,8 +61,14 @@ export function DashboardStats({ questions, section }: DashboardStatsProps) {
     bestStreak: 0,
   });
 
-  // Initialize and load stats from centralized service
+  // --- Pre-computed mode (compact) ---
+  // When `stats` prop is provided, skip the async fetch entirely
+  const isPrecomputed = !!precomputedStats;
+
+  // Initialize and load stats from centralized service (async fetch mode)
   useEffect(() => {
+    if (isPrecomputed || !questions) return;
+
     const init = async () => {
       const stats = await questionService.getAppStatistics(questions);
       setAppStats(stats);
@@ -60,7 +76,7 @@ export function DashboardStats({ questions, section }: DashboardStatsProps) {
     };
 
     init();
-  }, [questions]);
+  }, [questions, isPrecomputed]);
 
   // Derive streak from Leitner system's robust calculation (based on actual
   // lastReviewed dates across all progress) and persist to study-streak key
@@ -78,7 +94,7 @@ export function DashboardStats({ questions, section }: DashboardStatsProps) {
       bestStreak: 0,
     });
 
-    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+    const today = DateUtils.getLocalDateString(new Date()); // YYYY-MM-DD
     const newBestStreak = Math.max(leitnerStreak, stored.bestStreak);
 
     const updatedStreak: StudyStreak = {
@@ -90,6 +106,62 @@ export function DashboardStats({ questions, section }: DashboardStatsProps) {
     setStudyStreak(updatedStreak);
     saveToLocalStorage('study-streak', updatedStreak);
   }, [initialized, appStats]);
+
+  // --- Compact mode (pre-computed stats from parent) ---
+  if (section === 'compact' && precomputedStats) {
+    const leitner = precomputedStats.leitner;
+    return (
+      <div className='mx-auto max-w-2xl'>
+        <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-3'>
+          <div className='rounded-lg border bg-card p-4'>
+            <div className='text-2xl font-bold text-primary'>
+              {leitner.questionsStarted}
+            </div>
+            <div className='text-sm text-muted-foreground'>
+              Questions Started
+            </div>
+          </div>
+          <div className='rounded-lg border bg-card p-4'>
+            <div className='text-2xl font-bold text-success dark:text-emerald-400'>
+              {leitner.accuracyRate.toFixed(0)}%
+            </div>
+            <div className='text-sm text-muted-foreground'>Accuracy Rate</div>
+          </div>
+          <div className='rounded-lg border bg-card p-4'>
+            <div className='text-2xl font-bold text-primary dark:text-blue-400'>
+              {leitner.streakDays}
+            </div>
+            <div className='text-sm text-muted-foreground'>Day Streak</div>
+          </div>
+        </div>
+
+        {/* Box distribution */}
+        <div className='rounded-lg border bg-card p-4'>
+          <h3 className='mb-3 font-medium'>Progress by Box</h3>
+          <div className='grid grid-cols-3 gap-3 text-sm'>
+            <div className='text-center'>
+              <div className='text-lg font-bold text-destructive dark:text-red-400'>
+                {leitner.boxDistribution[1] || 0}
+              </div>
+              <div className='text-muted-foreground'>Box 1 (New)</div>
+            </div>
+            <div className='text-center'>
+              <div className='text-lg font-bold text-warning dark:text-amber-400'>
+                {leitner.boxDistribution[2] || 0}
+              </div>
+              <div className='text-muted-foreground'>Box 2 (Learning)</div>
+            </div>
+            <div className='text-center'>
+              <div className='text-lg font-bold text-success dark:text-emerald-400'>
+                {leitner.boxDistribution[3] || 0}
+              </div>
+              <div className='text-muted-foreground'>Box 3 (Mastered)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!initialized || !appStats) {
     return (
@@ -221,70 +293,10 @@ export function DashboardStats({ questions, section }: DashboardStatsProps) {
       <h2 className='text-base font-semibold tracking-wide text-muted-foreground'>
         Leitner Box Distribution
       </h2>
-      <div className='flex flex-col gap-3'>
-        {/* Segmented Bar - 3 Box System */}
-        <div className='flex w-full overflow-hidden rounded-xl border border-border/60'>
-          {[1, 2, 3].map((boxNumber, idx) => {
-            const questionCount = appStats.boxDistribution[boxNumber] || 0;
-            const percentage =
-              appStats.totalQuestions > 0
-                ? (questionCount / appStats.totalQuestions) * 100
-                : 0;
-            // Use actual percentage for proportional sizing, with small minimum for visibility
-            const flexGrow = questionCount > 0 ? Math.max(percentage, 5) : 1;
-
-            const segmentBgClass = `leitner-box-surface-${boxNumber}`;
-            const segmentTextClass = `leitner-box-text-${boxNumber}`;
-
-            return (
-              <div
-                key={boxNumber}
-                className={`group relative flex flex-col items-center justify-center px-3 py-4 text-center outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/40 ${segmentBgClass} ${segmentTextClass} ${idx !== 0 ? 'border-l-2 border-white/20 dark:border-black/20' : ''}`}
-                style={{
-                  flexGrow,
-                  minWidth: '60px', // Larger minimum width for 3-box system
-                  minHeight: '60px',
-                }}
-                tabIndex={0}
-                aria-label={`Box ${boxNumber}: ${questionCount} questions (${percentage.toFixed(1)}%)`}
-                title={`Box ${boxNumber} • ${questionCount} (${percentage.toFixed(1)}%)`}
-              >
-                <span className='absolute left-1 top-1 rounded-sm bg-black/5 px-1.5 py-0.5 text-[10px] font-medium tracking-wide dark:bg-white/10'>
-                  {boxNumber}
-                </span>
-                <span className='text-sm font-semibold tabular-nums sm:text-base'>
-                  {questionCount}
-                </span>
-                <div className='pointer-events-none absolute inset-0 rounded-md bg-black opacity-0 transition-opacity group-hover:opacity-[0.06] group-focus-visible:opacity-[0.10] dark:bg-white' />
-              </div>
-            );
-          })}
-        </div>
-        {/* Legend - 3 Box System */}
-        <div className='flex flex-wrap gap-x-4 gap-y-1.5 text-xs'>
-          {[1, 2, 3].map(boxNumber => {
-            const questionCount = appStats.boxDistribution[boxNumber] || 0;
-            const percentage =
-              appStats.totalQuestions > 0
-                ? Math.round((questionCount / appStats.totalQuestions) * 100)
-                : 0;
-            const dotClass = `leitner-box-dot-${boxNumber}`;
-            return (
-              <div
-                key={boxNumber}
-                className='flex items-center gap-1 text-muted-foreground'
-              >
-                <span className={`h-2 w-2 rounded-full ${dotClass}`}></span>
-                <span className='font-medium text-foreground'>{boxNumber}</span>
-                <span className='tabular-nums text-foreground/80'>
-                  {questionCount}
-                </span>
-                <span className='opacity-60'>({percentage}%)</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      <LeitnerBoxBar
+        boxDistribution={appStats.boxDistribution}
+        totalQuestions={appStats.totalQuestions}
+      />
     </motion.div>
   );
 

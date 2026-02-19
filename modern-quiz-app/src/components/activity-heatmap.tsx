@@ -2,15 +2,13 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { leitnerSystem } from '@/lib/leitner';
+import { DateUtils } from '@/lib/leitner/utils';
 
 const WEEKS = 15;
 
-function toLocalDateStr(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
+/** Delegate to canonical DateUtils */
+const toLocalDateStr = (date: Date): string =>
+  DateUtils.getLocalDateString(date);
 
 function getCellColor(
   count: number,

@@ -1,7 +1,15 @@
 'use client';
 
 // React imports
-import { useCallback, useState, useMemo, useLayoutEffect, useEffect, useRef, memo } from 'react';
+import {
+  useCallback,
+  useState,
+  useMemo,
+  useLayoutEffect,
+  useEffect,
+  useRef,
+  memo,
+} from 'react';
 import { flushSync } from 'react-dom';
 
 // Third-party imports
@@ -20,27 +28,13 @@ import { QuizQuestionContent } from '@/components/quiz/quiz-question-content';
 
 // Hook imports
 import { useQuizCardState } from '@/hooks/use-quiz-card-state';
+import type { EnhancedQuizStats } from '@/hooks/leitner/use-leitner-stats';
 
 // Utility imports
 import { triggerHaptic } from '@/lib/haptics';
 
 // Type imports
 import type { Question } from '@/types/quiz';
-
-interface EnhancedQuizStats {
-  totalQuestions: number;
-  answeredQuestions: number;
-  correctAnswers: number;
-  incorrectAnswers: number;
-  accuracy: number;
-  leitner: {
-    totalQuestions: number;
-    boxDistribution: Record<number, number>;
-    dueToday: number;
-    accuracyRate: number;
-    streakDays: number;
-  };
-}
 
 interface LeitnerQuizCardProps {
   question: Question;
@@ -51,11 +45,11 @@ interface LeitnerQuizCardProps {
     answerIndexes: number[]
   ) => Promise<
     | {
-      correct: boolean;
-      movedFromBox: number;
-      movedToBox: number;
-      nextReview: string;
-    }
+        correct: boolean;
+        movedFromBox: number;
+        movedToBox: number;
+        nextReview: string;
+      }
     | undefined
   >;
   onNext: () => void;
@@ -124,7 +118,10 @@ export function LeitnerQuizCard({
     if (justSubmitted && answerSectionRef.current) {
       // Small delay to ensure render
       setTimeout(() => {
-        answerSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        answerSectionRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
       }, 100);
     }
   }, [justSubmitted]);
@@ -143,10 +140,10 @@ export function LeitnerQuizCard({
       const submissionState = getSubmissionState?.(question.id);
       return submissionState
         ? {
-          isSubmitted: submissionState.isSubmitted,
-          isCorrect: submissionState.isCorrect,
-          showAnswer: submissionState.showAnswer,
-        }
+            isSubmitted: submissionState.isSubmitted,
+            isCorrect: submissionState.isCorrect,
+            showAnswer: submissionState.showAnswer,
+          }
         : undefined;
     })(),
   });
@@ -269,7 +266,7 @@ export function LeitnerQuizCard({
   const boxTextClass = `leitner-box-text-${currentBox}`;
 
   return (
-    <div className='flex flex-col h-full'>
+    <div className='flex h-full flex-col'>
       {/* Contextual Toolbar */}
       <QuizControls
         topics={topics}
@@ -290,7 +287,7 @@ export function LeitnerQuizCard({
       />
 
       {/* Main Quiz Card */}
-      <Card className='relative flex flex-col border border-border bg-card shadow-sm dark:shadow-sm mb-20'>
+      <Card className='relative mb-20 flex flex-col border border-border bg-card shadow-sm dark:shadow-sm'>
         {/* Header with Box Info ONLY */}
         <CardHeader className='rounded-t-lg bg-card/95 px-4 pb-0 pt-4'>
           <div className='flex flex-row items-center justify-between gap-3'>
@@ -349,7 +346,7 @@ export function LeitnerQuizCard({
           )}
 
           {/* Answer Section (Explanation) */}
-          <div className="mt-4" ref={answerSectionRef}>
+          <div className='mt-4' ref={answerSectionRef}>
             <QuizAnswer
               answer={question.answer}
               showAnswer={justSubmitted || cardState.showAnswer}
@@ -364,30 +361,35 @@ export function LeitnerQuizCard({
       {/* STICKY ACTION BAR (Thumb Zone) */}
       <div className='fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-background/95 px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md'>
         <div className='mx-auto grid max-w-4xl grid-cols-4 gap-2'>
-
           <Button
             variant='secondary'
             size='default'
             onClick={handlePrevious}
             disabled={!canGoPrevious}
             className='col-span-1 h-11 w-full rounded-lg border border-border/50 shadow-sm transition-all active:scale-95 disabled:opacity-30'
-            aria-label="Previous Question"
+            aria-label='Previous Question'
           >
-            <ChevronLeft className='h-6 w-6' stroke="currentColor" style={{ color: 'hsl(var(--foreground))' }} strokeWidth={2.5} />
+            <ChevronLeft
+              className='h-6 w-6'
+              stroke='currentColor'
+              style={{ color: 'hsl(var(--foreground))' }}
+              strokeWidth={2.5}
+            />
           </Button>
 
           {/* PRIMARY ACTION BUTTON (Morphing) */}
-          <div className="col-span-3">
+          <div className='col-span-3'>
             {cardState.showAnswer ? (
               // State: Result / Next
-              sessionProgress?.isActive && sessionProgress.current === sessionProgress.total ? (
+              sessionProgress?.isActive &&
+              sessionProgress.current === sessionProgress.total ? (
                 <Button // End Session
                   onClick={onEndSession}
                   disabled={false}
-                  variant="success"
+                  variant='success'
                   className='h-11 w-full rounded-lg text-base font-semibold shadow-sm'
                 >
-                  Finish <Target className="ml-2 h-4 w-4" />
+                  Finish <Target className='ml-2 h-4 w-4' />
                 </Button>
               ) : (
                 <Button // Next Question
@@ -395,7 +397,7 @@ export function LeitnerQuizCard({
                   disabled={!canGoNext}
                   className='h-11 w-full rounded-lg text-base font-semibold shadow-sm'
                 >
-                  Next <ChevronRight className="ml-2 h-4 w-4" />
+                  Next <ChevronRight className='ml-2 h-4 w-4' />
                 </Button>
               )
             ) : (
@@ -403,8 +405,9 @@ export function LeitnerQuizCard({
               <Button
                 onClick={handleSubmit}
                 disabled={buttonStates.submitDisabled}
-                className={`h-11 w-full rounded-lg text-base font-semibold shadow-sm ${cardState.isSubmitting ? 'opacity-80' : ''
-                  }`}
+                className={`h-11 w-full rounded-lg text-base font-semibold shadow-sm ${
+                  cardState.isSubmitting ? 'opacity-80' : ''
+                }`}
               >
                 {cardState.isSubmitting ? 'Checking...' : 'Check Answer'}
               </Button>

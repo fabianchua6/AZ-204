@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   getStoredSyncCode,
   sync,
@@ -17,6 +17,7 @@ interface UseSyncReturn {
 }
 
 export function useSync(): UseSyncReturn {
+  const isSyncingRef = useRef(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +27,7 @@ export function useSync(): UseSyncReturn {
     setLastSyncTime(getLastSyncTime());
   }, []);
 
+  // Stable reference — no deps on isSyncing so effects don't re-register
   const syncNow = useCallback(async () => {
     const code = getStoredSyncCode();
     if (!code) {
@@ -33,9 +35,10 @@ export function useSync(): UseSyncReturn {
       return null;
     }
 
-    if (isSyncing) return null;
+    if (isSyncingRef.current) return null;
 
     try {
+      isSyncingRef.current = true;
       setIsSyncing(true);
       setError(null);
       debug('🔄 Auto-sync started');
@@ -55,9 +58,10 @@ export function useSync(): UseSyncReturn {
       console.error('Auto-sync error:', e);
       return { success: false, error: errorMessage };
     } finally {
+      isSyncingRef.current = false;
       setIsSyncing(false);
     }
-  }, [isSyncing]);
+  }, []);
 
   // 1. Sync on Mount (if code exists)
   useEffect(() => {
