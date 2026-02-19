@@ -1,5 +1,6 @@
 import {
   collectLocalData,
+  getStoredSyncCode,
   storeSyncCode,
   pushData,
   pullData,
