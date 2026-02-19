@@ -603,15 +603,47 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.10.1 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.10.1</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 19, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Added QA regression suites for DashboardStats and Daily
+                  Brief component flows
+                </li>
+                <li>
+                  ✦ Added automation suites for Home page orchestration and
+                  Session Results CTA behavior
+                </li>
+                <li>
+                  ✦ Strengthened useLeitnerStats tests for debounce timing,
+                  stale timer cleanup, and failure resilience
+                </li>
+                <li>
+                  ✦ Expanded useLeitnerSession tests for expired/invalid saved
+                  sessions and end-session timing guards
+                </li>
+                <li>
+                  ✦ Added 24 new automated tests across high-risk async, UI, and
+                  orchestration branches
+                </li>
+              </ul>
+            </div>
+
             {/* v1.10.0 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.10.0</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 19, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>
