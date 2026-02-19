@@ -170,13 +170,20 @@ export function ActivityHeatmap({ compact = false }: ActivityHeatmapProps) {
 
         {/* Week columns */}
         {columns.map((week, wIdx) => (
-          <div key={wIdx} className='flex flex-col' style={{ gap: '3px' }}>
+          <div
+            key={wIdx}
+            className='flex flex-col'
+            style={{ gap: '3px', overflow: 'visible' }}
+          >
             {week.map((cell, dIdx) => (
               <div
                 key={dIdx}
                 onMouseEnter={e => handleMouseEnter(cell, e)}
                 className={[
-                  'aspect-square w-full cursor-default rounded-[2px] transition-opacity hover:opacity-75',
+                  'relative z-0 aspect-square w-full cursor-default rounded-[2px]',
+                  'transition-all duration-100 ease-out',
+                  !cell.isFuture &&
+                    'hover:z-10 hover:scale-[1.55] hover:shadow-md hover:brightness-110',
                   getCellColor(cell.count, dailyTarget, cell.isFuture),
                   cell.isToday
                     ? 'ring-1 ring-primary ring-offset-[1px] ring-offset-card'
@@ -195,7 +202,7 @@ export function ActivityHeatmap({ compact = false }: ActivityHeatmapProps) {
   if (compact) return grid;
 
   return (
-    <div className='mx-auto w-full rounded-xl border border-border bg-card p-4 shadow-sm sm:max-w-md'>
+    <div className='flex h-full w-full flex-col rounded-xl border border-border bg-card p-4 shadow-sm'>
       <div className='mb-4 flex items-center justify-between'>
         <div>
           <h3 className='text-sm font-semibold text-foreground'>
@@ -219,7 +226,7 @@ export function ActivityHeatmap({ compact = false }: ActivityHeatmapProps) {
         </div>
       </div>
 
-      {grid}
+      <div className='mt-auto'>{grid}</div>
     </div>
   );
 }

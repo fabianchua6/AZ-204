@@ -47,7 +47,7 @@ export default function DashboardPage() {
       <Header />
 
       <main className='container mx-auto px-4 py-6'>
-        <div className='mx-auto max-w-4xl'>
+        <div className='mx-auto max-w-5xl'>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -65,10 +65,19 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <ActivityHeatmap />
+            {/* 1/3 heatmap + 2/3 stat cards side-by-side on desktop */}
+            <div className='flex flex-col gap-6 lg:grid lg:grid-cols-3'>
+              <div className='lg:col-span-1'>
+                <ActivityHeatmap />
+              </div>
+              <div className='lg:col-span-2'>
+                <DashboardStats questions={questions} section='stats' />
+              </div>
+            </div>
 
+            {/* Leitner box distribution — full width below */}
             <div className='mt-6'>
-              <DashboardStats questions={questions} />
+              <DashboardStats questions={questions} section='leitner' />
             </div>
           </motion.div>
         </div>

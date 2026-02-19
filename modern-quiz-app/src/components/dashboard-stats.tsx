@@ -19,6 +19,8 @@ import type { Question } from '@/types/quiz';
 
 interface DashboardStatsProps {
   questions: Question[];
+  /** 'stats' renders only the cards, 'leitner' only the box bar, default renders both */
+  section?: 'stats' | 'leitner';
 }
 
 interface StudyStreak {
@@ -40,7 +42,7 @@ interface AppStats {
   completionAccuracy: number;
 }
 
-export function DashboardStats({ questions }: DashboardStatsProps) {
+export function DashboardStats({ questions, section }: DashboardStatsProps) {
   const [initialized, setInitialized] = useState(false);
   const [appStats, setAppStats] = useState<AppStats | null>(null);
   const [studyStreak, setStudyStreak] = useState<StudyStreak>({
@@ -179,124 +181,130 @@ export function DashboardStats({ questions }: DashboardStatsProps) {
     },
   ];
 
+  const statsGrid = (
+    <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4'>
+      {stats.map((stat, index) => (
+        <motion.div
+          key={stat.title}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+        >
+          <Card
+            className={`h-full ${stat.bgColor} border-0 shadow-sm backdrop-blur-sm`}
+          >
+            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3'>
+              <CardTitle
+                className={`text-xs font-medium sm:text-sm ${stat.textColor}`}
+              >
+                {stat.title}
+              </CardTitle>
+              <stat.icon
+                className={`h-3 w-3 sm:h-4 sm:w-4 ${stat.iconColor}`}
+              />
+            </CardHeader>
+            <CardContent className='pt-0'>
+              <div
+                className={`text-lg font-bold sm:text-2xl ${stat.textColor}`}
+              >
+                {stat.value}
+              </div>
+              <p
+                className={`text-xs ${stat.textColor} mt-1 hidden leading-tight opacity-75 sm:block`}
+              >
+                {stat.description}
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
+    </div>
+  );
+
+  const leitnerSection = (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.6 }}
+      className='space-y-3'
+    >
+      <h2 className='text-base font-semibold tracking-wide text-muted-foreground'>
+        Leitner Box Distribution
+      </h2>
+      <div className='flex flex-col gap-3'>
+        {/* Segmented Bar - 3 Box System */}
+        <div className='flex w-full overflow-hidden rounded-xl border border-border/60'>
+          {[1, 2, 3].map((boxNumber, idx) => {
+            const questionCount = appStats.boxDistribution[boxNumber] || 0;
+            const percentage =
+              appStats.totalQuestions > 0
+                ? (questionCount / appStats.totalQuestions) * 100
+                : 0;
+            // Use actual percentage for proportional sizing, with small minimum for visibility
+            const flexGrow = questionCount > 0 ? Math.max(percentage, 5) : 1;
+
+            const segmentBgClass = `leitner-box-surface-${boxNumber}`;
+            const segmentTextClass = `leitner-box-text-${boxNumber}`;
+
+            return (
+              <div
+                key={boxNumber}
+                className={`group relative flex flex-col items-center justify-center px-3 py-4 text-center outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/40 ${segmentBgClass} ${segmentTextClass} ${idx !== 0 ? 'border-l-2 border-white/20 dark:border-black/20' : ''}`}
+                style={{
+                  flexGrow,
+                  minWidth: '60px', // Larger minimum width for 3-box system
+                  minHeight: '60px',
+                }}
+                tabIndex={0}
+                aria-label={`Box ${boxNumber}: ${questionCount} questions (${percentage.toFixed(1)}%)`}
+                title={`Box ${boxNumber} • ${questionCount} (${percentage.toFixed(1)}%)`}
+              >
+                <span className='absolute left-1 top-1 rounded-sm bg-black/5 px-1.5 py-0.5 text-[10px] font-medium tracking-wide dark:bg-white/10'>
+                  {boxNumber}
+                </span>
+                <span className='text-sm font-semibold tabular-nums sm:text-base'>
+                  {questionCount}
+                </span>
+                <div className='pointer-events-none absolute inset-0 rounded-md bg-black opacity-0 transition-opacity group-hover:opacity-[0.06] group-focus-visible:opacity-[0.10] dark:bg-white' />
+              </div>
+            );
+          })}
+        </div>
+        {/* Legend - 3 Box System */}
+        <div className='flex flex-wrap gap-x-4 gap-y-1.5 text-xs'>
+          {[1, 2, 3].map(boxNumber => {
+            const questionCount = appStats.boxDistribution[boxNumber] || 0;
+            const percentage =
+              appStats.totalQuestions > 0
+                ? Math.round((questionCount / appStats.totalQuestions) * 100)
+                : 0;
+            const dotClass = `leitner-box-dot-${boxNumber}`;
+            return (
+              <div
+                key={boxNumber}
+                className='flex items-center gap-1 text-muted-foreground'
+              >
+                <span className={`h-2 w-2 rounded-full ${dotClass}`}></span>
+                <span className='font-medium text-foreground'>{boxNumber}</span>
+                <span className='tabular-nums text-foreground/80'>
+                  {questionCount}
+                </span>
+                <span className='opacity-60'>({percentage}%)</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  if (section === 'stats') return statsGrid;
+  if (section === 'leitner') return leitnerSection;
+
   return (
     <div className='space-y-8'>
-      {/* Main Stats Grid */}
-      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4'>
-        {stats.map((stat, index) => (
-          <motion.div
-            key={stat.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card
-              className={`${stat.bgColor} border-0 shadow-sm backdrop-blur-sm`}
-            >
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3'>
-                <CardTitle
-                  className={`text-xs font-medium sm:text-sm ${stat.textColor}`}
-                >
-                  {stat.title}
-                </CardTitle>
-                <stat.icon
-                  className={`h-3 w-3 sm:h-4 sm:w-4 ${stat.iconColor}`}
-                />
-              </CardHeader>
-              <CardContent className='pt-0'>
-                <div
-                  className={`text-lg font-bold sm:text-2xl ${stat.textColor}`}
-                >
-                  {stat.value}
-                </div>
-                <p
-                  className={`text-xs ${stat.textColor} mt-1 hidden leading-tight opacity-75 sm:block`}
-                >
-                  {stat.description}
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Compact Box Distribution Subsection (Option A: Proportional Segmented Bar) */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className='space-y-3'
-      >
-        <h2 className='text-base font-semibold tracking-wide text-muted-foreground'>
-          Leitner Box Distribution
-        </h2>
-        <div className='flex flex-col gap-3'>
-          {/* Segmented Bar - 3 Box System */}
-          <div className='flex w-full overflow-hidden rounded-xl border border-border/60'>
-            {[1, 2, 3].map((boxNumber, idx) => {
-              const questionCount = appStats.boxDistribution[boxNumber] || 0;
-              const percentage =
-                appStats.totalQuestions > 0
-                  ? (questionCount / appStats.totalQuestions) * 100
-                  : 0;
-              // Use actual percentage for proportional sizing, with small minimum for visibility
-              const flexGrow = questionCount > 0 ? Math.max(percentage, 5) : 1;
-
-              const segmentBgClass = `leitner-box-surface-${boxNumber}`;
-              const segmentTextClass = `leitner-box-text-${boxNumber}`;
-
-              return (
-                <div
-                  key={boxNumber}
-                  className={`group relative flex flex-col items-center justify-center px-3 py-4 text-center outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/40 ${segmentBgClass} ${segmentTextClass} ${idx !== 0 ? 'border-l-2 border-white/20 dark:border-black/20' : ''}`}
-                  style={{
-                    flexGrow,
-                    minWidth: '60px', // Larger minimum width for 3-box system
-                    minHeight: '60px',
-                  }}
-                  tabIndex={0}
-                  aria-label={`Box ${boxNumber}: ${questionCount} questions (${percentage.toFixed(1)}%)`}
-                  title={`Box ${boxNumber} • ${questionCount} (${percentage.toFixed(1)}%)`}
-                >
-                  <span className='absolute left-1 top-1 rounded-sm bg-black/5 px-1.5 py-0.5 text-[10px] font-medium tracking-wide dark:bg-white/10'>
-                    {boxNumber}
-                  </span>
-                  <span className='text-sm font-semibold tabular-nums sm:text-base'>
-                    {questionCount}
-                  </span>
-                  <div className='pointer-events-none absolute inset-0 rounded-md bg-black opacity-0 transition-opacity group-hover:opacity-[0.06] group-focus-visible:opacity-[0.10] dark:bg-white' />
-                </div>
-              );
-            })}
-          </div>
-          {/* Legend - 3 Box System */}
-          <div className='flex flex-wrap gap-x-4 gap-y-1.5 text-xs'>
-            {[1, 2, 3].map(boxNumber => {
-              const questionCount = appStats.boxDistribution[boxNumber] || 0;
-              const percentage =
-                appStats.totalQuestions > 0
-                  ? Math.round((questionCount / appStats.totalQuestions) * 100)
-                  : 0;
-              const dotClass = `leitner-box-dot-${boxNumber}`;
-              return (
-                <div
-                  key={boxNumber}
-                  className='flex items-center gap-1 text-muted-foreground'
-                >
-                  <span className={`h-2 w-2 rounded-full ${dotClass}`}></span>
-                  <span className='font-medium text-foreground'>
-                    {boxNumber}
-                  </span>
-                  <span className='tabular-nums text-foreground/80'>
-                    {questionCount}
-                  </span>
-                  <span className='opacity-60'>({percentage}%)</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </motion.div>
+      {statsGrid}
+      {leitnerSection}
     </div>
   );
 }
