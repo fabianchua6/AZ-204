@@ -19,6 +19,113 @@ export interface SyncResponse {
 const SYNC_CODE_KEY = 'quiz_sync_code';
 const LAST_SYNC_KEY = 'quiz_last_sync';
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function toNumber(value: unknown, fallback = 0): number {
+  const parsed =
+    typeof value === 'number' ? value : parseFloat(String(value ?? fallback));
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function mergeLeitnerQuestionProgress(
+  local: Record<string, unknown>,
+  remote: Record<string, unknown>
+): Record<string, unknown> {
+  const localReviewed = new Date(String(local.lastReviewed ?? 0)).getTime();
+  const remoteReviewed = new Date(String(remote.lastReviewed ?? 0)).getTime();
+  const hasRemoteNewer = remoteReviewed > localReviewed;
+  const source = hasRemoteNewer ? remote : local;
+
+  return {
+    ...source,
+    questionId: String(local.questionId ?? remote.questionId ?? ''),
+    timesCorrect: Math.max(
+      toNumber(local.timesCorrect),
+      toNumber(remote.timesCorrect)
+    ),
+    timesIncorrect: Math.max(
+      toNumber(local.timesIncorrect),
+      toNumber(remote.timesIncorrect)
+    ),
+  };
+}
+
+function mergeLeitnerProgressBlob(local: unknown, remote: unknown): unknown {
+  if (!isRecord(local) || !isRecord(remote)) {
+    return local ?? remote;
+  }
+
+  const merged: Record<string, unknown> = { ...local };
+  for (const [questionId, remoteProgress] of Object.entries(remote)) {
+    const localProgress = merged[questionId];
+    if (!isRecord(localProgress) || !isRecord(remoteProgress)) {
+      if (!(questionId in merged)) merged[questionId] = remoteProgress;
+      continue;
+    }
+    merged[questionId] = mergeLeitnerQuestionProgress(
+      localProgress,
+      remoteProgress
+    );
+  }
+  return merged;
+}
+
+function mergeSubmissionStates(local: unknown, remote: unknown): unknown {
+  if (!isRecord(local) || !isRecord(remote)) return local ?? remote;
+
+  const merged: Record<string, unknown> = { ...local };
+  for (const [questionId, remoteState] of Object.entries(remote)) {
+    const localState = merged[questionId];
+    if (!isRecord(localState) || !isRecord(remoteState)) {
+      if (!(questionId in merged)) merged[questionId] = remoteState;
+      continue;
+    }
+
+    const localSubmittedAt = toNumber(localState.submittedAt, 0);
+    const remoteSubmittedAt = toNumber(remoteState.submittedAt, 0);
+    merged[questionId] =
+      remoteSubmittedAt > localSubmittedAt ? remoteState : localState;
+  }
+  return merged;
+}
+
+function mergeCurrentSession(local: unknown, remote: unknown): unknown {
+  if (!isRecord(local) || !isRecord(remote)) return local ?? remote;
+  const localCreatedAt = toNumber(local.createdAt, 0);
+  const remoteCreatedAt = toNumber(remote.createdAt, 0);
+  return remoteCreatedAt > localCreatedAt ? remote : local;
+}
+
+function mergeLeitnerValue(
+  key: string,
+  local: unknown,
+  remote: unknown
+): unknown {
+  if (key === 'leitner-progress') {
+    return mergeLeitnerProgressBlob(local, remote);
+  }
+
+  if (key.startsWith('leitner-daily-attempts-')) {
+    return Math.max(toNumber(local, 0), toNumber(remote, 0));
+  }
+
+  if (key === 'leitner-submission-states') {
+    return mergeSubmissionStates(local, remote);
+  }
+
+  if (key === 'leitner-current-session') {
+    return mergeCurrentSession(local, remote);
+  }
+
+  if (key === 'leitner-quiz-index') {
+    return Math.max(toNumber(local, 0), toNumber(remote, 0));
+  }
+
+  return local ?? remote;
+}
+
 /**
  * Get the stored sync code from localStorage
  */
@@ -197,11 +304,27 @@ export async function sync(syncCode: string): Promise<SyncResponse> {
 
   // Step 3: Merge remote into local (only live buckets)
   if (remoteData) {
-    // Remote fills in any missing leitnerProgress keys (local wins)
+    // Merge leitner keys by key semantics (progress/session/index/daily attempts)
     if (remoteData.leitnerProgress) {
       for (const [key, value] of Object.entries(remoteData.leitnerProgress)) {
         if (!(key in localData.leitnerProgress)) {
           localData.leitnerProgress[key] = value;
+        } else {
+          localData.leitnerProgress[key] = mergeLeitnerValue(
+            key,
+            localData.leitnerProgress[key],
+            value
+          );
+        }
+      }
+    }
+
+    // Merge settings (local wins when both define same key)
+    if (remoteData.settings) {
+      if (!localData.settings) localData.settings = {};
+      for (const [key, value] of Object.entries(remoteData.settings)) {
+        if (!(key in localData.settings)) {
+          localData.settings[key] = value;
         }
       }
     }
@@ -233,6 +356,14 @@ export async function sync(syncCode: string): Promise<SyncResponse> {
                 : (local.lastStudyDate as string) ||
                   (remote.lastStudyDate as string),
           };
+        } else if (
+          key === 'daily-brief-last-shown' &&
+          key in localData.activity
+        ) {
+          const localDate = String(localData.activity[key] || '');
+          const remoteDate = String(value || '');
+          localData.activity[key] =
+            localDate >= remoteDate ? localDate : remoteDate;
         } else if (!(key in localData.activity)) {
           localData.activity[key] = value;
         }

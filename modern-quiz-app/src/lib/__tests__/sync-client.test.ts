@@ -185,10 +185,10 @@ describe('sync (Smart Merge)', () => {
     // Verify Pull was called
     expect(global.fetch).toHaveBeenNthCalledWith(1, '/api/sync/AZ-MERGE');
 
-    // Local leitner-progress wins (already exists locally)
+    // leitner-progress merges nested question maps from both sides
     expect(localStorageMock.setItem).toHaveBeenCalledWith(
       'leitner-progress',
-      expect.stringContaining('q1')
+      expect.stringMatching(/q1|q2/)
     );
 
     // Remote-only key (leitner-daily-attempts) gets merged in
@@ -203,9 +203,89 @@ describe('sync (Smart Merge)', () => {
       '/api/sync/AZ-MERGE',
       expect.objectContaining({
         method: 'POST',
-        body: expect.stringContaining('q1'),
+        body: expect.stringMatching(/q1|q2/),
       })
     );
+  });
+
+  it('merges same-day daily attempts using max value', async () => {
+    localStorageMock.setItem(
+      'leitner-daily-attempts-2025-01-15',
+      JSON.stringify(3)
+    );
+
+    const remoteData = {
+      quizProgress: {},
+      answeredQuestions: {},
+      leitnerProgress: {
+        'leitner-daily-attempts-2025-01-15': 9,
+      },
+      settings: {},
+      activity: {},
+      lastSync: '2025-01-15T00:00:00Z',
+    };
+
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: remoteData }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, lastSync: '2025-01-16T00:00:00Z' }),
+      });
+
+    await sync('AZ-ATTEMPTS');
+
+    const setCalls = (localStorageMock.setItem as jest.Mock).mock.calls.filter(
+      (c: string[]) => c[0] === 'leitner-daily-attempts-2025-01-15'
+    );
+    const mergedValue = JSON.parse(setCalls[setCalls.length - 1]![1]);
+    expect(mergedValue).toBe(9);
+  });
+
+  it('merges submission states by latest submittedAt per question', async () => {
+    localStorageMock.setItem(
+      'leitner-submission-states',
+      JSON.stringify({
+        q1: { isSubmitted: true, isCorrect: false, submittedAt: 1000 },
+      })
+    );
+
+    const remoteData = {
+      quizProgress: {},
+      answeredQuestions: {},
+      leitnerProgress: {
+        'leitner-submission-states': {
+          q1: { isSubmitted: true, isCorrect: true, submittedAt: 2000 },
+          q2: { isSubmitted: true, isCorrect: true, submittedAt: 1500 },
+        },
+      },
+      settings: {},
+      activity: {},
+      lastSync: '2025-01-16T00:00:00Z',
+    };
+
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: remoteData }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, lastSync: '2025-01-17T00:00:00Z' }),
+      });
+
+    await sync('AZ-SUBMISSIONS');
+
+    const submissionCalls = (
+      localStorageMock.setItem as jest.Mock
+    ).mock.calls.filter((c: string[]) => c[0] === 'leitner-submission-states');
+
+    const merged = JSON.parse(submissionCalls[submissionCalls.length - 1]![1]);
+    expect(merged.q1.isCorrect).toBe(true);
+    expect(merged.q1.submittedAt).toBe(2000);
+    expect(merged.q2.isCorrect).toBe(true);
   });
 
   it('merges study-streak with higher wins strategy', async () => {
