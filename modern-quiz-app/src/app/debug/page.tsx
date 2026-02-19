@@ -4,6 +4,7 @@ import { leitnerSystem } from '@/lib/leitner';
 import { useQuizData } from '@/hooks/use-quiz-data';
 import { questionService } from '@/lib/question-service';
 import { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
 import {
   Trash2,
   RefreshCw,
@@ -17,6 +18,9 @@ import {
   Cloud,
   Copy,
   Download,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react';
 import Link from 'next/link';
 import { generateSyncCode, isValidSyncCode } from '@/lib/generate-sync-code';
@@ -45,6 +49,7 @@ interface QuestionStats {
 }
 
 export default function DebugPage() {
+  const { theme, setTheme } = useTheme();
   const { questions, loading } = useQuizData();
   const [storageStats, setStorageStats] = useState<StorageStats | null>(null);
   const [questionStats, setQuestionStats] = useState<QuestionStats | null>(
@@ -298,6 +303,40 @@ export default function DebugPage() {
             </div>
           </section>
         )}
+
+        {/* Appearance */}
+        <section>
+          <h2 className='mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+            Appearance
+          </h2>
+          <div className='overflow-hidden rounded-xl border border-border bg-card'>
+            <div className='px-4 py-3'>
+              <p className='mb-3 text-sm text-muted-foreground'>Theme</p>
+              <div className='grid grid-cols-3 gap-2'>
+                {(
+                  [
+                    { value: 'light', label: 'Light', icon: Sun },
+                    { value: 'dark', label: 'Dark', icon: Moon },
+                    { value: 'system', label: 'System', icon: Monitor },
+                  ] as const
+                ).map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    onClick={() => setTheme(value)}
+                    className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-colors ${
+                      theme === value
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border bg-background/50 text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    <Icon className='h-4 w-4' />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Cloud Sync */}
         <section>

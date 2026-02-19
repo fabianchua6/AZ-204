@@ -1,8 +1,7 @@
 'use client';
 
-import { useTheme } from 'next-themes';
 import { usePathname } from 'next/navigation';
-import { Moon, Sun, BarChart3, Brain, Settings } from 'lucide-react';
+import { BarChart3, Brain, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -11,16 +10,7 @@ interface HeaderProps {
 }
 
 export function Header({ isVisible = true }: HeaderProps) {
-  const { theme, setTheme } = useTheme();
   const pathname = usePathname();
-
-  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
-  const getThemeIcon = () =>
-    theme === 'light' ? (
-      <Moon className='h-4 w-4' />
-    ) : (
-      <Sun className='h-4 w-4' />
-    );
 
   const isOnDashboard = pathname?.startsWith('/dashboard') ?? false;
   const isOnDebug = pathname?.startsWith('/debug') ?? false;
@@ -30,8 +20,9 @@ export function Header({ isVisible = true }: HeaderProps) {
 
   return (
     <header
-      className={`sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-sm transition-transform duration-300 ease-out ${isVisible ? 'translate-y-0' : '-translate-y-full'
-        }`}
+      className={`sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-sm transition-transform duration-300 ease-out ${
+        isVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}
     >
       <div className='container mx-auto px-4 py-2'>
         <div className='flex items-center justify-between'>
@@ -39,9 +30,7 @@ export function Header({ isVisible = true }: HeaderProps) {
             href='/'
             className='flex items-center transition-opacity hover:opacity-80'
           >
-            <h1 className='text-lg font-bold text-foreground'>
-              AZ-204
-            </h1>
+            <h1 className='text-lg font-bold text-foreground'>AZ-204</h1>
           </Link>
 
           <div className='flex items-center gap-1.5'>
@@ -65,23 +54,14 @@ export function Header({ isVisible = true }: HeaderProps) {
               variant='ghost'
               size='sm'
               asChild
-              className={`relative h-9 w-9 border border-border bg-background/50 p-0 transition-colors hover:bg-accent ${isOnDebug ? 'bg-accent' : ''
-                }`}
+              className={`relative h-9 w-9 border border-border bg-background/50 p-0 transition-colors hover:bg-accent ${
+                isOnDebug ? 'bg-accent' : ''
+              }`}
             >
               <Link href='/debug'>
                 <Settings className='h-4 w-4' />
                 <span className='sr-only'>Debug & Settings</span>
               </Link>
-            </Button>
-
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={toggleTheme}
-              className='relative h-9 w-9 border border-border bg-background/50 p-0 transition-colors hover:bg-accent'
-            >
-              {getThemeIcon()}
-              <span className='sr-only'>Toggle theme</span>
             </Button>
           </div>
         </div>
