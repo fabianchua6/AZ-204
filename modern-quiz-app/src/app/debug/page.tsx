@@ -603,15 +603,39 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.10.3 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.10.3</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 19, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Fixed streak display on the main quiz card by deriving
+                  streak from daily activity history first
+                </li>
+                <li>
+                  ✦ Added fallback to legacy progress-based streak logic when
+                  daily history is unavailable
+                </li>
+                <li>
+                  ✦ Added dedicated Leitner streak regression tests for
+                  yesterday-start streaks and gap handling
+                </li>
+              </ul>
+            </div>
+
             {/* v1.10.2 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.10.2</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 19, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>
