@@ -11,7 +11,6 @@ import {
   CheckCircle,
   XCircle,
   ChevronLeft,
-  HardDrive,
   RotateCcw,
   AlertTriangle,
   Sparkles,
@@ -66,6 +65,8 @@ export default function DebugPage() {
   const [syncInput, setSyncInput] = useState<string>('');
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState('');
 
   useEffect(() => {
     document.title = 'Settings - AZ-204 Quiz';
@@ -146,6 +147,9 @@ export default function DebugPage() {
     setTimeout(() => setMessage(null), 3000);
   };
 
+  // Keys to always preserve across any action
+  const preserveKeys = ['theme', 'quiz_sync_code', 'quiz_last_sync'];
+
   const handleRefreshSession = () => {
     try {
       localStorage.removeItem('leitner-current-session');
@@ -153,21 +157,27 @@ export default function DebugPage() {
       localStorage.removeItem('quiz-leitner-state');
       localStorage.removeItem('leitner-submission-states');
       localStorage.removeItem('leitner-quiz-index');
-      showMessage('success', 'Session cleared! Refresh for new questions.');
+      showMessage('success', 'Session refreshed! Reloading…');
       loadStats();
+      setTimeout(() => window.location.reload(), 500);
     } catch {
-      showMessage('error', 'Failed to clear session');
+      showMessage('error', 'Failed to refresh session');
     }
   };
 
   const handleClearCacheKeepProgress = () => {
     try {
       const progressData = localStorage.getItem('leitner-progress');
-      const keysToRemove: string[] = [];
+      const preserved: Record<string, string> = {};
+      preserveKeys.forEach(k => {
+        const v = localStorage.getItem(k);
+        if (v) preserved[k] = v;
+      });
 
+      const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key !== 'leitner-progress' && !key.includes('theme')) {
+        if (key && key !== 'leitner-progress' && !preserveKeys.includes(key)) {
           keysToRemove.push(key);
         }
       }
@@ -177,8 +187,9 @@ export default function DebugPage() {
       if (progressData) {
         localStorage.setItem('leitner-progress', progressData);
       }
+      Object.entries(preserved).forEach(([k, v]) => localStorage.setItem(k, v));
 
-      showMessage('success', 'Cache cleared, progress saved.');
+      showMessage('success', 'Cache cleared, progress & sync code saved.');
       loadStats();
     } catch {
       showMessage('error', 'Failed to clear cache');
@@ -186,23 +197,26 @@ export default function DebugPage() {
   };
 
   const handleClearAll = () => {
-    if (confirm('DELETE all progress? This cannot be undone.')) {
-      try {
-        const theme = localStorage.getItem('theme');
-        localStorage.clear();
-        if (theme) localStorage.setItem('theme', theme);
-        showMessage('success', 'All data cleared.');
-        loadStats();
-        loadQuestionStats();
-      } catch {
-        showMessage('error', 'Failed to clear data');
-      }
-    }
-  };
+    if (resetConfirmText.toLowerCase() !== 'confirm') return;
+    try {
+      const preserved: Record<string, string> = {};
+      preserveKeys.forEach(k => {
+        const v = localStorage.getItem(k);
+        if (v) preserved[k] = v;
+      });
 
-  const handleForceReload = () => {
-    handleRefreshSession();
-    window.location.reload();
+      localStorage.clear();
+
+      Object.entries(preserved).forEach(([k, v]) => localStorage.setItem(k, v));
+
+      setResetConfirmOpen(false);
+      setResetConfirmText('');
+      showMessage('success', 'All progress cleared. Sync code preserved.');
+      loadStats();
+      loadQuestionStats();
+    } catch {
+      showMessage('error', 'Failed to clear data');
+    }
   };
 
   return (
@@ -224,18 +238,18 @@ export default function DebugPage() {
         {/* Toast Message */}
         {message && (
           <div
-            className={`fixed left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium shadow-lg ${
+            className={`fixed left-4 right-4 top-20 z-50 flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium shadow-lg sm:left-1/2 sm:right-auto sm:w-max sm:min-w-72 sm:max-w-sm sm:-translate-x-1/2 sm:px-5 sm:py-3.5 ${
               message.type === 'success'
                 ? 'bg-green-500 text-white'
                 : 'bg-red-500 text-white'
             }`}
           >
             {message.type === 'success' ? (
-              <CheckCircle className='h-4 w-4' />
+              <CheckCircle className='h-5 w-5 shrink-0' />
             ) : (
-              <XCircle className='h-4 w-4' />
+              <XCircle className='h-5 w-5 shrink-0' />
             )}
-            {message.text}
+            <span>{message.text}</span>
           </div>
         )}
 
@@ -483,13 +497,13 @@ export default function DebugPage() {
               <div className='flex-1'>
                 <div className='font-medium'>Refresh Session</div>
                 <div className='text-sm text-muted-foreground'>
-                  New question order, keeps progress
+                  New question order, keeps progress & reloads page
                 </div>
               </div>
               <Sparkles className='h-4 w-4 text-primary' />
             </button>
 
-            {/* Secondary Actions */}
+            {/* Secondary Action */}
             <button
               onClick={handleClearCacheKeepProgress}
               className='flex w-full items-center gap-3 rounded-xl border border-border/50 p-4 text-left transition-colors hover:bg-muted/50'
@@ -500,29 +514,14 @@ export default function DebugPage() {
               <div className='flex-1'>
                 <div className='font-medium'>Clear Cache</div>
                 <div className='text-sm text-muted-foreground'>
-                  Keeps learning progress
-                </div>
-              </div>
-            </button>
-
-            <button
-              onClick={handleForceReload}
-              className='flex w-full items-center gap-3 rounded-xl border border-border/50 p-4 text-left transition-colors hover:bg-muted/50'
-            >
-              <div className='rounded-lg bg-muted p-2'>
-                <HardDrive className='h-5 w-5 text-muted-foreground' />
-              </div>
-              <div className='flex-1'>
-                <div className='font-medium'>Force Reload</div>
-                <div className='text-sm text-muted-foreground'>
-                  Clear cache & refresh page
+                  Removes temporary data, keeps learning progress & sync code
                 </div>
               </div>
             </button>
 
             {/* Danger Zone */}
             <button
-              onClick={handleClearAll}
+              onClick={() => setResetConfirmOpen(true)}
               className='mt-4 flex w-full items-center gap-3 rounded-xl border border-destructive/30 p-4 text-left transition-colors hover:bg-destructive/10'
             >
               <div className='rounded-lg bg-destructive/20 p-2'>
@@ -533,13 +532,72 @@ export default function DebugPage() {
                   Reset Everything
                 </div>
                 <div className='text-sm text-muted-foreground'>
-                  Delete all data permanently
+                  Deletes all progress permanently (sync code is preserved)
                 </div>
               </div>
               <AlertTriangle className='h-4 w-4 text-destructive' />
             </button>
           </div>
         </section>
+
+        {/* Reset Confirmation Dialog */}
+        {resetConfirmOpen && (
+          <div className='fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm'>
+            <div className='w-full max-w-sm space-y-4 rounded-2xl border border-border bg-background p-6 shadow-xl'>
+              <div className='flex items-center gap-3'>
+                <div className='rounded-lg bg-destructive/20 p-2'>
+                  <AlertTriangle className='h-5 w-5 text-destructive' />
+                </div>
+                <h3 className='text-lg font-semibold'>Reset Everything</h3>
+              </div>
+              <p className='text-sm text-muted-foreground'>
+                This will permanently delete all your learning progress, quiz
+                history, and session data. Your sync code will be preserved.
+              </p>
+              <p className='text-sm font-medium'>
+                Type{' '}
+                <span className='rounded bg-destructive/10 px-1.5 py-0.5 font-mono text-destructive'>
+                  confirm
+                </span>{' '}
+                to proceed:
+              </p>
+              <input
+                type='text'
+                value={resetConfirmText}
+                onChange={e => setResetConfirmText(e.target.value)}
+                placeholder='Type confirm here'
+                className='w-full rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm outline-none focus:border-destructive/50 focus:ring-1 focus:ring-destructive/30'
+                autoFocus
+                onKeyDown={e => {
+                  if (
+                    e.key === 'Enter' &&
+                    resetConfirmText.toLowerCase() === 'confirm'
+                  ) {
+                    handleClearAll();
+                  }
+                }}
+              />
+              <div className='flex gap-2'>
+                <button
+                  onClick={() => {
+                    setResetConfirmOpen(false);
+                    setResetConfirmText('');
+                  }}
+                  className='flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted'
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleClearAll}
+                  disabled={resetConfirmText.toLowerCase() !== 'confirm'}
+                  className='flex-1 rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-40'
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Changelog */}
         <section>
