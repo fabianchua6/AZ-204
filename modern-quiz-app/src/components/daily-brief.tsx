@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type TouchEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Clock, BookOpen } from 'lucide-react';
 import { leitnerSystem } from '@/lib/leitner';
@@ -29,6 +29,12 @@ interface DailyBriefProps {
 export function DailyBrief({ questions }: DailyBriefProps) {
   const [open, setOpen] = useState(false);
   const [stats, setStats] = useState<LeitnerStats | null>(null);
+  const [dragOffsetY, setDragOffsetY] = useState(0);
+  const [isHandleDragging, setIsHandleDragging] = useState(false);
+  const handleTouchStartY = useRef<number | null>(null);
+  const scrollLockY = useRef(0);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const isSheetDragActiveRef = useRef(false);
 
   useEffect(() => {
     if (questions.length === 0) return;
@@ -50,9 +56,97 @@ export function DailyBrief({ questions }: DailyBriefProps) {
   }, [questions]);
 
   const handleDismiss = () => {
+    setDragOffsetY(0);
+    setIsHandleDragging(false);
+    handleTouchStartY.current = null;
     saveToLocalStorage('daily-brief-last-shown', toLocalDateStr(new Date()));
     setOpen(false);
   };
+
+  const handlePullHandleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    handleTouchStartY.current = event.touches[0]?.clientY ?? null;
+    setIsHandleDragging(false);
+    setDragOffsetY(0);
+  };
+
+  const handlePullHandleTouchMove = (event: TouchEvent<HTMLDivElement>) => {
+    if (handleTouchStartY.current === null) return;
+
+    const currentY = event.touches[0]?.clientY ?? handleTouchStartY.current;
+    const nextOffset = Math.max(0, currentY - handleTouchStartY.current);
+    const canStartSheetDragDown =
+      (scrollContainerRef.current?.scrollTop ?? 0) <= 0 && nextOffset > 0;
+
+    if (!isSheetDragActiveRef.current && !canStartSheetDragDown) return;
+
+    isSheetDragActiveRef.current = true;
+    event.preventDefault();
+    setIsHandleDragging(true);
+    setDragOffsetY(Math.min(nextOffset, 220));
+  };
+
+  const handlePullHandleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    if (handleTouchStartY.current === null) return;
+
+    const touchEndY =
+      event.changedTouches[0]?.clientY ?? handleTouchStartY.current;
+    if (!isSheetDragActiveRef.current) {
+      handleTouchStartY.current = null;
+      setIsHandleDragging(false);
+      setDragOffsetY(0);
+      return;
+    }
+
+    const swipeDistance = Math.max(
+      dragOffsetY,
+      touchEndY - handleTouchStartY.current
+    );
+    handleTouchStartY.current = null;
+    isSheetDragActiveRef.current = false;
+    setIsHandleDragging(false);
+
+    if (swipeDistance > 60) {
+      handleDismiss();
+      return;
+    }
+
+    setDragOffsetY(0);
+  };
+
+  const handlePullHandleTouchCancel = () => {
+    handleTouchStartY.current = null;
+    isSheetDragActiveRef.current = false;
+    setIsHandleDragging(false);
+    setDragOffsetY(0);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+
+    scrollLockY.current = window.scrollY;
+    const { style } = document.body;
+    const originalOverflow = style.overflow;
+    const originalPosition = style.position;
+    const originalTop = style.top;
+    const originalWidth = style.width;
+
+    style.overflow = 'hidden';
+    style.position = 'fixed';
+    style.top = `-${scrollLockY.current}px`;
+    style.width = '100%';
+
+    return () => {
+      style.overflow = originalOverflow;
+      style.position = originalPosition;
+      style.top = originalTop;
+      style.width = originalWidth;
+      try {
+        window.scrollTo(0, scrollLockY.current);
+      } catch {
+        // no-op for test environments that do not implement scrollTo
+      }
+    };
+  }, [open]);
 
   if (!stats) return null;
 
@@ -77,7 +171,20 @@ export function DailyBrief({ questions }: DailyBriefProps) {
           />
 
           {/* Bottom sheet — static positioner keeps centering; motion div animates slide */}
-          <div className='fixed inset-x-0 bottom-0 z-[61] flex justify-center sm:bottom-10 sm:px-4'>
+          <div
+            data-testid='daily-brief-sheet-wrapper'
+            className='fixed inset-x-0 bottom-0 z-[61] flex justify-center sm:bottom-10 sm:px-4'
+            onTouchStart={handlePullHandleTouchStart}
+            onTouchMove={handlePullHandleTouchMove}
+            onTouchEnd={handlePullHandleTouchEnd}
+            onTouchCancel={handlePullHandleTouchCancel}
+            style={{
+              transform: `translateY(${dragOffsetY}px)`,
+              transition: isHandleDragging
+                ? 'none'
+                : 'transform 200ms ease-out',
+            }}
+          >
             <motion.div
               key='sheet'
               initial={{ y: '100%' }}
@@ -88,16 +195,27 @@ export function DailyBrief({ questions }: DailyBriefProps) {
             >
               {/* Drag handle */}
               <div
-                className='flex shrink-0 cursor-pointer justify-center pb-2 pt-3'
+                className='flex shrink-0 cursor-pointer select-none justify-center pb-2 pt-3 [touch-action:none]'
                 onClick={handleDismiss}
                 role='button'
                 aria-label='Close daily brief'
+                tabIndex={0}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    handleDismiss();
+                  }
+                }}
               >
                 <div className='h-1 w-10 rounded-full bg-muted-foreground/25' />
               </div>
 
               {/* Scrollable content */}
-              <div className='min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-10'>
+              <div
+                data-testid='daily-brief-scroll-container'
+                className='show-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-10 [touch-action:pan-y]'
+                style={{ WebkitOverflowScrolling: 'touch' }}
+                ref={scrollContainerRef}
+              >
                 {/* Greeting */}
                 <div className='mb-5 flex items-start justify-between'>
                   <div>

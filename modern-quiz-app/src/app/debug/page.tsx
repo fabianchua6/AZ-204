@@ -603,15 +603,95 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.10.8 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.10.8</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 20, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Added swipe-down dismissal support from anywhere inside the
+                  Daily Brief sheet, not only the pull handle
+                </li>
+                <li>
+                  ✦ Preserved in-sheet scroll behavior by only starting sheet
+                  drag when content is already at the top
+                </li>
+              </ul>
+            </div>
+
+            {/* v1.10.7 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.10.7</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 20, 2026
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Added real-time pull-handle drag feedback so the Daily Brief
+                  sheet now visibly follows finger movement on iPhone
+                </li>
+                <li>
+                  ✦ Tuned swipe-down dismissal to work with live drag distance
+                  for a more native sheet interaction
+                </li>
+              </ul>
+            </div>
+
+            {/* v1.10.6 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.10.6</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 20, 2026
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Fixed Daily Brief so background content no longer scrolls
+                  while the sheet is open on iPhone
+                </li>
+                <li>
+                  ✦ Added swipe-down dismissal from the Daily Brief pull handle
+                  for more natural mobile sheet behavior
+                </li>
+              </ul>
+            </div>
+
+            {/* v1.10.5 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.10.5</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 20, 2026
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Fixed Daily Brief sheet scrolling on iPhone by enabling
+                  touch momentum scrolling in the sheet content area
+                </li>
+                <li>
+                  ✦ Improved touch gesture handling for vertical pan inside the
+                  Daily Brief bottom sheet to prevent stuck scroll
+                </li>
+              </ul>
+            </div>
+
             {/* v1.10.4 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.10.4</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 19, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>
