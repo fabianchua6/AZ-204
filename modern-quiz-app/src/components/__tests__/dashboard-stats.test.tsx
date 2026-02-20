@@ -112,10 +112,12 @@ describe('DashboardStats', () => {
     expect(screen.getByText('Current Streak')).toBeTruthy();
     expect(screen.getByText('Best Streak')).toBeTruthy();
 
-    expect(saveToLocalStorage).toHaveBeenCalledWith('study-streak', {
-      currentStreak: 4,
-      lastStudyDate: '2026-02-19',
-      bestStreak: 10,
+    await waitFor(() => {
+      expect(saveToLocalStorage).toHaveBeenCalledWith('study-streak', {
+        currentStreak: 4,
+        lastStudyDate: '2026-02-19',
+        bestStreak: 10,
+      });
     });
   });
 
