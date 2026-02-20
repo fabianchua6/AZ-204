@@ -60,6 +60,10 @@ describe('DailyBrief', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    Object.defineProperty(window, 'scrollTo', {
+      value: jest.fn(),
+      writable: true,
+    });
     (questionService.filterQuestions as jest.Mock).mockReturnValue(
       filteredQuestions
     );
@@ -113,6 +117,26 @@ describe('DailyBrief', () => {
     });
 
     fireEvent.click(closeButton);
+
+    expect(saveToLocalStorage).toHaveBeenCalledWith(
+      'daily-brief-last-shown',
+      '2026-02-19'
+    );
+  });
+
+  it('supports swipe-down dismissal from pull handle', async () => {
+    render(<DailyBrief questions={mockQuestions} />);
+
+    const closeButton = await screen.findByRole('button', {
+      name: 'Close daily brief',
+    });
+
+    fireEvent.touchStart(closeButton, {
+      touches: [{ clientY: 10 }],
+    });
+    fireEvent.touchEnd(closeButton, {
+      changedTouches: [{ clientY: 80 }],
+    });
 
     expect(saveToLocalStorage).toHaveBeenCalledWith(
       'daily-brief-last-shown',

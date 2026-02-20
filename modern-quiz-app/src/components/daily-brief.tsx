@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type TouchEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Clock, BookOpen } from 'lucide-react';
 import { leitnerSystem } from '@/lib/leitner';
@@ -29,6 +29,8 @@ interface DailyBriefProps {
 export function DailyBrief({ questions }: DailyBriefProps) {
   const [open, setOpen] = useState(false);
   const [stats, setStats] = useState<LeitnerStats | null>(null);
+  const handleTouchStartY = useRef<number | null>(null);
+  const scrollLockY = useRef(0);
 
   useEffect(() => {
     if (questions.length === 0) return;
@@ -53,6 +55,51 @@ export function DailyBrief({ questions }: DailyBriefProps) {
     saveToLocalStorage('daily-brief-last-shown', toLocalDateStr(new Date()));
     setOpen(false);
   };
+
+  const handlePullHandleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    handleTouchStartY.current = event.touches[0]?.clientY ?? null;
+  };
+
+  const handlePullHandleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    if (handleTouchStartY.current === null) return;
+
+    const touchEndY =
+      event.changedTouches[0]?.clientY ?? handleTouchStartY.current;
+    const swipeDistance = touchEndY - handleTouchStartY.current;
+    handleTouchStartY.current = null;
+
+    if (swipeDistance > 40) {
+      handleDismiss();
+    }
+  };
+
+  useEffect(() => {
+    if (!open) return;
+
+    scrollLockY.current = window.scrollY;
+    const { style } = document.body;
+    const originalOverflow = style.overflow;
+    const originalPosition = style.position;
+    const originalTop = style.top;
+    const originalWidth = style.width;
+
+    style.overflow = 'hidden';
+    style.position = 'fixed';
+    style.top = `-${scrollLockY.current}px`;
+    style.width = '100%';
+
+    return () => {
+      style.overflow = originalOverflow;
+      style.position = originalPosition;
+      style.top = originalTop;
+      style.width = originalWidth;
+      try {
+        window.scrollTo(0, scrollLockY.current);
+      } catch {
+        // no-op for test environments that do not implement scrollTo
+      }
+    };
+  }, [open]);
 
   if (!stats) return null;
 
@@ -90,8 +137,16 @@ export function DailyBrief({ questions }: DailyBriefProps) {
               <div
                 className='flex shrink-0 cursor-pointer justify-center pb-2 pt-3'
                 onClick={handleDismiss}
+                onTouchStart={handlePullHandleTouchStart}
+                onTouchEnd={handlePullHandleTouchEnd}
                 role='button'
                 aria-label='Close daily brief'
+                tabIndex={0}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    handleDismiss();
+                  }
+                }}
               >
                 <div className='h-1 w-10 rounded-full bg-muted-foreground/25' />
               </div>
