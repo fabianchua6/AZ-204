@@ -124,22 +124,23 @@ describe('DailyBrief', () => {
     );
   });
 
-  it('supports swipe-down dismissal from pull handle', async () => {
+  it('supports swipe-down dismissal from anywhere in sheet content', async () => {
     render(<DailyBrief questions={mockQuestions} />);
 
-    const closeButton = await screen.findByRole('button', {
+    await screen.findByRole('button', {
       name: 'Close daily brief',
     });
+    const scrollContainer = screen.getByTestId('daily-brief-scroll-container');
     const sheetWrapper = screen.getByTestId('daily-brief-sheet-wrapper');
 
-    fireEvent.touchStart(closeButton, {
+    fireEvent.touchStart(scrollContainer, {
       touches: [{ clientY: 10 }],
     });
-    fireEvent.touchMove(closeButton, {
+    fireEvent.touchMove(scrollContainer, {
       touches: [{ clientY: 50 }],
     });
     expect(sheetWrapper.style.transform).toContain('translateY(40px)');
-    fireEvent.touchEnd(closeButton, {
+    fireEvent.touchEnd(scrollContainer, {
       changedTouches: [{ clientY: 80 }],
     });
 
@@ -147,5 +148,58 @@ describe('DailyBrief', () => {
       'daily-brief-last-shown',
       '2026-02-19'
     );
+  });
+
+  it('supports swipe-down dismissal from the sheet wrapper', async () => {
+    render(<DailyBrief questions={mockQuestions} />);
+
+    await screen.findByRole('button', {
+      name: 'Close daily brief',
+    });
+    const sheetWrapper = screen.getByTestId('daily-brief-sheet-wrapper');
+
+    fireEvent.touchStart(sheetWrapper, {
+      touches: [{ clientY: 20 }],
+    });
+    fireEvent.touchMove(sheetWrapper, {
+      touches: [{ clientY: 75 }],
+    });
+    expect(sheetWrapper.style.transform).toContain('translateY(55px)');
+    fireEvent.touchEnd(sheetWrapper, {
+      changedTouches: [{ clientY: 95 }],
+    });
+
+    expect(saveToLocalStorage).toHaveBeenCalledWith(
+      'daily-brief-last-shown',
+      '2026-02-19'
+    );
+  });
+
+  it('does not start sheet drag when content is scrolled', async () => {
+    render(<DailyBrief questions={mockQuestions} />);
+
+    await screen.findByRole('button', {
+      name: 'Close daily brief',
+    });
+    const scrollContainer = screen.getByTestId('daily-brief-scroll-container');
+    const sheetWrapper = screen.getByTestId('daily-brief-sheet-wrapper');
+
+    Object.defineProperty(scrollContainer, 'scrollTop', {
+      value: 20,
+      writable: true,
+    });
+
+    fireEvent.touchStart(scrollContainer, {
+      touches: [{ clientY: 20 }],
+    });
+    fireEvent.touchMove(scrollContainer, {
+      touches: [{ clientY: 90 }],
+    });
+    expect(sheetWrapper.style.transform).toContain('translateY(0px)');
+    fireEvent.touchEnd(scrollContainer, {
+      changedTouches: [{ clientY: 110 }],
+    });
+
+    expect(saveToLocalStorage).not.toHaveBeenCalled();
   });
 });
