@@ -97,7 +97,11 @@ export function DailyBrief({ questions }: DailyBriefProps) {
               </div>
 
               {/* Scrollable content */}
-              <div className='min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-10'>
+              <div
+                data-testid='daily-brief-scroll-container'
+                className='show-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-10 [touch-action:pan-y]'
+                style={{ WebkitOverflowScrolling: 'touch' }}
+              >
                 {/* Greeting */}
                 <div className='mb-5 flex items-start justify-between'>
                   <div>
