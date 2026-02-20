@@ -100,12 +100,9 @@ describe('DailyBrief', () => {
     expect(screen.getByText('Due Today')).toBeTruthy();
     expect(screen.getByText('Started')).toBeTruthy();
     expect(screen.getByTestId('activity-heatmap')).toBeTruthy();
-    expect(screen.getByTestId('daily-brief-scroll-container')).toHaveClass(
-      'show-scrollbar'
-    );
-    expect(screen.getByTestId('daily-brief-scroll-container')).toHaveClass(
-      '[touch-action:pan-y]'
-    );
+    const scrollContainer = screen.getByTestId('daily-brief-scroll-container');
+    expect(scrollContainer.className).toContain('show-scrollbar');
+    expect(scrollContainer.className).toContain('[touch-action:pan-y]');
   });
 
   it('persists daily-brief-last-shown when dismissed from drag handle', async () => {
