@@ -78,6 +78,13 @@ export class LeitnerSystem {
     }
   }
 
+  // Reload progress from localStorage (e.g. after a cross-device sync writes new data)
+  async reloadFromStorage(): Promise<void> {
+    this.initialized = false;
+    this.initializationPromise = null;
+    await this.initializeAsync();
+  }
+
   // Enhanced localStorage operations with validation
   private async loadFromStorage(): Promise<void> {
     try {

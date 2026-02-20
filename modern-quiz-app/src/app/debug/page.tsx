@@ -603,15 +603,41 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.10.9 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.10.9</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 20, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Fixed already-answered questions reappearing after syncing
+                  progress from another device
+                </li>
+                <li>
+                  ✦ Session state (current session, submission states, quiz
+                  index) is now treated as device-local and is never overwritten
+                  by a remote sync
+                </li>
+                <li>
+                  ✦ Leitner progress is now reloaded from storage immediately
+                  after a successful sync so due-question calculations are
+                  always up to date
+                </li>
+              </ul>
+            </div>
+
             {/* v1.10.8 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.10.8</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 20, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>

@@ -244,7 +244,7 @@ describe('sync (Smart Merge)', () => {
     expect(mergedValue).toBe(9);
   });
 
-  it('merges submission states by latest submittedAt per question', async () => {
+  it('does NOT apply remote submission states — they are device-local session state', async () => {
     localStorageMock.setItem(
       'leitner-submission-states',
       JSON.stringify({
@@ -266,6 +266,9 @@ describe('sync (Smart Merge)', () => {
       lastSync: '2025-01-16T00:00:00Z',
     };
 
+    // Reset mock call history so seed calls don't pollute the assertion
+    (localStorageMock.setItem as jest.Mock).mockClear();
+
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
@@ -278,14 +281,13 @@ describe('sync (Smart Merge)', () => {
 
     await sync('AZ-SUBMISSIONS');
 
+    // submission states should NOT be written from remote — the local value stays intact
     const submissionCalls = (
       localStorageMock.setItem as jest.Mock
     ).mock.calls.filter((c: string[]) => c[0] === 'leitner-submission-states');
 
-    const merged = JSON.parse(submissionCalls[submissionCalls.length - 1]![1]);
-    expect(merged.q1.isCorrect).toBe(true);
-    expect(merged.q1.submittedAt).toBe(2000);
-    expect(merged.q2.isCorrect).toBe(true);
+    // applyData skips this key, so no setItem call should have occurred for it
+    expect(submissionCalls).toHaveLength(0);
   });
 
   it('merges study-streak with higher wins strategy', async () => {
@@ -449,5 +451,138 @@ describe('sync (Smart Merge)', () => {
     expect(merged.currentStreak).toBe(6);
     expect(merged.bestStreak).toBe(8);
     expect(merged.lastStudyDate).toBe('2025-01-18');
+  });
+});
+
+describe('Session key exclusion (cross-device answered-question bug)', () => {
+  const SESSION_KEYS = [
+    'leitner-current-session',
+    'leitner-submission-states',
+    'leitner-quiz-index',
+  ];
+
+  it('pullData never writes session-local keys from remote data', async () => {
+    const remoteData = {
+      quizProgress: {},
+      answeredQuestions: {},
+      leitnerProgress: {
+        'leitner-progress': { q1: { currentBox: 2 } },
+        'leitner-current-session': {
+          questionIds: ['q1', 'q2'],
+          createdAt: Date.now(),
+        },
+        'leitner-submission-states': {
+          q1: { isSubmitted: true, isCorrect: true, submittedAt: 1000 },
+        },
+        'leitner-quiz-index': 3,
+      },
+      settings: {},
+      activity: {},
+    };
+
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true, data: remoteData }),
+    });
+
+    await pullData('AZ-PULL-SESSION');
+
+    const setCalls = (localStorageMock.setItem as jest.Mock).mock.calls;
+    for (const key of SESSION_KEYS) {
+      const wrote = setCalls.some((c: string[]) => c[0] === key);
+      expect(wrote).toBe(false);
+    }
+    // leitner-progress (non-session key) IS still applied
+    expect(setCalls.some((c: string[]) => c[0] === 'leitner-progress')).toBe(
+      true
+    );
+  });
+
+  it('sync never applies remote session-local keys to localStorage', async () => {
+    localStorageMock.setItem(
+      'leitner-progress',
+      JSON.stringify({ q1: { currentBox: 1 } })
+    );
+
+    const remoteData = {
+      quizProgress: {},
+      answeredQuestions: {},
+      leitnerProgress: {
+        'leitner-progress': { q1: { currentBox: 2 } },
+        'leitner-current-session': {
+          questionIds: ['q1', 'q2'],
+          createdAt: Date.now() + 1000,
+        },
+        'leitner-submission-states': {
+          q1: { isSubmitted: true, isCorrect: true, submittedAt: 5000 },
+        },
+        'leitner-quiz-index': 10,
+      },
+      settings: {},
+      activity: {},
+    };
+
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: remoteData }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, lastSync: '2025-06-01T00:00:00Z' }),
+      });
+
+    await sync('AZ-SYNC-SESSION');
+
+    const setCalls = (localStorageMock.setItem as jest.Mock).mock.calls;
+    for (const key of SESSION_KEYS) {
+      const wrote = setCalls.some((c: string[]) => c[0] === key);
+      expect(wrote).toBe(false);
+    }
+  });
+
+  it('sync preserves local session even when remote session is newer', async () => {
+    const localSession = {
+      questionIds: ['qa', 'qb', 'qc'],
+      createdAt: 1000,
+    };
+    localStorageMock.setItem(
+      'leitner-current-session',
+      JSON.stringify(localSession)
+    );
+
+    const remoteData = {
+      quizProgress: {},
+      answeredQuestions: {},
+      leitnerProgress: {
+        'leitner-current-session': {
+          questionIds: ['qx', 'qy'],
+          createdAt: 9999999,
+        },
+      },
+      settings: {},
+      activity: {},
+    };
+
+    // Reset mock call history so the seed call doesn't pollute the assertion
+    (localStorageMock.setItem as jest.Mock).mockClear();
+
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: remoteData }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, lastSync: '2025-06-01T00:00:00Z' }),
+      });
+
+    await sync('AZ-LOCAL-SESSION');
+
+    // The local session must NOT be overwritten
+    const sessionCalls = (
+      localStorageMock.setItem as jest.Mock
+    ).mock.calls.filter((c: string[]) => c[0] === 'leitner-current-session');
+    expect(sessionCalls).toHaveLength(0);
   });
 });
