@@ -603,15 +603,35 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.10.7 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.10.7</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 20, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Added real-time pull-handle drag feedback so the Daily Brief
+                  sheet now visibly follows finger movement on iPhone
+                </li>
+                <li>
+                  ✦ Tuned swipe-down dismissal to work with live drag distance
+                  for a more native sheet interaction
+                </li>
+              </ul>
+            </div>
+
             {/* v1.10.6 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.10.6</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 20, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>

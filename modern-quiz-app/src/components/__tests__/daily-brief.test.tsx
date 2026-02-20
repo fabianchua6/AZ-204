@@ -130,10 +130,15 @@ describe('DailyBrief', () => {
     const closeButton = await screen.findByRole('button', {
       name: 'Close daily brief',
     });
+    const sheetWrapper = screen.getByTestId('daily-brief-sheet-wrapper');
 
     fireEvent.touchStart(closeButton, {
       touches: [{ clientY: 10 }],
     });
+    fireEvent.touchMove(closeButton, {
+      touches: [{ clientY: 50 }],
+    });
+    expect(sheetWrapper.style.transform).toContain('translateY(40px)');
     fireEvent.touchEnd(closeButton, {
       changedTouches: [{ clientY: 80 }],
     });

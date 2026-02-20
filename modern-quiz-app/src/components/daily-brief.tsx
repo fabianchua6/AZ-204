@@ -29,6 +29,8 @@ interface DailyBriefProps {
 export function DailyBrief({ questions }: DailyBriefProps) {
   const [open, setOpen] = useState(false);
   const [stats, setStats] = useState<LeitnerStats | null>(null);
+  const [dragOffsetY, setDragOffsetY] = useState(0);
+  const [isHandleDragging, setIsHandleDragging] = useState(false);
   const handleTouchStartY = useRef<number | null>(null);
   const scrollLockY = useRef(0);
 
@@ -52,12 +54,25 @@ export function DailyBrief({ questions }: DailyBriefProps) {
   }, [questions]);
 
   const handleDismiss = () => {
+    setDragOffsetY(0);
+    setIsHandleDragging(false);
+    handleTouchStartY.current = null;
     saveToLocalStorage('daily-brief-last-shown', toLocalDateStr(new Date()));
     setOpen(false);
   };
 
   const handlePullHandleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     handleTouchStartY.current = event.touches[0]?.clientY ?? null;
+    setIsHandleDragging(true);
+    setDragOffsetY(0);
+  };
+
+  const handlePullHandleTouchMove = (event: TouchEvent<HTMLDivElement>) => {
+    if (handleTouchStartY.current === null) return;
+    event.preventDefault();
+    const currentY = event.touches[0]?.clientY ?? handleTouchStartY.current;
+    const nextOffset = Math.max(0, currentY - handleTouchStartY.current);
+    setDragOffsetY(Math.min(nextOffset, 220));
   };
 
   const handlePullHandleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
@@ -65,12 +80,25 @@ export function DailyBrief({ questions }: DailyBriefProps) {
 
     const touchEndY =
       event.changedTouches[0]?.clientY ?? handleTouchStartY.current;
-    const swipeDistance = touchEndY - handleTouchStartY.current;
+    const swipeDistance = Math.max(
+      dragOffsetY,
+      touchEndY - handleTouchStartY.current
+    );
     handleTouchStartY.current = null;
+    setIsHandleDragging(false);
 
-    if (swipeDistance > 40) {
+    if (swipeDistance > 60) {
       handleDismiss();
+      return;
     }
+
+    setDragOffsetY(0);
+  };
+
+  const handlePullHandleTouchCancel = () => {
+    handleTouchStartY.current = null;
+    setIsHandleDragging(false);
+    setDragOffsetY(0);
   };
 
   useEffect(() => {
@@ -124,7 +152,16 @@ export function DailyBrief({ questions }: DailyBriefProps) {
           />
 
           {/* Bottom sheet — static positioner keeps centering; motion div animates slide */}
-          <div className='fixed inset-x-0 bottom-0 z-[61] flex justify-center sm:bottom-10 sm:px-4'>
+          <div
+            data-testid='daily-brief-sheet-wrapper'
+            className='fixed inset-x-0 bottom-0 z-[61] flex justify-center sm:bottom-10 sm:px-4'
+            style={{
+              transform: `translateY(${dragOffsetY}px)`,
+              transition: isHandleDragging
+                ? 'none'
+                : 'transform 200ms ease-out',
+            }}
+          >
             <motion.div
               key='sheet'
               initial={{ y: '100%' }}
@@ -135,10 +172,12 @@ export function DailyBrief({ questions }: DailyBriefProps) {
             >
               {/* Drag handle */}
               <div
-                className='flex shrink-0 cursor-pointer justify-center pb-2 pt-3'
+                className='flex shrink-0 cursor-pointer select-none justify-center pb-2 pt-3 [touch-action:none]'
                 onClick={handleDismiss}
                 onTouchStart={handlePullHandleTouchStart}
+                onTouchMove={handlePullHandleTouchMove}
                 onTouchEnd={handlePullHandleTouchEnd}
+                onTouchCancel={handlePullHandleTouchCancel}
                 role='button'
                 aria-label='Close daily brief'
                 tabIndex={0}
