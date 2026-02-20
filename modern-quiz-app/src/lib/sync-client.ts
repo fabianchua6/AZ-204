@@ -19,6 +19,17 @@ export interface SyncResponse {
 const SYNC_CODE_KEY = 'quiz_sync_code';
 const LAST_SYNC_KEY = 'quiz_last_sync';
 
+/**
+ * Keys that hold device-local session state and must never be overwritten from
+ * a remote sync source.  Restoring a foreign session would make questions that
+ * were already answered on another device reappear in the current quiz.
+ */
+const SESSION_LOCAL_KEYS = new Set([
+  'leitner-current-session',
+  'leitner-submission-states',
+  'leitner-quiz-index',
+]);
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
@@ -205,6 +216,10 @@ function applyData(data: SyncData): void {
   // Leitner progress
   if (data.leitnerProgress) {
     for (const [key, value] of Object.entries(data.leitnerProgress)) {
+      // Never overwrite device-local session state from a remote source.
+      // Restoring another device's session causes already-answered questions
+      // to reappear in the current quiz.
+      if (SESSION_LOCAL_KEYS.has(key)) continue;
       localStorage.setItem(key, JSON.stringify(value));
     }
   }
@@ -307,6 +322,9 @@ export async function sync(syncCode: string): Promise<SyncResponse> {
     // Merge leitner keys by key semantics (progress/session/index/daily attempts)
     if (remoteData.leitnerProgress) {
       for (const [key, value] of Object.entries(remoteData.leitnerProgress)) {
+        // Session-local keys are never merged from a remote device so that the
+        // current device's active session is never overridden.
+        if (SESSION_LOCAL_KEYS.has(key)) continue;
         if (!(key in localData.leitnerProgress)) {
           localData.leitnerProgress[key] = value;
         } else {

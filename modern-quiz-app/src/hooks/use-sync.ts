@@ -7,6 +7,7 @@ import {
   getLastSyncTime,
   SyncResponse,
 } from '@/lib/sync-client';
+import { leitnerSystem } from '@/lib/leitner';
 import { debug } from '@/lib/logger';
 
 interface UseSyncReturn {
@@ -46,6 +47,10 @@ export function useSync(): UseSyncReturn {
 
       if (result.success) {
         setLastSyncTime(result.lastSync || new Date().toISOString());
+        // Reload in-memory Leitner progress so getDueQuestions reflects the
+        // newly synced data; without this, questions answered on another device
+        // would still appear as new in the current session.
+        await leitnerSystem.reloadFromStorage();
         debug('✅ Auto-sync completed');
       } else {
         setError(result.error || 'Sync failed');
