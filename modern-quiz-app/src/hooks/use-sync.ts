@@ -12,6 +12,7 @@ import { debug } from '@/lib/logger';
 
 interface UseSyncReturn {
   isSyncing: boolean;
+  isInitialSyncComplete: boolean;
   lastSyncTime: string | null;
   syncNow: () => Promise<SyncResponse | null>;
   error: string | null;
@@ -20,6 +21,9 @@ interface UseSyncReturn {
 export function useSync(): UseSyncReturn {
   const isSyncingRef = useRef(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isInitialSyncComplete, setIsInitialSyncComplete] = useState(
+    () => !getStoredSyncCode()
+  );
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,10 +74,24 @@ export function useSync(): UseSyncReturn {
 
   // 1. Sync on Mount (if code exists)
   useEffect(() => {
-    const code = getStoredSyncCode();
-    if (code) {
-      syncNow();
-    }
+    let isMounted = true;
+
+    const runInitialSync = async () => {
+      const code = getStoredSyncCode();
+      if (!code) {
+        if (isMounted) setIsInitialSyncComplete(true);
+        return;
+      }
+
+      await syncNow();
+      if (isMounted) setIsInitialSyncComplete(true);
+    };
+
+    runInitialSync();
+
+    return () => {
+      isMounted = false;
+    };
   }, [syncNow]);
 
   // 2. Sync on Visibility Change (switching tabs/apps)
@@ -96,6 +114,7 @@ export function useSync(): UseSyncReturn {
 
   return {
     isSyncing,
+    isInitialSyncComplete,
     lastSyncTime,
     syncNow,
     error,

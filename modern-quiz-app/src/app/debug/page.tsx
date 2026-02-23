@@ -603,15 +603,39 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.10.10 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.10.10</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 23, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ App now waits for initial sync to finish before leaving the
+                  loading screen
+                </li>
+                <li>
+                  ✦ Daily Brief is now shown only after startup sync completes
+                  so it reflects the latest pulled and pushed activity
+                </li>
+                <li>
+                  ✦ Added startup loading coverage to ensure sync gating
+                  behavior stays intact
+                </li>
+              </ul>
+            </div>
+
             {/* v1.10.9 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.10.9</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 20, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>
