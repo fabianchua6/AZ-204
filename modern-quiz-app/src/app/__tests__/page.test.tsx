@@ -103,7 +103,10 @@ describe('Home page orchestration', () => {
     (useScrollDirection as jest.Mock).mockReturnValue({
       isHeaderVisible: true,
     });
-    (useSync as jest.Mock).mockReturnValue({ syncNow });
+    (useSync as jest.Mock).mockReturnValue({
+      syncNow,
+      isInitialSyncComplete: true,
+    });
     (useQuizData as jest.Mock).mockReturnValue({
       questions: [],
       topics: [],
@@ -118,6 +121,23 @@ describe('Home page orchestration', () => {
       questions: [],
       topics: [],
       loading: true,
+      error: null,
+    });
+
+    render(<Home />);
+
+    expect(screen.getByTestId('loading-spinner')).toBeTruthy();
+  });
+
+  it('renders loading state while initial sync is running', () => {
+    (useSync as jest.Mock).mockReturnValue({
+      syncNow,
+      isInitialSyncComplete: false,
+    });
+    (useQuizData as jest.Mock).mockReturnValue({
+      questions: [{ id: 'q1' }],
+      topics: ['Storage'],
+      loading: false,
       error: null,
     });
 

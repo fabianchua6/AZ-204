@@ -40,7 +40,7 @@ export default function Home() {
   const answers = leitnerState.answers;
 
   // Auto-sync integration
-  const { syncNow } = useSync();
+  const { syncNow, isInitialSyncComplete } = useSync();
 
   // Trigger sync when session completes
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function Home() {
     }
   }, [leitnerState.isSessionComplete, syncNow]);
 
-  if (loading) {
+  if (loading || !isInitialSyncComplete) {
     return (
       <div className='flex min-h-screen items-center justify-center bg-background'>
         <LoadingSpinner />
