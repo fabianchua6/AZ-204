@@ -28,6 +28,7 @@ import { QuizQuestionContent } from '@/components/quiz/quiz-question-content';
 
 // Hook imports
 import { useQuizCardState } from '@/hooks/use-quiz-card-state';
+import { useQuizKeyboardShortcuts } from '@/hooks/use-quiz-keyboard-shortcuts';
 import type { EnhancedQuizStats } from '@/hooks/leitner/use-leitner-stats';
 
 // Utility imports
@@ -259,6 +260,27 @@ export function LeitnerQuizCard({
       cardState.answerSubmitted,
     ]
   );
+
+  // Determine if this is the last question in an active session
+  const isSessionEnd =
+    !!sessionProgress?.isActive &&
+    sessionProgress.current === sessionProgress.total;
+
+  // Keyboard shortcuts for desktop (1-9: select option, ←: prev, →/Enter: submit/next)
+  useQuizKeyboardShortcuts({
+    optionCount: question.options.length,
+    answerSubmitted: cardState.answerSubmitted,
+    showAnswer: cardState.showAnswer,
+    canGoNext,
+    canGoPrevious,
+    submitDisabled: buttonStates.submitDisabled,
+    isSessionEnd,
+    onSelectOption: handleOptionSelect,
+    onNext: handleNext,
+    onPrevious: handlePrevious,
+    onSubmit: handleSubmit,
+    onEndSession,
+  });
 
   // Get box styling using CSS classes
   const currentBox = questionProgress?.currentBox || 1;
