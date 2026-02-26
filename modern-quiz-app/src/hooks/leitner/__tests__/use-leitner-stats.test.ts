@@ -74,7 +74,8 @@ describe('useLeitnerStats', () => {
     });
 
     expect(questionService.getAppStatistics).toHaveBeenCalledWith(
-      mockQuestions
+      mockQuestions,
+      { force: true }
     );
   });
 
@@ -165,7 +166,8 @@ describe('useLeitnerStats', () => {
 
     await waitFor(() => {
       expect(questionService.getAppStatistics).toHaveBeenCalledWith(
-        mockQuestions
+        mockQuestions,
+        { force: true }
       );
     });
 

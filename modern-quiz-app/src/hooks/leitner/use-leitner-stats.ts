@@ -42,8 +42,12 @@ export function useLeitnerStats(
     // Debounce stats calculation
     const timeoutId = setTimeout(async () => {
       try {
-        // Route through QuestionService for consistent filtering + caching
-        const appStats = await questionService.getAppStatistics(questions);
+        // Force fresh stats since this effect is already debounced by 100ms.
+        // Without force, the 15s WeakMap cache in QuestionService can return
+        // stale dueToday / boxDistribution values after rapid answer submissions.
+        const appStats = await questionService.getAppStatistics(questions, {
+          force: true,
+        });
 
         setStats({
           totalQuestions: appStats.totalQuestions,

@@ -603,15 +603,32 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.11.1 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.11.1</span>
+                <span className='text-xs text-muted-foreground'>
+                  Feb 26, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Fixed &ldquo;X left&rdquo; showing stale data on the session
+                  results page by bypassing the stats cache after each answer
+                  submission
+                </li>
+              </ul>
+            </div>
+
             {/* v1.11.0 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.11.0</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 26, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>
