@@ -603,15 +603,38 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.11.3 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.11.3</span>
+                <span className='text-xs text-muted-foreground'>
+                  Mar 3, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Added haptic to &ldquo;Continue Learning&rdquo; and
+                  &ldquo;View Progress&rdquo; buttons in quiz completion modal
+                </li>
+                <li>
+                  ✦ Added haptic to topic-selector buttons (topic grid)
+                </li>
+                <li>
+                  ✦ Added haptic to &ldquo;Finish&rdquo; (End Session) button
+                  in the quiz action bar
+                </li>
+              </ul>
+            </div>
+
             {/* v1.11.2 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.11.2</span>
                 <span className='text-xs text-muted-foreground'>
                   Mar 3, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>

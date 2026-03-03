@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { triggerHaptic } from '@/lib/haptics';
 
 interface TopicSelectorProps {
   topics: string[];
@@ -52,7 +53,10 @@ export function TopicSelector({
         <Button
           variant={selectedTopic === null ? 'default' : 'outline'}
           size='lg'
-          onClick={() => onTopicChange(null)}
+          onClick={() => {
+            triggerHaptic('selection');
+            onTopicChange(null);
+          }}
           className='group h-auto justify-start whitespace-normal px-4 py-4 text-left transition-colors duration-200'
         >
           <div className='flex items-center gap-3'>
@@ -73,7 +77,10 @@ export function TopicSelector({
             key={topic}
             variant={selectedTopic === topic ? 'default' : 'outline'}
             size='lg'
-            onClick={() => onTopicChange(topic)}
+            onClick={() => {
+              triggerHaptic('selection');
+              onTopicChange(topic);
+            }}
             className='group h-auto justify-start whitespace-normal px-4 py-4 text-left transition-colors duration-200'
           >
             <div className='flex items-center gap-3'>

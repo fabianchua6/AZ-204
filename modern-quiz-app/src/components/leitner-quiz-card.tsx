@@ -239,6 +239,13 @@ export function LeitnerQuizCard({
     }
   }, [onPrevious]);
 
+  const handleEndSession = useCallback(() => {
+    if (onEndSession) {
+      triggerHaptic('success');
+      onEndSession();
+    }
+  }, [onEndSession]);
+
   // Custom button states for Leitner mode - don't disable navigation during submission
   const buttonStates = useMemo(
     () => ({
@@ -406,7 +413,7 @@ export function LeitnerQuizCard({
               sessionProgress?.isActive &&
               sessionProgress.current === sessionProgress.total ? (
                 <Button // End Session
-                  onClick={onEndSession}
+                  onClick={handleEndSession}
                   disabled={false}
                   variant='success'
                   className='h-11 w-full rounded-lg text-base font-semibold shadow-sm'
