@@ -65,6 +65,14 @@ export function DailyBrief({ questions }: DailyBriefProps) {
     setOpen(false);
   };
 
+  const handleBackdropDismiss = () => {
+    handleDismiss('light');
+  };
+
+  const handleDragHandleDismiss = () => {
+    handleDismiss('light');
+  };
+
   const handlePullHandleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     handleTouchStartY.current = event.touches[0]?.clientY ?? null;
     setIsHandleDragging(false);
@@ -169,7 +177,7 @@ export function DailyBrief({ questions }: DailyBriefProps) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className='fixed inset-0 z-[60] bg-black/50 backdrop-blur-[2px]'
-            onClick={handleDismiss}
+            onClick={handleBackdropDismiss}
           />
 
           {/* Bottom sheet — static positioner keeps centering; motion div animates slide */}
@@ -198,13 +206,13 @@ export function DailyBrief({ questions }: DailyBriefProps) {
               {/* Drag handle */}
               <div
                 className='flex shrink-0 cursor-pointer select-none justify-center pb-2 pt-3 [touch-action:none]'
-                onClick={handleDismiss}
+                onClick={handleDragHandleDismiss}
                 role='button'
                 aria-label='Close daily brief'
                 tabIndex={0}
                 onKeyDown={event => {
                   if (event.key === 'Enter' || event.key === ' ') {
-                    handleDismiss();
+                    handleDragHandleDismiss();
                   }
                 }}
               >
