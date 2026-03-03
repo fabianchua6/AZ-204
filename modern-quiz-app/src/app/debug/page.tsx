@@ -603,15 +603,105 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.11.5 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.11.5</span>
+                <span className='text-xs text-muted-foreground'>
+                  Mar 3, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Replaced hand-rolled haptic implementation with the{' '}
+                  <code>web-haptics</code> library (
+                  <a
+                    href='https://haptics.lochie.me/'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='underline'
+                  >
+                    haptics.lochie.me
+                  </a>
+                  ) for robust iOS Safari &amp; Android support
+                </li>
+                <li>
+                  ✦ Fixed Daily Brief dismiss handler TypeScript error with
+                  React event types
+                </li>
+              </ul>
+            </div>
+
+            {/* v1.11.4 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.11.4</span>
+                <span className='text-xs text-muted-foreground'>
+                  Mar 3, 2026
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Haptics now work on iOS Safari via the hidden-label click
+                  trick (bypasses Vibration API restriction)
+                </li>
+                <li>
+                  ✦ Multi-pulse patterns (success, warning, error) replay on iOS
+                  using scheduled label clicks
+                </li>
+              </ul>
+            </div>
+
+            {/* v1.11.3 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.11.3</span>
+                <span className='text-xs text-muted-foreground'>
+                  Mar 3, 2026
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Added haptic to &ldquo;Continue Learning&rdquo; and
+                  &ldquo;View Progress&rdquo; buttons in quiz completion modal
+                </li>
+                <li>✦ Added haptic to topic-selector buttons (topic grid)</li>
+                <li>
+                  ✦ Added haptic to &ldquo;Finish&rdquo; (End Session) button in
+                  the quiz action bar
+                </li>
+              </ul>
+            </div>
+
+            {/* v1.11.2 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.11.2</span>
+                <span className='text-xs text-muted-foreground'>
+                  Mar 3, 2026
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Extended haptic feedback to the Session Results &ldquo;Start
+                  New Session&rdquo; button
+                </li>
+                <li>
+                  ✦ Added haptic feedback on Daily Brief tap-dismiss (light) and
+                  swipe-dismiss (warning double-tap)
+                </li>
+              </ul>
+            </div>
+
             {/* v1.11.1 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.11.1</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 26, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>

@@ -1,62 +1,50 @@
 'use client';
 
 /**
- * Haptic feedback utility for mobile devices
- * Uses the Vibration API with fallback to no-op for unsupported devices
+ * Haptic feedback utility powered by the web-haptics library.
+ * @see https://haptics.lochie.me/
+ *
+ * Handles both Android (Vibration API) and iOS Safari
+ * (hidden-label click trick) internally via web-haptics.
  */
 
-export type HapticPattern = 'light' | 'medium' | 'heavy' | 'success' | 'error' | 'warning' | 'selection';
+import { WebHaptics } from 'web-haptics';
 
-// Vibration patterns in milliseconds
-const HAPTIC_PATTERNS: Record<HapticPattern, number | number[]> = {
-  light: 10,
-  medium: 25,
-  heavy: 50,
-  success: [10, 50, 30], // Short pause, then confirmation
-  error: [50, 30, 50, 30, 50], // Triple buzz for error
-  warning: [30, 50, 30], // Double tap
-  selection: 15, // Quick tap for option selection
-};
+export type HapticPattern =
+  | 'light'
+  | 'medium'
+  | 'heavy'
+  | 'success'
+  | 'error'
+  | 'warning'
+  | 'selection';
 
-/**
- * Check if haptic feedback is supported
- */
+// Lazy-initialised singleton — avoids SSR DOM access in Next.js
+let _instance: WebHaptics | null = null;
+
+function getInstance(): WebHaptics | null {
+  if (typeof window === 'undefined') return null;
+  if (!_instance) {
+    _instance = new WebHaptics();
+  }
+  return _instance;
+}
+
 export function isHapticSupported(): boolean {
-  if (typeof window === 'undefined') return false;
-  return 'vibrate' in navigator;
+  return WebHaptics.isSupported;
 }
 
-/**
- * Trigger haptic feedback
- * @param pattern - The type of haptic feedback to trigger
- */
 export function triggerHaptic(pattern: HapticPattern = 'light'): void {
-  if (!isHapticSupported()) return;
-  
-  try {
-    const vibrationPattern = HAPTIC_PATTERNS[pattern];
-    navigator.vibrate(vibrationPattern);
-  } catch {
-    // Silently fail if vibration is not allowed
-  }
+  const instance = getInstance();
+  if (!instance) return;
+  instance.trigger(pattern);
 }
 
-/**
- * Cancel any ongoing haptic feedback
- */
 export function cancelHaptic(): void {
-  if (!isHapticSupported()) return;
-  
-  try {
-    navigator.vibrate(0);
-  } catch {
-    // Silently fail
-  }
+  if (!_instance) return;
+  _instance.cancel();
 }
 
-/**
- * React hook for haptic feedback
- */
 export function useHaptic() {
   return {
     trigger: triggerHaptic,

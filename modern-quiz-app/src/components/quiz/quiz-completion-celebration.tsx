@@ -156,7 +156,10 @@ export function QuizCompletionCelebration({
                   className='space-y-3'
                 >
                   <Button
-                    onClick={onContinue}
+                    onClick={() => {
+                      triggerHaptic('medium');
+                      onContinue();
+                    }}
                     variant='success'
                     className='w-full'
                     size='lg'
@@ -165,7 +168,10 @@ export function QuizCompletionCelebration({
                     Continue Learning
                   </Button>
                   <Button
-                    onClick={onViewProgress}
+                    onClick={() => {
+                      triggerHaptic('light');
+                      onViewProgress();
+                    }}
                     variant='outline'
                     className='w-full border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/20'
                   >
