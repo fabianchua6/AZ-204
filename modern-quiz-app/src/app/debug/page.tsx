@@ -603,15 +603,35 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
+            {/* v1.11.2 */}
+            <div>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold'>v1.11.2</span>
+                <span className='text-xs text-muted-foreground'>
+                  Mar 3, 2026
+                </span>
+                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                  Latest
+                </span>
+              </div>
+              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                <li>
+                  ✦ Extended haptic feedback to the Session Results
+                  &ldquo;Start New Session&rdquo; button
+                </li>
+                <li>
+                  ✦ Added haptic feedback on Daily Brief tap-dismiss (light)
+                  and swipe-dismiss (warning double-tap)
+                </li>
+              </ul>
+            </div>
+
             {/* v1.11.1 */}
             <div>
               <div className='flex items-center gap-2'>
                 <span className='font-semibold'>v1.11.1</span>
                 <span className='text-xs text-muted-foreground'>
                   Feb 26, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
                 </span>
               </div>
               <ul className='mt-1 space-y-0.5 text-muted-foreground'>

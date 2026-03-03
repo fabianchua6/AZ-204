@@ -10,6 +10,7 @@ import { loadFromLocalStorage, saveToLocalStorage } from '@/lib/utils';
 import { questionService } from '@/lib/question-service';
 import { DateUtils } from '@/lib/leitner/utils';
 import type { Question } from '@/types/quiz';
+import { triggerHaptic } from '@/lib/haptics';
 
 /** Delegate to canonical DateUtils to keep one YYYY-MM-DD implementation */
 const toLocalDateStr = (date: Date): string =>
@@ -55,7 +56,8 @@ export function DailyBrief({ questions }: DailyBriefProps) {
     });
   }, [questions]);
 
-  const handleDismiss = () => {
+  const handleDismiss = (pattern: 'light' | 'warning' = 'light') => {
+    triggerHaptic(pattern);
     setDragOffsetY(0);
     setIsHandleDragging(false);
     handleTouchStartY.current = null;
@@ -106,7 +108,7 @@ export function DailyBrief({ questions }: DailyBriefProps) {
     setIsHandleDragging(false);
 
     if (swipeDistance > 60) {
-      handleDismiss();
+      handleDismiss('warning');
       return;
     }
 

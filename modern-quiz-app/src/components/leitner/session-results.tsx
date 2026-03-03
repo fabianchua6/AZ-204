@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { QuizControls } from '@/components/quiz/quiz-controls';
 import { LeitnerBoxBar } from '@/components/leitner/leitner-box-bar';
 import type { LeitnerStats } from '@/lib/leitner';
+import { triggerHaptic } from '@/lib/haptics';
 
 interface SessionResultsProps {
   sessionResults: {
@@ -128,7 +129,14 @@ export function SessionResults({
           </div>
 
           {/* Action Button */}
-          <Button onClick={onStartNewSession} size='lg' className='w-full'>
+          <Button
+            onClick={() => {
+              triggerHaptic('medium');
+              onStartNewSession();
+            }}
+            size='lg'
+            className='w-full'
+          >
             {stats.leitner.dueToday > 0
               ? `Continue Learning (${stats.leitner.dueToday} left)`
               : 'Start New Session'}
