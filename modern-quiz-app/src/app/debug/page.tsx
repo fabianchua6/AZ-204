@@ -4,6 +4,7 @@ import { leitnerSystem } from '@/lib/leitner';
 import { useQuizData } from '@/hooks/use-quiz-data';
 import { questionService } from '@/lib/question-service';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import {
   Trash2,
@@ -13,6 +14,8 @@ import {
   ChevronLeft,
   RotateCcw,
   AlertTriangle,
+  ChevronDown,
+  ChevronUp,
   Sparkles,
   Cloud,
   Copy,
@@ -67,6 +70,7 @@ export default function DebugPage() {
   const [syncing, setSyncing] = useState(false);
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState('');
+  const [showFullChangelog, setShowFullChangelog] = useState(false);
 
   useEffect(() => {
     document.title = 'Settings - AZ-204 Quiz';
@@ -603,764 +607,601 @@ export default function DebugPage() {
             Changelog
           </h2>
           <div className='space-y-4 text-sm'>
-            {/* v1.11.5 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.11.5</span>
-                <span className='text-xs text-muted-foreground'>
-                  Mar 3, 2026
-                </span>
-                <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
-                  Latest
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Replaced hand-rolled haptic implementation with the{' '}
-                  <code>web-haptics</code> library (
-                  <a
-                    href='https://haptics.lochie.me/'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='underline'
-                  >
-                    haptics.lochie.me
-                  </a>
-                  ) for robust iOS Safari &amp; Android support
-                </li>
-                <li>
-                  ✦ Fixed Daily Brief dismiss handler TypeScript error with
-                  React event types
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.11.4 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.11.4</span>
-                <span className='text-xs text-muted-foreground'>
-                  Mar 3, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Haptics now work on iOS Safari via the hidden-label click
-                  trick (bypasses Vibration API restriction)
-                </li>
-                <li>
-                  ✦ Multi-pulse patterns (success, warning, error) replay on iOS
-                  using scheduled label clicks
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.11.3 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.11.3</span>
-                <span className='text-xs text-muted-foreground'>
-                  Mar 3, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Added haptic to &ldquo;Continue Learning&rdquo; and
-                  &ldquo;View Progress&rdquo; buttons in quiz completion modal
-                </li>
-                <li>✦ Added haptic to topic-selector buttons (topic grid)</li>
-                <li>
-                  ✦ Added haptic to &ldquo;Finish&rdquo; (End Session) button in
-                  the quiz action bar
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.11.2 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.11.2</span>
-                <span className='text-xs text-muted-foreground'>
-                  Mar 3, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Extended haptic feedback to the Session Results &ldquo;Start
-                  New Session&rdquo; button
-                </li>
-                <li>
-                  ✦ Added haptic feedback on Daily Brief tap-dismiss (light) and
-                  swipe-dismiss (warning double-tap)
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.11.1 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.11.1</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 26, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Fixed &ldquo;X left&rdquo; showing stale data on the session
-                  results page by bypassing the stats cache after each answer
-                  submission
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.11.0 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.11.0</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 26, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Added keyboard shortcuts for the quiz on desktop: 1-9 to
-                  select options, ← for previous, → or Enter for submit/next
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.10.10 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.10.10</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 23, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ App now waits for initial sync to finish before leaving the
-                  loading screen
-                </li>
-                <li>
-                  ✦ Daily Brief is now shown only after startup sync completes
-                  so it reflects the latest pulled and pushed activity
-                </li>
-                <li>
-                  ✦ Added startup loading coverage to ensure sync gating
-                  behavior stays intact
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.10.9 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.10.9</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 20, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Fixed already-answered questions reappearing after syncing
-                  progress from another device
-                </li>
-                <li>
-                  ✦ Session state (current session, submission states, quiz
-                  index) is now treated as device-local and is never overwritten
-                  by a remote sync
-                </li>
-                <li>
-                  ✦ Leitner progress is now reloaded from storage immediately
-                  after a successful sync so due-question calculations are
-                  always up to date
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.10.8 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.10.8</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 20, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Added swipe-down dismissal support from anywhere inside the
-                  Daily Brief sheet, not only the pull handle
-                </li>
-                <li>
-                  ✦ Preserved in-sheet scroll behavior by only starting sheet
-                  drag when content is already at the top
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.10.7 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.10.7</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 20, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Added real-time pull-handle drag feedback so the Daily Brief
-                  sheet now visibly follows finger movement on iPhone
-                </li>
-                <li>
-                  ✦ Tuned swipe-down dismissal to work with live drag distance
-                  for a more native sheet interaction
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.10.6 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.10.6</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 20, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Fixed Daily Brief so background content no longer scrolls
-                  while the sheet is open on iPhone
-                </li>
-                <li>
-                  ✦ Added swipe-down dismissal from the Daily Brief pull handle
-                  for more natural mobile sheet behavior
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.10.5 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.10.5</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 20, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Fixed Daily Brief sheet scrolling on iPhone by enabling
-                  touch momentum scrolling in the sheet content area
-                </li>
-                <li>
-                  ✦ Improved touch gesture handling for vertical pan inside the
-                  Daily Brief bottom sheet to prevent stuck scroll
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.10.4 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.10.4</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 19, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Fixed sync collisions for shared Leitner keys so remote and
-                  local data now merge instead of silently dropping one side
-                </li>
-                <li>
-                  ✦ Added key-aware merge rules for leitner-progress, daily
-                  attempts, submission states, current session, and quiz index
-                </li>
-                <li>
-                  ✦ Added sync regression tests to keep "questions left" counts
-                  and progress state consistent across devices
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.10.3 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.10.3</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 19, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Fixed streak display on the main quiz card by deriving
-                  streak from daily activity history first
-                </li>
-                <li>
-                  ✦ Added fallback to legacy progress-based streak logic when
-                  daily history is unavailable
-                </li>
-                <li>
-                  ✦ Added dedicated Leitner streak regression tests for
-                  yesterday-start streaks and gap handling
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.10.2 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.10.2</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 19, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Added sync-client edge-case tests for streak merge fallback
-                  behavior when local or remote streak data is partial
-                </li>
-                <li>
-                  ✦ Added debug-page safety tests for Clear Cache and guarded
-                  Reset Everything flows
-                </li>
-                <li>
-                  ✦ Verified full suite at 144 passing tests and clean
-                  TypeScript build after QA expansion
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.10.1 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.10.1</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 19, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Added QA regression suites for DashboardStats and Daily
-                  Brief component flows
-                </li>
-                <li>
-                  ✦ Added automation suites for Home page orchestration and
-                  Session Results CTA behavior
-                </li>
-                <li>
-                  ✦ Strengthened useLeitnerStats tests for debounce timing,
-                  stale timer cleanup, and failure resilience
-                </li>
-                <li>
-                  ✦ Expanded useLeitnerSession tests for expired/invalid saved
-                  sessions and end-session timing guards
-                </li>
-                <li>
-                  ✦ Added 24 new automated tests across high-risk async, UI, and
-                  orchestration branches
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.10.0 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.10.0</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 19, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Unified two divergent DashboardStats components into one
-                  with a compact/full section mode
-                </li>
-                <li>
-                  ✦ Extracted shared LeitnerBoxBar component — replaces
-                  copy-pasted box distribution UI in 3 places
-                </li>
-                <li>
-                  ✦ Routed useLeitnerStats through QuestionService cache for
-                  consistent filtered stats everywhere
-                </li>
-                <li>✦ Fixed Daily Brief showing unfiltered question counts</li>
-                <li>
-                  ✦ Fixed streak sync resurrecting dead streaks across devices —
-                  only bestStreak and lastStudyDate are merged now
-                </li>
-                <li>
-                  ✦ Deduplicated date formatting (4 variants → canonical
-                  DateUtils), shuffleArray (2 copies → 1), and EnhancedQuizStats
-                  type (2 definitions → 1 export)
-                </li>
-                <li>
-                  ✦ Fixed useSync stale closure causing effect re-registration
-                  on every sync cycle
-                </li>
-                <li>
-                  ✦ Removed 8 dead files (~600+ lines) and 2 dead utility
-                  functions
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.9.1 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.9.1</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 19, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Fixed streak display on Learning Dashboard — now uses
-                  Leitner system&apos;s robust streak calculation instead of
-                  naive day-counter that only updated on dashboard visits
-                </li>
-                <li>
-                  ✦ Best Streak now correctly persists and syncs across sessions
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.9.0 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.9.0</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 19, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Deep data layer cleanup — removed 8 dead/orphaned
-                  localStorage keys and their sync baggage
-                </li>
-                <li>
-                  ✦ One-time storage migration runs on first load to prune
-                  legacy keys (quiz_progress_*, quiz_answered_global,
-                  quiz-practice-state, etc.)
-                </li>
-                <li>
-                  ✦ Sync collector rewritten with explicit allowlist — no longer
-                  ships dead data to Redis via greedy prefix sweep
-                </li>
-                <li>
-                  ✦ Retired answeredQuestions sync bucket — Leitner system is
-                  the sole source of truth
-                </li>
-                <li>
-                  ✦ Study streak date format standardized to YYYY-MM-DD (ISO) —
-                  migration auto-converts old format
-                </li>
-                <li>
-                  ✦ Deleted orphaned use-smart-learning hook and legacy
-                  leitner-stats storage key
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.8.3 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.8.3</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 19, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Fixed PDF parser dropping inline explanations — 3 questions
-                  (SAS, Always Encrypted, Managed Identity) now show their
-                  explanations
-                </li>
-                <li>
-                  ✦ Study streaks now sync across devices — current streak, best
-                  streak, and last study date are included in cloud sync
-                </li>
-                <li>
-                  ✦ Daily brief state syncs across devices — dismissal carries
-                  over
-                </li>
-                <li>
-                  ✦ Smart streak merge — sync picks the higher streak values and
-                  most recent study date between devices
-                </li>
-                <li>
-                  ✦ Rebuilt all data files — src/data and public/data now
-                  verified in sync
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.8.2 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.8.2</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 19, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Smart sync merge — syncing now pulls remote first and unions
-                  both devices&apos; answers before pushing
-                </li>
-                <li>
-                  ✦ Sync pull no longer throws on server errors — returns a
-                  clean error instead
-                </li>
-                <li>
-                  ✦ Server now accepts custom sync codes (e.g.{' '}
-                  <span className='font-mono'>AZ-FABIAN</span>) end-to-end
-                </li>
-                <li>✦ Daily Brief sheet constrained to a card on desktop</li>
-              </ul>
-            </div>
-
-            {/* v1.8.1 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.8.1</span>
-                <span className='text-xs text-muted-foreground'>Feb 2026</span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Fixed sync backup — &ldquo;Update Backup&rdquo; was silently
-                  failing due to missing export
-                </li>
-                <li>
-                  ✦ Custom sync codes — codes like{' '}
-                  <span className='font-mono'>AZ-FABIAN</span> now accepted (3–8
-                  alphanumeric chars after{' '}
-                  <span className='font-mono'>AZ-</span>)
-                </li>
-                <li>
-                  ✦ Change Sync Code — migrate all progress to a new or custom
-                  code within Settings
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.8.0 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.8.0</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 19, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Daily Brief — slide-up sheet with stats and heatmap on first
-                  daily visit
-                </li>
-                <li>✦ Activity heatmap now fully responsive on mobile</li>
-                <li>✦ Removed heatmap legend; expanded to 15 weeks</li>
-                <li>✦ Heatmap moved above stats cards on Dashboard</li>
-              </ul>
-            </div>
-
-            {/* v1.7.0 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.7.0</span>
-                <span className='text-xs text-muted-foreground'>
-                  Feb 19, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>✦ GitHub-style daily activity heatmap on Dashboard</li>
-                <li>✦ Extended daily activity history retention to 90 days</li>
-                <li>
-                  ✦ Moved theme toggle to Settings — Light / Dark / System
-                  picker
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.6.0 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.6.0</span>
-                <span className='text-xs text-muted-foreground'>Feb 2026</span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Cross-device sync backend via Upstash Redis with sync codes
-                </li>
-                <li>✦ Auto-sync progress to cloud on session completion</li>
-                <li>✦ PDF questions prioritised before non-PDF in sessions</li>
-                <li>✦ Unified Cloud Sync card with mobile-responsive layout</li>
-                <li>✦ Fixed stale submission states on session refresh</li>
-                <li>✦ Rewrote 5 blank question explanations for accuracy</li>
-              </ul>
-            </div>
-
-            {/* v1.5.1 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.5.1</span>
-                <span className='text-xs text-muted-foreground'>
-                  Jan 14, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>✦ Replaced hardcoded colors with semantic design tokens</li>
-                <li>✦ Success and warning button variants</li>
-                <li>✦ Fixed iOS font size overrides (rem → px)</li>
-                <li>✦ Removed non-exam &quot;awesomeness&quot; question</li>
-              </ul>
-            </div>
-
-            {/* v1.5.0 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.5.0</span>
-                <span className='text-xs text-muted-foreground'>
-                  Jan 5, 2026
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Redesigned Settings page with modern minimal aesthetic
-                </li>
-                <li>✦ Added Changelog section</li>
-                <li>✦ Disabled iOS Dynamic Type font scaling</li>
-              </ul>
-            </div>
-
-            {/* v1.4.1 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.4.1</span>
-                <span className='text-xs text-muted-foreground'>
-                  Dec 26–28, 2025
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Fixed Arc browser TLS error loop (HSTS, cache headers)
-                </li>
-                <li>✦ Upgraded Next.js to 15.5.9 (security patches)</li>
-                <li>✦ Resolved conflicting Vercel/Next.js header config</li>
-              </ul>
-            </div>
-
-            {/* v1.4.0 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.4.0</span>
-                <span className='text-xs text-muted-foreground'>
-                  Dec 24, 2025
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Removed Practice Mode — single Leitner-only experience
-                </li>
-                <li>
-                  ✦ Decomposed monolithic hook into session, progress, and stats
-                </li>
-                <li>✦ 80/20 PDF-to-non-PDF question split per session</li>
-                <li>
-                  ✦ Auto-hide header on scroll, sticky footer, mobile grid
-                  layout
-                </li>
-              </ul>
-            </div>
-
-            {/* v1.3.1 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.3.1</span>
-                <span className='text-xs text-muted-foreground'>
-                  Dec 17–18, 2025
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>
-                  ✦ Added &quot;End Quiz&quot; button after final question
-                </li>
-                <li>✦ Show answer feedback before session auto-complete</li>
-                <li>✦ Fixed session refresh bug and sequence randomisation</li>
-              </ul>
-            </div>
-
-            {/* v1.3.0 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.3.0</span>
-                <span className='text-xs text-muted-foreground'>
-                  Oct – Dec 16, 2025
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>✦ Extracted 142 questions from exam PDF documents</li>
-                <li>✦ Settings page for managing quiz progress</li>
-                <li>✦ Custom AZ-204 favicon and haptic feedback on mobile</li>
-                <li>
-                  ✦ Performance pass — React.memo, debug logger, shared hook
-                </li>
-                <li>✦ Improved randomisation and session auto-invalidation</li>
-                <li>✦ Cleaned broken questions and fixed answer data</li>
-              </ul>
-            </div>
-
-            {/* v1.2.0 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.2.0</span>
-                <span className='text-xs text-muted-foreground'>
-                  Aug 22 – Sep 9, 2025
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>✦ PWA implementation attempted and cleanly reverted</li>
-                <li>✦ Fixed critical localStorage iteration bug</li>
-                <li>✦ Complete state isolation between quiz modes</li>
-                <li>✦ Content audit — removed inappropriate questions</li>
-                <li>✦ Completion celebration with session results breakdown</li>
-                <li>✦ Dynamic browser tab titles and debug navigation</li>
-              </ul>
-            </div>
-
-            {/* v1.1.0 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.1.0</span>
-                <span className='text-xs text-muted-foreground'>
-                  Aug 19–21, 2025
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>✦ 3-box Leitner spaced repetition system</li>
-                <li>
-                  ✦ Quiz card redesign with dark mode and layered colour system
-                </li>
-                <li>✦ Dashboard with Leitner box distribution</li>
-                <li>✦ Filtered code-block and solution-goal questions</li>
-                <li>✦ Refactored codebase for engineering best practices</li>
-              </ul>
-            </div>
-
-            {/* v1.0.0 */}
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='font-semibold'>v1.0.0</span>
-                <span className='text-xs text-muted-foreground'>
-                  Aug 18, 2025
-                </span>
-              </div>
-              <ul className='mt-1 space-y-0.5 text-muted-foreground'>
-                <li>✦ Next.js quiz app deployed on Vercel</li>
-                <li>✦ Questions seeded from AZ-204 topic markdown files</li>
-                <li>✦ Topic selector, quiz card, answer options</li>
-              </ul>
-            </div>
+            {[
+              {
+                version: 'v1.11.5',
+                date: 'Mar 3, 2026',
+                isLatest: true,
+                items: [
+                  <>
+                    ✦ Replaced hand-rolled haptic implementation with the{' '}
+                    <code>web-haptics</code> library (
+                    <a
+                      href='https://haptics.lochie.me/'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='underline'
+                    >
+                      haptics.lochie.me
+                    </a>
+                    ) for robust iOS Safari &amp; Android support
+                  </>,
+                  <>
+                    ✦ Fixed Daily Brief dismiss handler TypeScript error with
+                    React event types
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.11.4',
+                date: 'Mar 3, 2026',
+                items: [
+                  <>
+                    ✦ Haptics now work on iOS Safari via the hidden-label click
+                    trick (bypasses Vibration API restriction)
+                  </>,
+                  <>
+                    ✦ Multi-pulse patterns (success, warning, error) replay on
+                    iOS using scheduled label clicks
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.11.3',
+                date: 'Mar 3, 2026',
+                items: [
+                  <>
+                    ✦ Added haptic to &ldquo;Continue Learning&rdquo; and
+                    &ldquo;View Progress&rdquo; buttons in quiz completion modal
+                  </>,
+                  <>✦ Added haptic to topic-selector buttons (topic grid)</>,
+                  <>
+                    ✦ Added haptic to &ldquo;Finish&rdquo; (End Session) button
+                    in the quiz action bar
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.11.2',
+                date: 'Mar 3, 2026',
+                items: [
+                  <>
+                    ✦ Extended haptic feedback to the Session Results
+                    &ldquo;Start New Session&rdquo; button
+                  </>,
+                  <>
+                    ✦ Added haptic feedback on Daily Brief tap-dismiss (light)
+                    and swipe-dismiss (warning double-tap)
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.11.1',
+                date: 'Feb 26, 2026',
+                items: [
+                  <>
+                    ✦ Fixed &ldquo;X left&rdquo; showing stale data on the
+                    session results page by bypassing the stats cache after each
+                    answer submission
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.11.0',
+                date: 'Feb 26, 2026',
+                items: [
+                  <>
+                    ✦ Added keyboard shortcuts for the quiz on desktop: 1-9 to
+                    select options, ← for previous, → or Enter for submit/next
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.10.10',
+                date: 'Feb 23, 2026',
+                items: [
+                  <>
+                    ✦ App now waits for initial sync to finish before leaving
+                    the loading screen
+                  </>,
+                  <>
+                    ✦ Daily Brief is now shown only after startup sync completes
+                    so it reflects the latest pulled and pushed activity
+                  </>,
+                  <>
+                    ✦ Added startup loading coverage to ensure sync gating
+                    behavior stays intact
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.10.9',
+                date: 'Feb 20, 2026',
+                items: [
+                  <>
+                    ✦ Fixed already-answered questions reappearing after syncing
+                    progress from another device
+                  </>,
+                  <>
+                    ✦ Session state (current session, submission states, quiz
+                    index) is now treated as device-local and is never
+                    overwritten by a remote sync
+                  </>,
+                  <>
+                    ✦ Leitner progress is now reloaded from storage immediately
+                    after a successful sync so due-question calculations are
+                    always up to date
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.10.8',
+                date: 'Feb 20, 2026',
+                items: [
+                  <>
+                    ✦ Added swipe-down dismissal support from anywhere inside
+                    the Daily Brief sheet, not only the pull handle
+                  </>,
+                  <>
+                    ✦ Preserved in-sheet scroll behavior by only starting sheet
+                    drag when content is already at the top
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.10.7',
+                date: 'Feb 20, 2026',
+                items: [
+                  <>
+                    ✦ Added real-time pull-handle drag feedback so the Daily
+                    Brief sheet now visibly follows finger movement on iPhone
+                  </>,
+                  <>
+                    ✦ Tuned swipe-down dismissal to work with live drag distance
+                    for a more native sheet interaction
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.10.6',
+                date: 'Feb 20, 2026',
+                items: [
+                  <>
+                    ✦ Fixed Daily Brief so background content no longer scrolls
+                    while the sheet is open on iPhone
+                  </>,
+                  <>
+                    ✦ Added swipe-down dismissal from the Daily Brief pull
+                    handle for more natural mobile sheet behavior
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.10.5',
+                date: 'Feb 20, 2026',
+                items: [
+                  <>
+                    ✦ Fixed Daily Brief sheet scrolling on iPhone by enabling
+                    touch momentum scrolling in the sheet content area
+                  </>,
+                  <>
+                    ✦ Improved touch gesture handling for vertical pan inside
+                    the Daily Brief bottom sheet to prevent stuck scroll
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.10.4',
+                date: 'Feb 19, 2026',
+                items: [
+                  <>
+                    ✦ Fixed sync collisions for shared Leitner keys so remote
+                    and local data now merge instead of silently dropping one
+                    side
+                  </>,
+                  <>
+                    ✦ Added key-aware merge rules for leitner-progress, daily
+                    attempts, submission states, current session, and quiz index
+                  </>,
+                  <>
+                    ✦ Added sync regression tests to keep "questions left"
+                    counts and progress state consistent across devices
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.10.3',
+                date: 'Feb 19, 2026',
+                items: [
+                  <>
+                    ✦ Fixed streak display on the main quiz card by deriving
+                    streak from daily activity history first
+                  </>,
+                  <>
+                    ✦ Added fallback to legacy progress-based streak logic when
+                    daily history is unavailable
+                  </>,
+                  <>
+                    ✦ Added dedicated Leitner streak regression tests for
+                    yesterday-start streaks and gap handling
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.10.2',
+                date: 'Feb 19, 2026',
+                items: [
+                  <>
+                    ✦ Added sync-client edge-case tests for streak merge
+                    fallback behavior when local or remote streak data is
+                    partial
+                  </>,
+                  <>
+                    ✦ Added debug-page safety tests for Clear Cache and guarded
+                    Reset Everything flows
+                  </>,
+                  <>
+                    ✦ Verified full suite at 144 passing tests and clean
+                    TypeScript build after QA expansion
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.10.1',
+                date: 'Feb 19, 2026',
+                items: [
+                  <>
+                    ✦ Added QA regression suites for DashboardStats and Daily
+                    Brief component flows
+                  </>,
+                  <>
+                    ✦ Added automation suites for Home page orchestration and
+                    Session Results CTA behavior
+                  </>,
+                  <>
+                    ✦ Strengthened useLeitnerStats tests for debounce timing,
+                    stale timer cleanup, and failure resilience
+                  </>,
+                  <>
+                    ✦ Expanded useLeitnerSession tests for expired/invalid saved
+                    sessions and end-session timing guards
+                  </>,
+                  <>
+                    ✦ Added 24 new automated tests across high-risk async, UI,
+                    and orchestration branches
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.10.0',
+                date: 'Feb 19, 2026',
+                items: [
+                  <>
+                    ✦ Unified two divergent DashboardStats components into one
+                    with a compact/full section mode
+                  </>,
+                  <>
+                    ✦ Extracted shared LeitnerBoxBar component — replaces
+                    copy-pasted box distribution UI in 3 places
+                  </>,
+                  <>
+                    ✦ Routed useLeitnerStats through QuestionService cache for
+                    consistent filtered stats everywhere
+                  </>,
+                  <>✦ Fixed Daily Brief showing unfiltered question counts</>,
+                  <>
+                    ✦ Fixed streak sync resurrecting dead streaks across devices
+                    — only bestStreak and lastStudyDate are merged now
+                  </>,
+                  <>
+                    ✦ Deduplicated date formatting (4 variants → canonical
+                    DateUtils), shuffleArray (2 copies → 1), and
+                    EnhancedQuizStats type (2 definitions → 1 export)
+                  </>,
+                  <>
+                    ✦ Fixed useSync stale closure causing effect re-registration
+                    on every sync cycle
+                  </>,
+                  <>
+                    ✦ Removed 8 dead files (~600+ lines) and 2 dead utility
+                    functions
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.9.1',
+                date: 'Feb 19, 2026',
+                items: [
+                  <>
+                    ✦ Fixed streak display on Learning Dashboard — now uses
+                    Leitner system&apos;s robust streak calculation instead of
+                    naive day-counter that only updated on dashboard visits
+                  </>,
+                  <>
+                    ✦ Best Streak now correctly persists and syncs across
+                    sessions
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.9.0',
+                date: 'Feb 19, 2026',
+                items: [
+                  <>
+                    ✦ Deep data layer cleanup — removed 8 dead/orphaned
+                    localStorage keys and their sync baggage
+                  </>,
+                  <>
+                    ✦ One-time storage migration runs on first load to prune
+                    legacy keys (quiz_progress_*, quiz_answered_global,
+                    quiz-practice-state, etc.)
+                  </>,
+                  <>
+                    ✦ Sync collector rewritten with explicit allowlist — no
+                    longer ships dead data to Redis via greedy prefix sweep
+                  </>,
+                  <>
+                    ✦ Retired answeredQuestions sync bucket — Leitner system is
+                    the sole source of truth
+                  </>,
+                  <>
+                    ✦ Study streak date format standardized to YYYY-MM-DD (ISO)
+                    — migration auto-converts old format
+                  </>,
+                  <>
+                    ✦ Deleted orphaned use-smart-learning hook and legacy
+                    leitner-stats storage key
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.8.3',
+                date: 'Feb 19, 2026',
+                items: [
+                  <>
+                    ✦ Fixed PDF parser dropping inline explanations — 3
+                    questions (SAS, Always Encrypted, Managed Identity) now show
+                    their explanations
+                  </>,
+                  <>
+                    ✦ Study streaks now sync across devices — current streak,
+                    best streak, and last study date are included in cloud sync
+                  </>,
+                  <>
+                    ✦ Daily brief state syncs across devices — dismissal carries
+                    over
+                  </>,
+                  <>
+                    ✦ Smart streak merge — sync picks the higher streak values
+                    and most recent study date between devices
+                  </>,
+                  <>
+                    ✦ Rebuilt all data files — src/data and public/data now
+                    verified in sync
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.8.2',
+                date: 'Feb 19, 2026',
+                items: [
+                  <>
+                    ✦ Smart sync merge — syncing now pulls remote first and
+                    unions both devices&apos; answers before pushing
+                  </>,
+                  <>
+                    ✦ Sync pull no longer throws on server errors — returns a
+                    clean error instead
+                  </>,
+                  <>
+                    ✦ Server now accepts custom sync codes (e.g.{' '}
+                    <span className='font-mono'>AZ-FABIAN</span>) end-to-end
+                  </>,
+                  <>✦ Daily Brief sheet constrained to a card on desktop</>,
+                ],
+              },
+              {
+                version: 'v1.8.1',
+                date: 'Feb 2026',
+                items: [
+                  <>
+                    ✦ Fixed sync backup — &ldquo;Update Backup&rdquo; was
+                    silently failing due to missing export
+                  </>,
+                  <>
+                    ✦ Custom sync codes — codes like{' '}
+                    <span className='font-mono'>AZ-FABIAN</span> now accepted
+                    (3–8 alphanumeric chars after{' '}
+                    <span className='font-mono'>AZ-</span>)
+                  </>,
+                  <>
+                    ✦ Change Sync Code — migrate all progress to a new or custom
+                    code within Settings
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.8.0',
+                date: 'Feb 19, 2026',
+                items: [
+                  <>
+                    ✦ Daily Brief — slide-up sheet with stats and heatmap on
+                    first daily visit
+                  </>,
+                  <>✦ Activity heatmap now fully responsive on mobile</>,
+                  <>✦ Removed heatmap legend; expanded to 15 weeks</>,
+                  <>✦ Heatmap moved above stats cards on Dashboard</>,
+                ],
+              },
+              {
+                version: 'v1.7.0',
+                date: 'Feb 19, 2026',
+                items: [
+                  <>✦ GitHub-style daily activity heatmap on Dashboard</>,
+                  <>✦ Extended daily activity history retention to 90 days</>,
+                  <>
+                    ✦ Moved theme toggle to Settings — Light / Dark / System
+                    picker
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.6.0',
+                date: 'Feb 2026',
+                items: [
+                  <>
+                    ✦ Cross-device sync backend via Upstash Redis with sync
+                    codes
+                  </>,
+                  <>✦ Auto-sync progress to cloud on session completion</>,
+                  <>✦ PDF questions prioritised before non-PDF in sessions</>,
+                  <>✦ Unified Cloud Sync card with mobile-responsive layout</>,
+                  <>✦ Fixed stale submission states on session refresh</>,
+                  <>✦ Rewrote 5 blank question explanations for accuracy</>,
+                ],
+              },
+              {
+                version: 'v1.5.1',
+                date: 'Jan 14, 2026',
+                items: [
+                  <>✦ Replaced hardcoded colors with semantic design tokens</>,
+                  <>✦ Success and warning button variants</>,
+                  <>✦ Fixed iOS font size overrides (rem → px)</>,
+                  <>✦ Removed non-exam &quot;awesomeness&quot; question</>,
+                ],
+              },
+              {
+                version: 'v1.5.0',
+                date: 'Jan 5, 2026',
+                items: [
+                  <>✦ Redesigned Settings page with modern minimal aesthetic</>,
+                  <>✦ Added Changelog section</>,
+                  <>✦ Disabled iOS Dynamic Type font scaling</>,
+                ],
+              },
+              {
+                version: 'v1.4.1',
+                date: 'Dec 26–28, 2025',
+                items: [
+                  <>✦ Fixed Arc browser TLS error loop (HSTS, cache headers)</>,
+                  <>✦ Upgraded Next.js to 15.5.9 (security patches)</>,
+                  <>✦ Resolved conflicting Vercel/Next.js header config</>,
+                ],
+              },
+              {
+                version: 'v1.4.0',
+                date: 'Dec 24, 2025',
+                items: [
+                  <>✦ Removed Practice Mode — single Leitner-only experience</>,
+                  <>
+                    ✦ Decomposed monolithic hook into session, progress, and
+                    stats
+                  </>,
+                  <>✦ 80/20 PDF-to-non-PDF question split per session</>,
+                  <>
+                    ✦ Auto-hide header on scroll, sticky footer, mobile grid
+                    layout
+                  </>,
+                ],
+              },
+              {
+                version: 'v1.3.1',
+                date: 'Dec 17–18, 2025',
+                items: [
+                  <>✦ Added &quot;End Quiz&quot; button after final question</>,
+                  <>✦ Show answer feedback before session auto-complete</>,
+                  <>✦ Fixed session refresh bug and sequence randomisation</>,
+                ],
+              },
+              {
+                version: 'v1.3.0',
+                date: 'Oct – Dec 16, 2025',
+                items: [
+                  <>✦ Extracted 142 questions from exam PDF documents</>,
+                  <>✦ Settings page for managing quiz progress</>,
+                  <>✦ Custom AZ-204 favicon and haptic feedback on mobile</>,
+                  <>
+                    ✦ Performance pass — React.memo, debug logger, shared hook
+                  </>,
+                  <>✦ Improved randomisation and session auto-invalidation</>,
+                  <>✦ Cleaned broken questions and fixed answer data</>,
+                ],
+              },
+              {
+                version: 'v1.2.0',
+                date: 'Aug 22 – Sep 9, 2025',
+                items: [
+                  <>✦ PWA implementation attempted and cleanly reverted</>,
+                  <>✦ Fixed critical localStorage iteration bug</>,
+                  <>✦ Complete state isolation between quiz modes</>,
+                  <>✦ Content audit — removed inappropriate questions</>,
+                  <>✦ Completion celebration with session results breakdown</>,
+                  <>✦ Dynamic browser tab titles and debug navigation</>,
+                ],
+              },
+              {
+                version: 'v1.1.0',
+                date: 'Aug 19–21, 2025',
+                items: [
+                  <>✦ 3-box Leitner spaced repetition system</>,
+                  <>
+                    ✦ Quiz card redesign with dark mode and layered colour
+                    system
+                  </>,
+                  <>✦ Dashboard with Leitner box distribution</>,
+                  <>✦ Filtered code-block and solution-goal questions</>,
+                  <>✦ Refactored codebase for engineering best practices</>,
+                ],
+              },
+              {
+                version: 'v1.0.0',
+                date: 'Aug 18, 2025',
+                items: [
+                  <>✦ Next.js quiz app deployed on Vercel</>,
+                  <>✦ Questions seeded from AZ-204 topic markdown files</>,
+                  <>✦ Topic selector, quiz card, answer options</>,
+                ],
+              },
+            ]
+              .slice(0, showFullChangelog ? undefined : 3)
+              .map((log, i) => (
+                <div key={i}>
+                  <div className='flex items-center gap-2'>
+                    <span className='font-semibold'>{log.version}</span>
+                    <span className='text-xs text-muted-foreground'>
+                      {log.date}
+                    </span>
+                    {log.isLatest && (
+                      <span className='rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary'>
+                        Latest
+                      </span>
+                    )}
+                  </div>
+                  <ul className='mt-1 space-y-0.5 text-muted-foreground'>
+                    {log.items.map((item, j) => (
+                      <li key={j}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
           </div>
+
+          <button
+            onClick={() => setShowFullChangelog(!showFullChangelog)}
+            className='mt-6 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent/50 active:bg-accent/70'
+          >
+            {showFullChangelog ? (
+              <>
+                <ChevronUp className='h-4 w-4' />
+                Show less
+              </>
+            ) : (
+              <>
+                <ChevronDown className='h-4 w-4' />
+                See more
+              </>
+            )}
+          </button>
         </section>
 
         {/* App Info */}
