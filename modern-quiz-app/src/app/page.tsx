@@ -78,7 +78,7 @@ export default function Home() {
       <Header isVisible={isHeaderVisible} />
       <DailyBrief questions={questions} />
 
-      <main className='container mx-auto px-4 py-8 md:py-12'>
+      <main className='container mx-auto px-2 py-2 md:py-4'>
         <div className='mx-auto max-w-4xl'>
           {/* Quiz Card - Primary Focus */}
           <AnimatePresence mode='wait'>
