@@ -14,26 +14,23 @@ export function useQuizData() {
       try {
         setLoading(true);
 
-        // Load topics
-        const topicsResponse = await fetch('/data/topics.json');
-        if (!topicsResponse.ok) throw new Error('Failed to load topics');
-        const topicsData = await topicsResponse.json();
-
-        // Load regular questions
-        const questionsResponse = await fetch('/data/questions.json');
-        if (!questionsResponse.ok) throw new Error('Failed to load questions');
-        const regularQuestions = await questionsResponse.json();
-
-        // Load PDF questions
-        let pdfQuestions: Question[] = [];
-        try {
-          const pdfResponse = await fetch('/data/pdf-questions.json');
-          if (pdfResponse.ok) {
-            pdfQuestions = await pdfResponse.json();
-          }
-        } catch (pdfError) {
-          console.warn('PDF questions not available:', pdfError);
-        }
+        // Fetch all data concurrently to reduce loading time
+        const [topicsData, regularQuestions, pdfQuestions] = await Promise.all([
+          fetch('/data/topics.json').then(res => {
+            if (!res.ok) throw new Error('Failed to load topics');
+            return res.json();
+          }),
+          fetch('/data/questions.json').then(res => {
+            if (!res.ok) throw new Error('Failed to load questions');
+            return res.json();
+          }),
+          fetch('/data/pdf-questions.json')
+            .then(res => (res.ok ? res.json() : []))
+            .catch(err => {
+              console.warn('PDF questions not available:', err);
+              return [];
+            }) as Promise<Question[]>,
+        ]);
 
         // Merge and prioritize PDF questions
         // PDF questions come first, then regular questions
@@ -41,7 +38,7 @@ export function useQuizData() {
 
         // Extract unique topics from both regular and PDF questions
         const allTopics = new Set([...topicsData]);
-        
+
         // Add topics from PDF questions that might not be in the original topics list
         pdfQuestions.forEach(q => {
           if (q.topic) {
