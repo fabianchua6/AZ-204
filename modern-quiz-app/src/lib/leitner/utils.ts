@@ -209,7 +209,7 @@ export class AlgorithmUtils {
     if (wasCorrect) {
       return Math.min(currentBox + 1, LEITNER_CONFIG.LIMITS.MAX_BOX); // Move up, max Box 3
     } else {
-      return LEITNER_CONFIG.LIMITS.MIN_BOX; // Reset to Box 1 for incorrect answers
+      return Math.max(currentBox - 1, LEITNER_CONFIG.LIMITS.MIN_BOX); // Step down by 1 box (soft penalty)
     }
   }
 

@@ -6,8 +6,8 @@ export const LEITNER_CONFIG = {
   // Box intervals in days (3-box system optimized for intensive study)
   INTERVALS: {
     1: 1, // Box 1: 1 day (new/difficult questions)
-    2: 2, // Box 2: 2 days (improving questions)
-    3: 3, // Box 3: 3 days (mastered questions)
+    2: 3, // Box 2: 3 days (improving questions)
+    3: 7, // Box 3: 7 days (mastered questions)
   } as const,
 
   // Storage keys
@@ -25,8 +25,8 @@ export const LEITNER_CONFIG = {
     CLEANUP_THRESHOLD_DAYS: 30,
     MIN_DUE_QUESTIONS: 20,
     MAX_NEW_QUESTIONS_PER_SESSION: 20,
-    REVIEW_PROBABILITY: 0.1, // 10% chance to include box 3 questions for review
-    BOX2_REVIEW_PROBABILITY: 0.05, // 5% chance to include box 2 questions for review
+    REVIEW_PROBABILITY: 0, // 0% chance to intentionally drop Box 3 logic
+    BOX2_REVIEW_PROBABILITY: 0, // 0% chance to intentionally drop Box 2 logic
     MAX_REVIEW_QUESTIONS: 3, // Cap on random review questions per session
   } as const,
 
