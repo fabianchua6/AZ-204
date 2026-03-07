@@ -1,8 +1,5 @@
 'use client';
 
-// React imports
-// import { useMemo } from 'react';
-
 // Third-party imports
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -10,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Header } from '@/components/header';
 import { DailyBrief } from '@/components/daily-brief';
 import { LeitnerQuizCard } from '@/components/leitner-quiz-card';
-import { LoadingSpinner } from '@/components/loading-spinner';
 import { SessionResults } from '@/components/leitner/session-results';
 import { DashboardStats } from '@/components/dashboard-stats';
 
@@ -25,7 +21,7 @@ import { useEffect } from 'react';
 import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/lib/constants';
 
 export default function Home() {
-  const { questions, topics, loading, error } = useQuizData();
+  const { questions, topics } = useQuizData();
   const { isHeaderVisible } = useScrollDirection({ threshold: 15 });
 
   // Leitner mode is now the only mode
@@ -78,22 +74,12 @@ export default function Home() {
     leitnerState.actions,
   ]);
 
-  if (loading || !isInitialSyncComplete) {
-    return (
-      <div className='flex min-h-screen items-center justify-center bg-background'>
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (error) {
+  if (!isInitialSyncComplete) {
     return (
       <div className='flex min-h-screen items-center justify-center bg-background'>
         <div className='text-center'>
-          <h1 className='mb-4 text-2xl font-bold text-destructive'>
-            Error Loading Quiz Data
-          </h1>
-          <p className='text-muted-foreground'>{error}</p>
+          <div className='mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
+          <p className='text-muted-foreground'>Syncing...</p>
         </div>
       </div>
     );

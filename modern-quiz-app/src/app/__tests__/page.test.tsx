@@ -35,10 +35,6 @@ jest.mock('@/components/leitner-quiz-card', () => ({
   ),
 }));
 
-jest.mock('@/components/loading-spinner', () => ({
-  LoadingSpinner: () => <div data-testid='loading-spinner'>loading</div>,
-}));
-
 jest.mock('@/components/leitner/session-results', () => ({
   SessionResults: () => <div data-testid='session-results'>results</div>,
 }));
@@ -116,20 +112,7 @@ describe('Home page orchestration', () => {
     (useQuizStateWithLeitner as jest.Mock).mockReturnValue(baseLeitnerState);
   });
 
-  it('renders loading state', () => {
-    (useQuizData as jest.Mock).mockReturnValue({
-      questions: [],
-      topics: [],
-      loading: true,
-      error: null,
-    });
-
-    render(<Home />);
-
-    expect(screen.getByTestId('loading-spinner')).toBeTruthy();
-  });
-
-  it('renders loading state while initial sync is running', () => {
+  it('renders syncing state while initial sync is running', () => {
     (useSync as jest.Mock).mockReturnValue({
       syncNow,
       isInitialSyncComplete: false,
@@ -143,21 +126,7 @@ describe('Home page orchestration', () => {
 
     render(<Home />);
 
-    expect(screen.getByTestId('loading-spinner')).toBeTruthy();
-  });
-
-  it('renders error state', () => {
-    (useQuizData as jest.Mock).mockReturnValue({
-      questions: [],
-      topics: [],
-      loading: false,
-      error: 'boom',
-    });
-
-    render(<Home />);
-
-    expect(screen.getByText('Error Loading Quiz Data')).toBeTruthy();
-    expect(screen.getByText('boom')).toBeTruthy();
+    expect(screen.getByText('Syncing...')).toBeTruthy();
   });
 
   it('renders session results and triggers sync on completion', async () => {

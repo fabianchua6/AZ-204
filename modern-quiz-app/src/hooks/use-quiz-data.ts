@@ -1,62 +1,44 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import type { Question } from '@/types/quiz';
 
+// Statically import the JSON payloads natively.
+// Webpack automatically parses and bundles these objects into memory synchronously.
+import topicsData from '@/data/topics.json';
+import questionsData from '@/data/questions.json';
+import pdfQuestionsData from '@/data/pdf-questions.json';
+
 export function useQuizData() {
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [topics, setTopics] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { questions, topics } = useMemo(() => {
+    // Merge and prioritize PDF questions just like before
+    // PDF questions come first, then regular questions
+    const allQuestions = [
+      ...(pdfQuestionsData as Question[]),
+      ...(questionsData as Question[]),
+    ];
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
+    // Extract unique topics from both regular and PDF questions
+    const allTopics = new Set([...(topicsData as string[])]);
 
-        // Fetch all data concurrently to reduce loading time
-        const [topicsData, regularQuestions, pdfQuestions] = await Promise.all([
-          fetch('/data/topics.json').then(res => {
-            if (!res.ok) throw new Error('Failed to load topics');
-            return res.json();
-          }),
-          fetch('/data/questions.json').then(res => {
-            if (!res.ok) throw new Error('Failed to load questions');
-            return res.json();
-          }),
-          fetch('/data/pdf-questions.json')
-            .then(res => (res.ok ? res.json() : []))
-            .catch(err => {
-              console.warn('PDF questions not available:', err);
-              return [];
-            }) as Promise<Question[]>,
-        ]);
-
-        // Merge and prioritize PDF questions
-        // PDF questions come first, then regular questions
-        const allQuestions = [...pdfQuestions, ...regularQuestions];
-
-        // Extract unique topics from both regular and PDF questions
-        const allTopics = new Set([...topicsData]);
-
-        // Add topics from PDF questions that might not be in the original topics list
-        pdfQuestions.forEach(q => {
-          if (q.topic) {
-            allTopics.add(q.topic);
-          }
-        });
-
-        setTopics(Array.from(allTopics).sort());
-        setQuestions(allQuestions);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
+    // Add topics from PDF questions that might not be in the original topics list
+    (pdfQuestionsData as Question[]).forEach(q => {
+      if (q.topic) {
+        allTopics.add(q.topic);
       }
-    };
+    });
 
-    loadData();
+    return {
+      questions: allQuestions,
+      topics: Array.from(allTopics).sort(),
+    };
   }, []);
 
-  return { questions, topics, loading, error };
+  // Return synchronous load state variables cleanly mapped off as complete.
+  return {
+    questions,
+    topics,
+    loading: false, // Legacy fallback maintained for dependents
+    error: null,
+  };
 }

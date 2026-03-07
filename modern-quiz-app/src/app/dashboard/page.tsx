@@ -6,11 +6,10 @@ import { Header } from '@/components/header';
 import { DashboardStats } from '@/components/dashboard-stats';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
 import { useQuizData } from '@/hooks/use-quiz-data';
-import { LoadingSpinner } from '@/components/loading-spinner';
 import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/lib/constants';
 
 export default function DashboardPage() {
-  const { questions, loading, error } = useQuizData();
+  const { questions } = useQuizData();
 
   // Set dynamic page title with question count
   useEffect(() => {
@@ -20,27 +19,6 @@ export default function DashboardPage() {
       document.title = 'Analytics Dashboard - AZ-204 Certification';
     }
   }, [questions.length]);
-
-  if (loading) {
-    return (
-      <div className='flex min-h-screen items-center justify-center bg-background'>
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className='flex min-h-screen items-center justify-center bg-background'>
-        <div className='text-center'>
-          <h1 className='mb-4 text-2xl font-bold text-destructive'>
-            Error Loading Dashboard Data
-          </h1>
-          <p className='text-muted-foreground'>{error}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className='via-background-secondary to-background-tertiary min-h-screen bg-gradient-to-br from-background'>
