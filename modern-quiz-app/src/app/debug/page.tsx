@@ -1188,16 +1188,16 @@ export default function DebugPage() {
 
           <button
             onClick={() => setShowFullChangelog(!showFullChangelog)}
-            className='mt-6 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent/50 active:bg-accent/70'
+            className='mt-3 flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline'
           >
             {showFullChangelog ? (
               <>
-                <ChevronUp className='h-4 w-4' />
+                <ChevronUp className='h-3 w-3' />
                 Show less
               </>
             ) : (
               <>
-                <ChevronDown className='h-4 w-4' />
+                <ChevronDown className='h-3 w-3' />
                 See more
               </>
             )}
