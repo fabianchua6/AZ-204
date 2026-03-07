@@ -181,6 +181,15 @@ export function LeitnerQuizCard({
     ]
   );
 
+  // Arrow-key navigation always replaces the selection (never toggles)
+  const handleNavigateOption = useCallback(
+    (optionIndex: number) => {
+      if (cardState.answerSubmitted) return;
+      onAnswerSelect(question.id, [optionIndex]);
+    },
+    [cardState.answerSubmitted, onAnswerSelect, question.id]
+  );
+
   const handleSubmit = useCallback(async () => {
     if (
       !question.id ||
@@ -276,6 +285,7 @@ export function LeitnerQuizCard({
   // Keyboard shortcuts for desktop (1-9: select option, ←: prev, →/Enter: submit/next)
   useQuizKeyboardShortcuts({
     optionCount: question.options.length,
+    selectedAnswers: externalSelectedAnswers,
     answerSubmitted: cardState.answerSubmitted,
     showAnswer: cardState.showAnswer,
     canGoNext,
@@ -283,6 +293,7 @@ export function LeitnerQuizCard({
     submitDisabled: buttonStates.submitDisabled,
     isSessionEnd,
     onSelectOption: handleOptionSelect,
+    onNavigateOption: handleNavigateOption,
     onNext: handleNext,
     onPrevious: handlePrevious,
     onSubmit: handleSubmit,
