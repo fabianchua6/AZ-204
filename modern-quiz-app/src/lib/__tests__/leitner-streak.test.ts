@@ -27,9 +27,9 @@ describe('Leitner streak calculation', () => {
 
   it('calculates streak from daily history starting from yesterday when today has no activity', () => {
     const history = {
-      '2026-02-18': 8,
-      '2026-02-17': 4,
-      '2026-02-16': 2,
+      '2026-02-18': 25,
+      '2026-02-17': 21,
+      '2026-02-16': 20,
     };
 
     const streak = AlgorithmUtils.calculateStreakDaysFromDailyHistory(history);
@@ -38,8 +38,19 @@ describe('Leitner streak calculation', () => {
 
   it('breaks streak at first missing day in daily history', () => {
     const history = {
-      '2026-02-18': 5,
-      '2026-02-16': 5,
+      '2026-02-18': 20,
+      '2026-02-16': 20,
+    };
+
+    const streak = AlgorithmUtils.calculateStreakDaysFromDailyHistory(history);
+    expect(streak).toBe(1);
+  });
+
+  it('breaks streak if day has < 20 correct answers', () => {
+    const history = {
+      '2026-02-18': 20,
+      '2026-02-17': 19, // Breaks streak
+      '2026-02-16': 20,
     };
 
     const streak = AlgorithmUtils.calculateStreakDaysFromDailyHistory(history);
@@ -51,9 +62,9 @@ describe('Leitner streak calculation', () => {
     await system.ensureInitialized();
     system.clearProgress();
 
-    localStorage.setItem('leitner-daily-attempts-2026-02-18', '7');
-    localStorage.setItem('leitner-daily-attempts-2026-02-17', '3');
-    localStorage.setItem('leitner-daily-attempts-2026-02-16', '1');
+    localStorage.setItem('leitner-daily-correct-2026-02-18', '25');
+    localStorage.setItem('leitner-daily-correct-2026-02-17', '21');
+    localStorage.setItem('leitner-daily-correct-2026-02-16', '20');
 
     const stats = system.getStats(mockQuestions);
     expect(stats.streakDays).toBe(3);

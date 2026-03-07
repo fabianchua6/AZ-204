@@ -266,14 +266,15 @@ export class AlgorithmUtils {
     referenceDate: Date = new Date()
   ): number {
     const hasAnyActivity = Object.values(activityHistory).some(
-      count => count > 0
+      count => count >= 20 // 20 correct answers required for a streak day
     );
     if (!hasAnyActivity) {
       return 0;
     }
 
     const todayStr = DateUtils.getLocalDateString(referenceDate);
-    const hasActivityToday = (activityHistory[todayStr] || 0) > 0;
+    // Determine if today met the streak requirement
+    const hasActivityToday = (activityHistory[todayStr] || 0) >= 20;
 
     // If no activity today yet, allow streak to start from yesterday.
     const startOffset = hasActivityToday ? 0 : 1;
@@ -284,7 +285,8 @@ export class AlgorithmUtils {
       checkDate.setDate(checkDate.getDate() - offset);
       const dateStr = DateUtils.getLocalDateString(checkDate);
 
-      if ((activityHistory[dateStr] || 0) > 0) {
+      // 20 correct answers required for a streak day
+      if ((activityHistory[dateStr] || 0) >= 20) {
         streak++;
       } else {
         break;

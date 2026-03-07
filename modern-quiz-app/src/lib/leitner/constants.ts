@@ -38,7 +38,7 @@ export const LEITNER_CONFIG = {
 
   // Default user settings
   DEFAULT_SETTINGS: {
-    dailyTarget: 60, // Default to 60 questions per day
+    dailyTarget: 20, // Default to 20 correct answers per day for streak
   } as const,
 } as const;
 

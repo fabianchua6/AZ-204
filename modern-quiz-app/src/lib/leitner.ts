@@ -311,10 +311,10 @@ export class LeitnerSystem {
     return AlgorithmUtils.moveQuestion(currentBox, wasCorrect);
   }
 
-  // Daily attempts tracking for daily target calculation
-  private incrementDailyAttempts(): void {
+  // Daily attempts tracking for daily target calculation based on correct answers
+  private incrementDailyCorrect(): void {
     const today = this.getLocalDateString(new Date());
-    const key = `leitner-daily-attempts-${today}`;
+    const key = `leitner-daily-correct-${today}`;
 
     try {
       // Use atomic increment to prevent race conditions
@@ -327,25 +327,28 @@ export class LeitnerSystem {
 
       StorageUtils.safeSetItem(key, String(attempts + 1));
     } catch (error) {
-      console.error('Failed to update daily attempts:', error);
+      console.error('Failed to update daily correct attempts:', error);
       // Fallback: try to set to 1 if increment fails
       try {
         StorageUtils.safeSetItem(key, '1');
       } catch (fallbackError) {
-        console.error('Failed to set fallback daily attempts:', fallbackError);
+        console.error(
+          'Failed to set fallback daily correct attempts:',
+          fallbackError
+        );
       }
     }
   }
 
-  private getDailyAttempts(): number {
+  private getDailyCorrect(): number {
     const today = this.getLocalDateString(new Date());
-    const key = `leitner-daily-attempts-${today}`;
+    const key = `leitner-daily-correct-${today}`;
 
     try {
       const current = StorageUtils.safeGetItem(key);
       return current ? parseInt(current, 10) : 0;
     } catch (error) {
-      console.error('Failed to get daily attempts:', error);
+      console.error('Failed to get daily correct attempts:', error);
       return 0;
     }
   }
@@ -355,7 +358,7 @@ export class LeitnerSystem {
     try {
       // Clear today's attempts
       const today = this.getLocalDateString(new Date());
-      const todayKey = `leitner-daily-attempts-${today}`;
+      const todayKey = `leitner-daily-correct-${today}`;
       StorageUtils.safeRemoveItem(todayKey);
 
       // Clean up old daily attempts keys (older than 7 days)
@@ -363,8 +366,12 @@ export class LeitnerSystem {
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('leitner-daily-attempts-')) {
-          const dateStr = key.replace('leitner-daily-attempts-', '');
+        if (
+          key &&
+          (key.startsWith('leitner-daily-correct-') ||
+            key.startsWith('leitner-daily-attempts-'))
+        ) {
+          const dateStr = key.replace(/leitner-daily-(correct|attempts)-/, '');
           try {
             const keyDate = new Date(dateStr + 'T00:00:00');
             const daysDiff =
@@ -384,7 +391,7 @@ export class LeitnerSystem {
       // Now safely remove all collected keys
       keysToRemove.forEach(key => StorageUtils.safeRemoveItem(key));
     } catch (error) {
-      console.error('Failed to clear daily attempts:', error);
+      console.error('Failed to clear daily correct attempts:', error);
     }
   }
 
@@ -393,8 +400,12 @@ export class LeitnerSystem {
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('leitner-daily-attempts-')) {
-          const dateStr = key.replace('leitner-daily-attempts-', '');
+        if (
+          key &&
+          (key.startsWith('leitner-daily-correct-') ||
+            key.startsWith('leitner-daily-attempts-'))
+        ) {
+          const dateStr = key.replace(/leitner-daily-(correct|attempts)-/, '');
           try {
             const keyDate = new Date(dateStr + 'T00:00:00');
             const daysDiff =
@@ -411,7 +422,7 @@ export class LeitnerSystem {
         }
       }
     } catch (error) {
-      console.error('Failed to cleanup old daily attempts:', error);
+      console.error('Failed to cleanup old daily correct attempts:', error);
     }
   }
 
@@ -422,13 +433,27 @@ export class LeitnerSystem {
       if (typeof window === 'undefined') return history;
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('leitner-daily-attempts-')) {
-          const dateStr = key.replace('leitner-daily-attempts-', '');
+        if (key && key.startsWith('leitner-daily-correct-')) {
+          const dateStr = key.replace('leitner-daily-correct-', '');
           const value = StorageUtils.safeGetItem(key);
           if (value) {
             const count = parseInt(value, 10);
             if (!isNaN(count) && count > 0) {
               history[dateStr] = count;
+            }
+          }
+        } else if (key && key.startsWith('leitner-daily-attempts-')) {
+          // Legacy support for past heat-map tracking, assuming any attempt was correct
+          // to not retroactively lose their existing streak days or heatmap boxes immediately
+          const dateStr = key.replace('leitner-daily-attempts-', '');
+          if (!history[dateStr]) {
+            // Prefer the new key if both exist
+            const value = StorageUtils.safeGetItem(key);
+            if (value) {
+              const count = parseInt(value, 10);
+              if (!isNaN(count) && count > 0) {
+                history[dateStr] = count;
+              }
             }
           }
         }
@@ -475,8 +500,11 @@ export class LeitnerSystem {
 
     this.progress.set(questionId, updatedProgress);
 
-    // Track daily attempts for daily target calculation
-    this.incrementDailyAttempts();
+    // Track daily correct attempts for daily target/streak calculation
+    // Now only extends the streak tally if the answer was correct
+    if (wasCorrect) {
+      this.incrementDailyCorrect();
+    }
 
     this.saveToStorage();
 
@@ -730,8 +758,8 @@ export class LeitnerSystem {
     // Calculate streak (simplified - just check if user has been active)
     const streakDays = this.calculateStreakDays();
 
-    // Calculate due today based on daily target vs. total attempts today
-    const questionsAnsweredToday = this.getDailyAttempts();
+    // Calculate due today based on daily target vs. total correct attempts today
+    const questionsAnsweredToday = this.getDailyCorrect();
 
     // Calculate remaining questions to reach daily target
     const remainingToday = Math.max(
