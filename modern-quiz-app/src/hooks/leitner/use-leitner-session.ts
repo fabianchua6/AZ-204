@@ -29,6 +29,7 @@ export function useLeitnerSession({
   onSessionReset,
 }: UseLeitnerSessionProps) {
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
+  const [sessionId, setSessionId] = useState<number | null>(null);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [savedSessionResults, setSavedSessionResults] =
     useState<SessionResults | null>(null);
@@ -127,6 +128,7 @@ export function useLeitnerSession({
             // Valid restore
             if (!isMounted) return;
             setFilteredQuestions(restoredQuestions);
+            setSessionId(savedSession.createdAt);
             setIsLoadingSession(false);
             debug(
               '✅ Session restored:',
@@ -178,6 +180,7 @@ export function useLeitnerSession({
         });
 
         if (!isMounted) return;
+        setSessionId(now);
         setFilteredQuestions(sessionQuestions);
         setIsLoadingSession(false);
 
@@ -211,6 +214,7 @@ export function useLeitnerSession({
     isEndingSessionRef.current = false;
 
     saveToLocalStorage('leitner-current-session', null);
+    setSessionId(null);
     // Clearing submission states is responsibility of Progress hook, but we need to coordinate.
     // We will trigger a refresh which will cause re-generation.
 
@@ -259,6 +263,7 @@ export function useLeitnerSession({
   );
 
   return {
+    sessionId,
     filteredQuestions,
     isLoadingSession,
     savedSessionResults,

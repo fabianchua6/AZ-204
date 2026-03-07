@@ -22,7 +22,10 @@ export function useQuizStateWithLeitner(
   });
 
   // 2. Progress State (Answers, Index, Submissions)
-  const progress = useLeitnerProgress(session.filteredQuestions);
+  const progress = useLeitnerProgress(
+    session.filteredQuestions,
+    session.sessionId
+  );
 
   // 3. Stats Management
   const stats = useLeitnerStats(questions, progress.submissionStates);
