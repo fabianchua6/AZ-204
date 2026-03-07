@@ -35,9 +35,8 @@ export default function Home() {
   const filteredQuestions = leitnerState.filteredQuestions;
   const answers = leitnerState.answers;
 
-  // Auto-sync integration
-  const { syncNow, isInitialSyncComplete } = useSync();
-
+  // Auto-sync integration (runs in background, doesn't block UI)
+  const { syncNow } = useSync();
   // Trigger sync when session completes
   useEffect(() => {
     if (leitnerState.isSessionComplete) {
@@ -57,7 +56,6 @@ export default function Home() {
         !filteredQuestions[currentQuestionIndex]
       ) {
         event.preventDefault();
-        // Dynamic import used as a lightweight fallback for haptics outside component context
         import('@/lib/haptics').then(({ triggerHaptic }) => {
           triggerHaptic('medium');
         });
@@ -73,17 +71,6 @@ export default function Home() {
     currentQuestionIndex,
     leitnerState.actions,
   ]);
-
-  if (!isInitialSyncComplete) {
-    return (
-      <div className='flex min-h-screen items-center justify-center bg-background'>
-        <div className='text-center'>
-          <div className='mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
-          <p className='text-muted-foreground'>Syncing...</p>
-        </div>
-      </div>
-    );
-  }
 
   const currentQuestion = filteredQuestions[currentQuestionIndex];
 
@@ -125,7 +112,7 @@ export default function Home() {
               >
                 <div className='text-center'>
                   <div className='mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
-                  <p className='text-muted-foreground'>Loading session...</p>
+                  <p className='text-muted-foreground'>Syncing...</p>
                 </div>
               </motion.div>
             ) : currentQuestion ? (

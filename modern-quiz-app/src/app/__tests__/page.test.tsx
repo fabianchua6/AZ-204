@@ -112,23 +112,6 @@ describe('Home page orchestration', () => {
     (useQuizStateWithLeitner as jest.Mock).mockReturnValue(baseLeitnerState);
   });
 
-  it('renders syncing state while initial sync is running', () => {
-    (useSync as jest.Mock).mockReturnValue({
-      syncNow,
-      isInitialSyncComplete: false,
-    });
-    (useQuizData as jest.Mock).mockReturnValue({
-      questions: [{ id: 'q1' }],
-      topics: ['Storage'],
-      loading: false,
-      error: null,
-    });
-
-    render(<Home />);
-
-    expect(screen.getByText('Syncing...')).toBeTruthy();
-  });
-
   it('renders session results and triggers sync on completion', async () => {
     (useQuizData as jest.Mock).mockReturnValue({
       questions: [{ id: 'q1' }],
@@ -172,7 +155,7 @@ describe('Home page orchestration', () => {
 
     render(<Home />);
 
-    expect(screen.getByText('Loading session...')).toBeTruthy();
+    expect(screen.getByText('Syncing...')).toBeTruthy();
   });
 
   it('renders question card when current question exists', () => {
