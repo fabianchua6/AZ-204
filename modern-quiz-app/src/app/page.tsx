@@ -50,6 +50,34 @@ export default function Home() {
     }
   }, [leitnerState.isSessionComplete, syncNow]);
 
+  // Global "Start Session" shortcut from dashboard empty state
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only trigger if we are showing the empty state / completion state
+      if (
+        event.shiftKey &&
+        event.key === 'Enter' &&
+        leitnerState.isSessionComplete === false &&
+        !filteredQuestions[currentQuestionIndex]
+      ) {
+        event.preventDefault();
+        // Dynamic import used as a lightweight fallback for haptics outside component context
+        import('@/lib/haptics').then(({ triggerHaptic }) => {
+          triggerHaptic('medium');
+        });
+        leitnerState.actions.startNewSession();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    leitnerState.isSessionComplete,
+    filteredQuestions,
+    currentQuestionIndex,
+    leitnerState.actions,
+  ]);
+
   if (loading || !isInitialSyncComplete) {
     return (
       <div className='flex min-h-screen items-center justify-center bg-background'>
@@ -178,6 +206,27 @@ export default function Home() {
                       section='compact'
                     />
                   )}
+
+                  {/* Start New Session action when empty */}
+                  <div className='pt-6'>
+                    <button
+                      onClick={() => {
+                        leitnerState.actions.startNewSession();
+                      }}
+                      className='group relative inline-flex h-11 w-full max-w-sm items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90'
+                    >
+                      <span>Start New Session</span>
+                      <div className='absolute right-4 hidden items-center gap-1.5 text-primary-foreground/70 transition-colors group-hover:text-primary-foreground md:flex'>
+                        <kbd className='inline-flex h-5 min-w-5 items-center justify-center rounded border border-primary-foreground/20 bg-primary-foreground/10 px-1.5 font-sans text-[10px] font-medium'>
+                          ⇧ Shift
+                        </kbd>
+                        <span className='text-[10px] opacity-50'>+</span>
+                        <kbd className='inline-flex h-5 min-w-5 items-center justify-center rounded border border-primary-foreground/20 bg-primary-foreground/10 px-1.5 font-sans text-[10px] font-medium'>
+                          ↵ Enter
+                        </kbd>
+                      </div>
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}

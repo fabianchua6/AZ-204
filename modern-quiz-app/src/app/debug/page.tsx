@@ -4,7 +4,6 @@ import { leitnerSystem } from '@/lib/leitner';
 import { useQuizData } from '@/hooks/use-quiz-data';
 import { questionService } from '@/lib/question-service';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import {
   Trash2,

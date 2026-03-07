@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { QuizControls } from '@/components/quiz/quiz-controls';
@@ -31,6 +32,22 @@ export function SessionResults({
   onStartNewSession,
   topics = [],
 }: SessionResultsProps) {
+  // Listen for Shift+Enter to start a new session
+  useEffect(() => {
+    // Only bind the shortcut if we are in desktop (viewport > 768px typically)
+    // Though practically, mobile devices don't have shift keys to trigger this easily anyway.
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.shiftKey && event.key === 'Enter') {
+        event.preventDefault();
+        triggerHaptic('medium');
+        onStartNewSession();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onStartNewSession]);
+
   return (
     <div className='space-y-4'>
       {/* Contextual Toolbar */}
@@ -135,11 +152,22 @@ export function SessionResults({
               onStartNewSession();
             }}
             size='lg'
-            className='w-full'
+            className='group relative w-full'
           >
-            {stats.leitner.dueToday > 0
-              ? `Continue Learning (${stats.leitner.dueToday} left)`
-              : 'Start New Session'}
+            <span>
+              {stats.leitner.dueToday > 0
+                ? `Continue Learning (${stats.leitner.dueToday} left)`
+                : 'Start New Session'}
+            </span>
+            <div className='absolute right-4 hidden items-center gap-1.5 text-primary-foreground/70 transition-colors group-hover:text-primary-foreground md:flex'>
+              <kbd className='inline-flex h-5 min-w-5 items-center justify-center rounded border border-primary-foreground/20 bg-primary-foreground/10 px-1.5 font-sans text-[10px] font-medium'>
+                ⇧ Shift
+              </kbd>
+              <span className='text-[10px] opacity-50'>+</span>
+              <kbd className='inline-flex h-5 min-w-5 items-center justify-center rounded border border-primary-foreground/20 bg-primary-foreground/10 px-1.5 font-sans text-[10px] font-medium'>
+                ↵ Enter
+              </kbd>
+            </div>
           </Button>
         </CardContent>
       </Card>
