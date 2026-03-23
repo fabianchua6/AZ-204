@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { DailyBrief } from '../daily-brief';
 import { leitnerSystem } from '@/lib/leitner';
 import { questionService } from '@/lib/question-service';
@@ -7,7 +13,7 @@ import type { Question } from '@/types/quiz';
 
 jest.mock('@/lib/leitner', () => ({
   leitnerSystem: {
-    ensureInitialized: jest.fn().mockResolvedValue(undefined),
+    reloadFromStorage: jest.fn().mockResolvedValue(undefined),
     getStats: jest.fn(),
   },
 }));
@@ -84,7 +90,7 @@ describe('DailyBrief', () => {
     const { container } = render(<DailyBrief questions={mockQuestions} />);
 
     await waitFor(() => {
-      expect(leitnerSystem.ensureInitialized).not.toHaveBeenCalled();
+      expect(leitnerSystem.reloadFromStorage).not.toHaveBeenCalled();
     });
 
     expect(container.innerHTML).toBe('');
@@ -94,6 +100,7 @@ describe('DailyBrief', () => {
     render(<DailyBrief questions={mockQuestions} />);
 
     await waitFor(() => {
+      expect(leitnerSystem.reloadFromStorage).toHaveBeenCalledTimes(1);
       expect(questionService.filterQuestions).toHaveBeenCalledWith(
         mockQuestions
       );
@@ -107,6 +114,74 @@ describe('DailyBrief', () => {
     const scrollContainer = screen.getByTestId('daily-brief-scroll-container');
     expect(scrollContainer.className).toContain('show-scrollbar');
     expect(scrollContainer.className).toContain('[touch-action:pan-y]');
+  });
+
+  it('shows loading state while reloadFromStorage is in flight', async () => {
+    let resolveReload!: () => void;
+    (leitnerSystem.reloadFromStorage as jest.Mock).mockReturnValue(
+      new Promise<void>(resolve => {
+        resolveReload = resolve;
+      })
+    );
+
+    render(<DailyBrief questions={mockQuestions} />);
+
+    // Modal opens immediately with loading indicator before stats arrive
+    expect(screen.getByTestId('daily-brief-loading')).toBeTruthy();
+    expect(screen.queryByText("Here's your study brief")).toBeNull();
+
+    // Resolve the storage reload — stats should replace the spinner
+    await act(async () => {
+      resolveReload();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('daily-brief-loading')).toBeNull();
+      expect(screen.getByText("Here's your study brief")).toBeTruthy();
+    });
+  });
+
+  it('shows a last-updated timestamp after stats have loaded', async () => {
+    render(<DailyBrief questions={mockQuestions} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('last-updated')).toBeTruthy();
+    });
+
+    expect(screen.getByTestId('last-updated').textContent).toMatch(/Updated/);
+  });
+
+  it('shows error fallback when reloadFromStorage fails and no in-memory stats exist', async () => {
+    (leitnerSystem.reloadFromStorage as jest.Mock).mockRejectedValueOnce(
+      new Error('storage failure')
+    );
+    // Also make getStats throw so the catch-block fallback also fails
+    (leitnerSystem.getStats as jest.Mock).mockImplementationOnce(() => {
+      throw new Error('no stats');
+    });
+
+    render(<DailyBrief questions={mockQuestions} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Couldn't load study data")).toBeTruthy();
+    });
+
+    expect(screen.queryByText("Here's your study brief")).toBeNull();
+  });
+
+  it('uses fallback stats when reloadFromStorage fails but in-memory stats are available', async () => {
+    (leitnerSystem.reloadFromStorage as jest.Mock).mockRejectedValueOnce(
+      new Error('storage failure')
+    );
+
+    render(<DailyBrief questions={mockQuestions} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Here's your study brief")).toBeTruthy();
+    });
+
+    // Stats from in-memory fallback are still shown
+    expect(screen.getByText('Due Today')).toBeTruthy();
   });
 
   it('persists daily-brief-last-shown when dismissed from drag handle', async () => {

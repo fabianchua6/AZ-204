@@ -608,9 +608,39 @@ export default function DebugPage() {
           <div className='space-y-4 text-sm'>
             {[
               {
+                version: 'v1.12.0',
+                date: 'Mar 23, 2026',
+                isLatest: true,
+                items: [
+                  <>
+                    ✦ Daily Brief now calls <code>reloadFromStorage()</code> on
+                    every open so in-memory state is always fresh — fixes stale
+                    stats in long-running SPA/PWA sessions
+                  </>,
+                  <>
+                    ✦ Daily Brief modal opens immediately with a syncing
+                    spinner; stats appear once the storage reload completes
+                    (stale-while-revalidate UX)
+                  </>,
+                  <>
+                    ✦ Added &ldquo;Updated HH:MM&rdquo; timestamp to Daily Brief
+                    so users can see exactly when data was refreshed
+                  </>,
+                  <>
+                    ✦ Added error fallback: if storage reload fails the brief
+                    still opens with in-memory stats; if those are also
+                    unavailable a friendly error message is shown
+                  </>,
+                  <>
+                    ✦ Added cancellation guard in the fetch effect to prevent
+                    race-condition state updates after unmount
+                  </>,
+                ],
+              },
+              {
                 version: 'v1.11.5',
                 date: 'Mar 3, 2026',
-                isLatest: true,
+                isLatest: false,
                 items: [
                   <>
                     ✦ Replaced hand-rolled haptic implementation with the{' '}

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type TouchEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Flame, Clock, BookOpen } from 'lucide-react';
+import { Flame, Clock, BookOpen, RefreshCw } from 'lucide-react';
 import { leitnerSystem } from '@/lib/leitner';
 import type { LeitnerStats } from '@/lib/leitner';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
@@ -30,6 +30,8 @@ interface DailyBriefProps {
 export function DailyBrief({ questions }: DailyBriefProps) {
   const [open, setOpen] = useState(false);
   const [stats, setStats] = useState<LeitnerStats | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [dragOffsetY, setDragOffsetY] = useState(0);
   const [isHandleDragging, setIsHandleDragging] = useState(false);
   const handleTouchStartY = useRef<number | null>(null);
@@ -48,12 +50,41 @@ export function DailyBrief({ questions }: DailyBriefProps) {
 
     if (lastShown === today) return;
 
-    leitnerSystem.ensureInitialized().then(() => {
-      const filtered = questionService.filterQuestions(questions);
-      const s = leitnerSystem.getStats(filtered);
-      setStats(s);
-      setOpen(true);
-    });
+    // Open immediately so the user sees a loading indicator rather than nothing.
+    let cancelled = false;
+    setIsRefreshing(true);
+    setOpen(true);
+
+    // Force a fresh load from localStorage so in-memory state is never stale
+    // (covers SPA/PWA sessions that stay open across days or after a cross-device sync).
+    leitnerSystem
+      .reloadFromStorage()
+      .then(() => {
+        if (cancelled) return;
+        const filtered = questionService.filterQuestions(questions);
+        const s = leitnerSystem.getStats(filtered);
+        setStats(s);
+        setLastUpdated(new Date());
+        setIsRefreshing(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        // Fallback: compute from whatever in-memory state is available so the
+        // brief still opens even if the storage reload fails.
+        try {
+          const filtered = questionService.filterQuestions(questions);
+          const s = leitnerSystem.getStats(filtered);
+          setStats(s);
+          setLastUpdated(new Date());
+        } catch {
+          // leave stats null — error state will render in the modal
+        }
+        setIsRefreshing(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [questions]);
 
   const handleDismiss = (pattern: 'light' | 'warning' = 'light') => {
@@ -158,11 +189,11 @@ export function DailyBrief({ questions }: DailyBriefProps) {
     };
   }, [open]);
 
-  if (!stats) return null;
+  if (!open) return null;
 
-  const box1 = stats.boxDistribution[1] || 0;
-  const box2 = stats.boxDistribution[2] || 0;
-  const box3 = stats.boxDistribution[3] || 0;
+  const box1 = stats?.boxDistribution[1] ?? 0;
+  const box2 = stats?.boxDistribution[2] ?? 0;
+  const box3 = stats?.boxDistribution[3] ?? 0;
   const boxTotal = box1 + box2 + box3 || 1;
 
   return (
@@ -226,89 +257,134 @@ export function DailyBrief({ questions }: DailyBriefProps) {
                 style={{ WebkitOverflowScrolling: 'touch' }}
                 ref={scrollContainerRef}
               >
-                {/* Greeting */}
-                <div className='mb-5 flex items-start justify-between'>
-                  <div>
-                    <h2 className='text-xl font-semibold text-foreground'>
-                      {getGreeting()}
-                    </h2>
-                    <p className='mt-0.5 text-sm text-muted-foreground'>
-                      Here&apos;s your study brief
+                {/* Loading state — shown while reloadFromStorage() is in flight */}
+                {isRefreshing && !stats && (
+                  <div
+                    data-testid='daily-brief-loading'
+                    className='flex flex-col items-center justify-center gap-3 py-12'
+                  >
+                    <RefreshCw
+                      className='h-5 w-5 animate-spin text-muted-foreground'
+                      aria-label='Syncing study brief'
+                    />
+                    <p className='text-sm text-muted-foreground'>
+                      Syncing your study brief&hellip;
                     </p>
                   </div>
-                  {stats.streakDays > 0 && (
-                    <span className='flex shrink-0 items-center gap-1 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-600 dark:bg-orange-500/15 dark:text-orange-400'>
-                      <Flame className='h-3.5 w-3.5' />
-                      {stats.streakDays}d
-                    </span>
-                  )}
-                </div>
+                )}
 
-                {/* Heatmap — top */}
-                <div className='mb-5'>
-                  <p className='mb-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
-                    Activity
-                  </p>
-                  <ActivityHeatmap compact />
-                </div>
+                {/* Error state — reload failed and no fallback stats available */}
+                {!isRefreshing && !stats && (
+                  <div className='flex flex-col items-center justify-center gap-2 py-12 text-center'>
+                    <p className='text-sm font-medium text-foreground'>
+                      Couldn&apos;t load study data
+                    </p>
+                    <p className='text-xs text-muted-foreground'>
+                      Please reopen the app to try again.
+                    </p>
+                  </div>
+                )}
 
-                {/* 2-stat row */}
-                <div className='mb-5 grid grid-cols-2 gap-3'>
-                  <div className='rounded-xl border border-amber-200/60 bg-amber-50/60 p-3 dark:border-amber-500/20 dark:bg-amber-500/10'>
-                    <div className='flex items-center gap-1.5 text-amber-600 dark:text-amber-400'>
-                      <Clock className='h-3.5 w-3.5' />
-                      <span className='text-xs font-medium'>Due Today</span>
+                {/* Full stats — shown once data is ready */}
+                {stats && (
+                  <>
+                    {/* Greeting */}
+                    <div className='mb-5 flex items-start justify-between'>
+                      <div>
+                        <h2 className='text-xl font-semibold text-foreground'>
+                          {getGreeting()}
+                        </h2>
+                        <p className='mt-0.5 text-sm text-muted-foreground'>
+                          Here&apos;s your study brief
+                        </p>
+                        {lastUpdated && (
+                          <p
+                            className='mt-0.5 text-xs text-muted-foreground/60'
+                            data-testid='last-updated'
+                          >
+                            Updated{' '}
+                            {lastUpdated.toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                        )}
+                      </div>
+                      {stats.streakDays > 0 && (
+                        <span className='flex shrink-0 items-center gap-1 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-600 dark:bg-orange-500/15 dark:text-orange-400'>
+                          <Flame className='h-3.5 w-3.5' />
+                          {stats.streakDays}d
+                        </span>
+                      )}
                     </div>
-                    <p className='mt-2 text-2xl font-bold tabular-nums text-amber-700 dark:text-amber-300'>
-                      {stats.dueToday}
-                    </p>
-                  </div>
 
-                  <div className='rounded-xl border border-blue-200/60 bg-blue-50/60 p-3 dark:border-blue-500/20 dark:bg-blue-500/10'>
-                    <div className='flex items-center gap-1.5 text-blue-600 dark:text-blue-400'>
-                      <BookOpen className='h-3.5 w-3.5' />
-                      <span className='text-xs font-medium'>Started</span>
+                    {/* Heatmap — top */}
+                    <div className='mb-5'>
+                      <p className='mb-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+                        Activity
+                      </p>
+                      <ActivityHeatmap compact />
                     </div>
-                    <p className='mt-2 text-2xl font-bold tabular-nums text-blue-700 dark:text-blue-300'>
-                      {stats.questionsStarted}
-                    </p>
-                  </div>
-                </div>
 
-                {/* Box distribution */}
-                <div>
-                  <p className='mb-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
-                    Leitner Boxes
-                  </p>
-                  <div className='space-y-2'>
-                    {([1, 2, 3] as const).map(box => {
-                      const count = stats.boxDistribution[box] || 0;
-                      const pct = Math.round((count / boxTotal) * 100);
-                      const barColor =
-                        box === 1
-                          ? 'bg-red-400 dark:bg-red-500'
-                          : box === 2
-                            ? 'bg-amber-400 dark:bg-amber-500'
-                            : 'bg-emerald-400 dark:bg-emerald-500';
-                      return (
-                        <div key={box} className='flex items-center gap-3'>
-                          <span className='w-3 shrink-0 text-center text-xs font-medium text-muted-foreground'>
-                            {box}
-                          </span>
-                          <div className='h-1.5 flex-1 overflow-hidden rounded-full bg-muted/60'>
-                            <div
-                              className={`h-full rounded-full transition-all ${barColor}`}
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
-                          <span className='w-8 shrink-0 text-right text-xs tabular-nums text-muted-foreground'>
-                            {count}
-                          </span>
+                    {/* 2-stat row */}
+                    <div className='mb-5 grid grid-cols-2 gap-3'>
+                      <div className='rounded-xl border border-amber-200/60 bg-amber-50/60 p-3 dark:border-amber-500/20 dark:bg-amber-500/10'>
+                        <div className='flex items-center gap-1.5 text-amber-600 dark:text-amber-400'>
+                          <Clock className='h-3.5 w-3.5' />
+                          <span className='text-xs font-medium'>Due Today</span>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                        <p className='mt-2 text-2xl font-bold tabular-nums text-amber-700 dark:text-amber-300'>
+                          {stats.dueToday}
+                        </p>
+                      </div>
+
+                      <div className='rounded-xl border border-blue-200/60 bg-blue-50/60 p-3 dark:border-blue-500/20 dark:bg-blue-500/10'>
+                        <div className='flex items-center gap-1.5 text-blue-600 dark:text-blue-400'>
+                          <BookOpen className='h-3.5 w-3.5' />
+                          <span className='text-xs font-medium'>Started</span>
+                        </div>
+                        <p className='mt-2 text-2xl font-bold tabular-nums text-blue-700 dark:text-blue-300'>
+                          {stats.questionsStarted}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Box distribution */}
+                    <div>
+                      <p className='mb-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+                        Leitner Boxes
+                      </p>
+                      <div className='space-y-2'>
+                        {([1, 2, 3] as const).map(box => {
+                          const count = stats.boxDistribution[box] || 0;
+                          const pct = Math.round((count / boxTotal) * 100);
+                          const barColor =
+                            box === 1
+                              ? 'bg-red-400 dark:bg-red-500'
+                              : box === 2
+                                ? 'bg-amber-400 dark:bg-amber-500'
+                                : 'bg-emerald-400 dark:bg-emerald-500';
+                          return (
+                            <div key={box} className='flex items-center gap-3'>
+                              <span className='w-3 shrink-0 text-center text-xs font-medium text-muted-foreground'>
+                                {box}
+                              </span>
+                              <div className='h-1.5 flex-1 overflow-hidden rounded-full bg-muted/60'>
+                                <div
+                                  className={`h-full rounded-full transition-all ${barColor}`}
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                              <span className='w-8 shrink-0 text-right text-xs tabular-nums text-muted-foreground'>
+                                {count}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </motion.div>
           </div>
