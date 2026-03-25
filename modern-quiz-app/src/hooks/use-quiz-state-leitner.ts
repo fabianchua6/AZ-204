@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from 'react';
 import type { Question } from '@/types/quiz';
 import { leitnerSystem } from '@/lib/leitner';
-import { getStoredSyncCode, pushData } from '@/lib/sync-client';
+import { getStoredSyncCode, sync } from '@/lib/sync-client';
 import { useLeitnerSession } from './leitner/use-leitner-session';
 import { useLeitnerProgress } from './leitner/use-leitner-progress';
 import { useLeitnerStats } from './leitner/use-leitner-stats';
@@ -43,7 +43,7 @@ export function useQuizStateWithLeitner(
     // Auto-sync progress after quiz completion if a sync code is stored
     const syncCode = getStoredSyncCode();
     if (syncCode) {
-      pushData(syncCode).catch(err => {
+      sync(syncCode).catch(err => {
         console.warn('[Sync] Auto-sync after quiz completion failed:', err);
       });
     }
