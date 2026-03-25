@@ -608,9 +608,26 @@ export default function DebugPage() {
           <div className='space-y-4 text-sm'>
             {[
               {
+                version: 'v1.12.1',
+                date: 'Mar 25, 2026',
+                isLatest: true,
+                items: [
+                  <>
+                    ✦ Fixed cross-device sync after session completion to use
+                    smart pull-merge-push so recent history from other devices
+                    is preserved
+                  </>,
+                  <>
+                    ✦ Prevented last-finished-device backup from overwriting
+                    cloud records created on another device in the previous few
+                    days
+                  </>,
+                ],
+              },
+              {
                 version: 'v1.12.0',
                 date: 'Mar 23, 2026',
-                isLatest: true,
+                isLatest: false,
                 items: [
                   <>
                     ✦ Daily Brief now calls <code>reloadFromStorage()</code> on
